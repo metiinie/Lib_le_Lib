@@ -48,3 +48,23 @@ asset, even by guessing the storage key (test this — don't assume it).
 Almost every module in this codebase touches sensitive data in some way. "While I was in
 there, I also..." is the exact failure mode that turns a one-file bug fix into an
 accidental new data-exposure surface. The scope card is the guardrail against that.
+
+---
+
+## Active Scope: Phase 1 — Auth & Core Identity
+
+```
+# Scope: Phase 1 — Auth & Core Identity
+
+✓ in:  src/auth/*, src/users/*, src/devices/*
+✗ out: profiles, photos, verification, discovery, matches, messaging, safety, admin panel, subscriptions
+
+Done when:
+1. Users can request an OTP via phone/email, which hashes and writes to `otp_codes` table.
+2. Users can verify the OTP, which creates/finds the `users` row and issues access + refresh JWT.
+3. Access token refresh/rotation endpoint works.
+4. Users can register their device's push token and E2E public key in `devices` table.
+5. Guard implementation (`JwtAuthGuard`, `RolesGuard`) protects routes based on roles.
+6. Automated integration tests pass for OTP rate-limiting, token rejection, and expiry.
+```
+

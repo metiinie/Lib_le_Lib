@@ -13,7 +13,7 @@ A secure mobile application that...
 ### Backend
 - NestJS
 - PostgreSQL
-- Prisma
+- TypeORM
 
 ### Storage
 - AWS S3

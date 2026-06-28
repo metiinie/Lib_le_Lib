@@ -1,9 +1,83 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { LoggerModule } from 'nestjs-pino';
+import { AppDataSource } from './config/typeorm.config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
+// Modules
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
+import { ProfilesModule } from './profiles/profiles.module';
+import { PhotosModule } from './photos/photos.module';
+import { DiscoveryModule } from './discovery/discovery.module';
+import { MatchesModule } from './matches/matches.module';
+import { MessagesModule } from './messages/messages.module';
+import { SafetyModule } from './safety/safety.module';
+import { VerificationModule } from './verification/verification.module';
+import { ResourcesModule } from './resources/resources.module';
+import { QaModule } from './qa/qa.module';
+import { SubscriptionsModule } from './subscriptions/subscriptions.module';
+
 @Module({
-  imports: [],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    TypeOrmModule.forRoot({
+      ...AppDataSource.options,
+      autoLoadEntities: true,
+    }),
+    LoggerModule.forRoot({
+      pinoHttp: {
+        redact: {
+          paths: [
+            'req.headers.authorization',
+            'req.body.phone',
+            'req.body.email',
+            'req.body.password',
+            'req.body.passwordHash',
+            'req.body.ciphertext',
+            'req.body.nonce',
+            'req.body.storageRef',
+            'req.body.selfieStorageRef',
+            'req.body.storyText',
+            'req.body.body',
+            'req.body.content',
+            'res.body.phone',
+            'res.body.email',
+            'res.body.password',
+            'res.body.passwordHash',
+            'res.body.ciphertext',
+            'res.body.nonce',
+            'res.body.storageRef',
+            'res.body.selfieStorageRef',
+            'res.body.storyText',
+            'res.body.body',
+            'res.body.content',
+          ],
+          censor: '[REDACTED]',
+        },
+        transport:
+          process.env.NODE_ENV !== 'production'
+            ? { target: 'pino-pretty', options: { colorize: true } }
+            : undefined,
+      },
+    }),
+    AuthModule,
+    UsersModule,
+    ProfilesModule,
+    PhotosModule,
+    DiscoveryModule,
+    MatchesModule,
+    MessagesModule,
+    SafetyModule,
+    VerificationModule,
+    ResourcesModule,
+    QaModule,
+    SubscriptionsModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
