@@ -67,4 +67,41 @@ Done when:
 5. Guard implementation (`JwtAuthGuard`, `RolesGuard`) protects routes based on roles.
 6. Automated integration tests pass for OTP rate-limiting, token rejection, and expiry.
 ```
+✅ COMPLETED
 
+---
+
+## Active Scope: Phase 2 — Profiles & Photos
+
+```
+# Scope: Phase 2 — Profiles & Photos
+
+✓ in:  src/profiles/*, src/photos/*, test/profiles-photos.e2e-spec.ts
+✗ out: verification, discovery, matches, messaging, safety, admin, subscriptions
+
+Done when:
+1. GET /profiles/me, POST /profiles/me, PATCH /profiles/me all work end-to-end against real DB.
+2. GET /regions and GET /interest-tags return seeded data.
+3. POST /photos/upload-url returns a valid presigned PUT URL.
+4. POST /photos registers a photo row with blurred_default = true.
+5. GET /photos/:id returns blurred URL for ungranted viewer, original URL for granted viewer.
+6. POST /photos/:id/reveal-grants grants, DELETE revokes.
+7. Automated e2e tests prove: Blur/reveal, Revoked reveal, non-owner grant rejection, underage rejection.
+```
+
+## Active Scope: Phase 3 — Verification
+
+```
+# Scope: Phase 3 — Verification
+
+✓ in:  src/verification/*, test/verification.e2e-spec.ts
+✗ out: Auth, Profiles, Photos, matching, etc.
+
+Done when:
+1. submit -> review -> decide works end to end via API.
+2. verification_officer role gate explicitly denies (403) non-officer requests.
+3. Isolated S3 credentials are used for storage.
+4. Audit logs are written atomically via transaction upon decision.
+5. Automated test proves role isolation.
+```
+✅ COMPLETED
