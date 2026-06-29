@@ -105,3 +105,20 @@ Done when:
 5. Automated test proves role isolation.
 ```
 ✅ COMPLETED
+
+## Active Scope: Phase 4 — Discovery & Matching
+
+```
+# Scope: Phase 4 — Discovery & Matching
+
+✓ in:  src/safety/entities/block.entity.ts, src/discovery/*, src/matches/*, src/compatibility-quiz/*, test/discovery-matches.e2e-spec.ts
+✗ out: Full moderation, report system, messaging/chat endpoints (Phase 5/6).
+
+Done when:
+1. `blocks` entity is implemented to fulfill discovery exclusion.
+2. GET /discovery returns filtered users, excluding blocks, self, matches, and previous swipes.
+3. POST /swipes creates mutual matches via DB trigger and reports status.
+4. GET /matches returns active matches, excluding newly blocked users.
+5. Compatibility Quiz endpoints (GET questions, POST responses) work with seeded data.
+6. Automated E2E test proves mutual match behavior and strict block exclusion.
+```

@@ -66,7 +66,7 @@ export class VerificationScheduler {
 
         // 3. Write audit log (system action -> actorId = null)
         await this.auditLogsRepo.insertWithManager({
-          actorId: null,
+          actorId: undefined,
           action: 'document_retention_purge',
           targetType: 'verification_document',
           targetId: doc.id,

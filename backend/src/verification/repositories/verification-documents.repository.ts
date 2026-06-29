@@ -26,7 +26,7 @@ export class VerificationDocumentsRepository {
   async nullStorageRef(id: string): Promise<void> {
     await this.repo.update(
       { id },
-      { storageRef: null, deletedAt: new Date() }
+      { storageRef: undefined, deletedAt: new Date() }
     );
   }
 

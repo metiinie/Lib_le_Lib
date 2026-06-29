@@ -148,7 +148,7 @@ export class VerificationService {
         status: dto.decision,
         decisionAt: new Date(),
         reviewerId: officerId,
-        rejectionReason: dto.decision === 'rejected' ? dto.rejectionReason : null,
+        rejectionReason: dto.decision === 'rejected' ? dto.rejectionReason : undefined,
         expiryDate: expiryDateString as any, // TypeORM type issue with date column string/Date
         updatedAt: new Date(),
       });

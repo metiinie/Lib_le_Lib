@@ -19,6 +19,7 @@ import { VerificationModule } from './verification/verification.module';
 import { ResourcesModule } from './resources/resources.module';
 import { QaModule } from './qa/qa.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
+import { CompatibilityQuizModule } from './compatibility-quiz/compatibility-quiz.module';
 
 @Module({
   imports: [
@@ -77,6 +78,7 @@ import { SubscriptionsModule } from './subscriptions/subscriptions.module';
     ResourcesModule,
     QaModule,
     SubscriptionsModule,
+    CompatibilityQuizModule,
   ],
   controllers: [AppController],
   providers: [AppService],
