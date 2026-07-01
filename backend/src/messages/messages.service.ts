@@ -1,45 +1,51 @@
-import { Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { MessagesRepository } from './repositories/messages.repository';
+import { MessageAttachmentsRepository } from './repositories/message-attachments.repository';
 import { Message, MessageType } from './entities/message.entity';
 import { MessageAttachment } from './entities/message-attachment.entity';
 import { Match } from '../matches/entities/match.entity';
 import { Device } from '../users/entities/device.entity';
 import { Profile } from '../profiles/entities/profile.entity';
+import { MatchesService } from '../matches/matches.service';
+import { BlocksRepository } from '../safety/repositories/blocks.repository';
 
 @Injectable()
 export class MessagesService {
   constructor(
-    @InjectRepository(Message)
-    private readonly messagesRepository: Repository<Message>,
-    @InjectRepository(MessageAttachment)
-    private readonly messageAttachmentsRepository: Repository<MessageAttachment>,
-    @InjectRepository(Match)
-    private readonly matchesRepository: Repository<Match>,
+    private readonly messagesRepository: MessagesRepository,
+    private readonly messageAttachmentsRepository: MessageAttachmentsRepository,
+    private readonly matchesService: MatchesService,
     @InjectRepository(Device)
     private readonly devicesRepository: Repository<Device>,
     @InjectRepository(Profile)
     private readonly profilesRepository: Repository<Profile>,
+    private readonly blocksRepo: BlocksRepository,
   ) {}
 
   /**
-   * Validates if the match exists, is active, and the user is part of it.
+   * Validates match membership and checks blocks.
+   * Delegates core match validation to MatchesService.
    */
-  async validateMatchMembership(matchId: string, userId: string): Promise<Match> {
-    const match = await this.matchesRepository.findOne({
-      where: { id: matchId },
-    });
+  async validateMatchMembership(
+    matchId: string,
+    userId: string,
+  ): Promise<Match> {
+    const match = await this.matchesService.validateMatchMembership(
+      matchId,
+      userId,
+    );
 
-    if (!match) {
-      throw new NotFoundException('Match not found');
-    }
-
-    if (match.status !== 'active') {
-      throw new ForbiddenException('Match is no longer active');
-    }
-
-    if (match.userAId !== userId && match.userBId !== userId) {
-      throw new ForbiddenException('You are not part of this match');
+    const otherUserId =
+      match.userAId === userId ? match.userBId : match.userAId;
+    const isBlocked = await this.blocksRepo.isBlocked(userId, otherUserId);
+    if (isBlocked) {
+      throw new ForbiddenException('This match is unavailable');
     }
 
     return match;
@@ -50,16 +56,17 @@ export class MessagesService {
    */
   async getMatchPublicKeys(matchId: string, userId: string): Promise<string[]> {
     const match = await this.validateMatchMembership(matchId, userId);
-    
+
     // The other user is whoever is not the requesting user
-    const targetUserId = match.userAId === userId ? match.userBId : match.userAId;
+    const targetUserId =
+      match.userAId === userId ? match.userBId : match.userAId;
 
     const devices = await this.devicesRepository.find({
       where: { userId: targetUserId },
       select: ['publicKey'],
     });
 
-    return devices.map(d => d.publicKey).filter(Boolean) as string[];
+    return devices.map((d) => d.publicKey).filter(Boolean) as string[];
   }
 
   /**
@@ -75,7 +82,7 @@ export class MessagesService {
   ): Promise<Message> {
     await this.validateMatchMembership(matchId, senderId);
 
-    const message = this.messagesRepository.create({
+    const message = this.messagesRepository.createMessage({
       matchId,
       senderId,
       messageType,
@@ -83,7 +90,7 @@ export class MessagesService {
       nonce,
     });
 
-    return this.messagesRepository.save(message);
+    return this.messagesRepository.saveMessage(message);
   }
 
   /**
@@ -97,13 +104,11 @@ export class MessagesService {
   ): Promise<[Message[], number]> {
     await this.validateMatchMembership(matchId, userId);
 
-    return this.messagesRepository.findAndCount({
-      where: { matchId },
-      relations: ['attachments'],
-      order: { sentAt: 'DESC' },
-      take: limit,
-      skip: offset,
-    });
+    return this.messagesRepository.findAndCountByMatchId(
+      matchId,
+      limit,
+      offset,
+    );
   }
 
   /**
@@ -117,9 +122,10 @@ export class MessagesService {
   ): Promise<{ message: Message; suppressReceipt: boolean }> {
     await this.validateMatchMembership(matchId, readerId);
 
-    const message = await this.messagesRepository.findOne({
-      where: { id: messageId, matchId },
-    });
+    const message = await this.messagesRepository.findByIdAndMatchId(
+      messageId,
+      matchId,
+    );
 
     if (!message) {
       throw new NotFoundException('Message not found');
@@ -128,7 +134,7 @@ export class MessagesService {
     // Only mark as read if the reader is NOT the sender
     if (message.senderId !== readerId && !message.readAt) {
       message.readAt = new Date();
-      await this.messagesRepository.save(message);
+      await this.messagesRepository.saveMessage(message);
     }
 
     const readerProfile = await this.profilesRepository.findOne({
@@ -145,20 +151,27 @@ export class MessagesService {
   /**
    * Registers a message attachment
    */
-  async registerAttachment(messageId: string, storageRef: string): Promise<MessageAttachment> {
-    const attachment = this.messageAttachmentsRepository.create({
+  async registerAttachment(
+    messageId: string,
+    storageRef: string,
+  ): Promise<MessageAttachment> {
+    const attachment = this.messageAttachmentsRepository.createAttachment({
       messageId,
       storageRef,
       blurredDefault: true,
     });
-    return this.messageAttachmentsRepository.save(attachment);
+    return this.messageAttachmentsRepository.saveAttachment(attachment);
   }
 
   /**
    * Reveal or revoke a message attachment
    */
-  async toggleAttachmentReveal(attachmentId: string, reveal: boolean): Promise<MessageAttachment> {
-    const attachment = await this.messageAttachmentsRepository.findOne({ where: { id: attachmentId } });
+  async toggleAttachmentReveal(
+    attachmentId: string,
+    reveal: boolean,
+  ): Promise<MessageAttachment> {
+    const attachment =
+      await this.messageAttachmentsRepository.findById(attachmentId);
     if (!attachment) {
       throw new NotFoundException('Attachment not found');
     }
@@ -171,6 +184,6 @@ export class MessagesService {
       attachment.revealedAt = null; // Option to clear or just set revoked_at
     }
 
-    return this.messageAttachmentsRepository.save(attachment);
+    return this.messageAttachmentsRepository.saveAttachment(attachment);
   }
 }

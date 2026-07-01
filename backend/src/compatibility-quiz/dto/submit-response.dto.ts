@@ -1,4 +1,10 @@
-import { IsUUID, IsOptional, IsString, IsNumber, IsArray } from 'class-validator';
+import {
+  IsUUID,
+  IsOptional,
+  IsString,
+  IsNumber,
+  IsArray,
+} from 'class-validator';
 
 export class SubmitResponseDto {
   @IsUUID()

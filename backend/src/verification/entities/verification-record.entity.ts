@@ -35,7 +35,11 @@ export class VerificationRecord {
   })
   status: string;
 
-  @Column({ name: 'submitted_at', type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
+  @Column({
+    name: 'submitted_at',
+    type: 'timestamptz',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
   submittedAt: Date;
 
   @Column({ name: 'decision_at', type: 'timestamptz', nullable: true })

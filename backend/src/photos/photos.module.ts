@@ -9,10 +9,7 @@ import { Photo } from './entities/photo.entity';
 import { PhotoRevealGrant } from './entities/photo-reveal-grant.entity';
 
 @Module({
-  imports: [
-    ConfigModule,
-    TypeOrmModule.forFeature([Photo, PhotoRevealGrant]),
-  ],
+  imports: [ConfigModule, TypeOrmModule.forFeature([Photo, PhotoRevealGrant])],
   controllers: [PhotosController],
   providers: [PhotosService, PhotosRepository, StorageService],
   exports: [PhotosService, StorageService],

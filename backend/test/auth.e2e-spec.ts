@@ -4,6 +4,7 @@ import request from 'supertest';
 import { JwtService } from '@nestjs/jwt';
 import { UsersRepository } from '../src/users/repositories/users.repository';
 import { AppModule } from '../src/app.module';
+import { ThrottlerGuard } from '@nestjs/throttler';
 
 describe('AuthController (e2e)', () => {
   let app: INestApplication;
@@ -11,20 +12,27 @@ describe('AuthController (e2e)', () => {
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideGuard(ThrottlerGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
 
     app = moduleFixture.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+    app.useGlobalPipes(
+      new ValidationPipe({ whitelist: true, transform: true }),
+    );
     await app.init();
   });
 
   afterAll(async () => {
-    await app.close();
+    if (app) {
+      await app.close();
+    }
   });
 
   describe('OTP Flow', () => {
     const testPhone = `+1555${Math.floor(1000000 + Math.random() * 9000000)}`;
-    let validOtpCode = '';
+    const validOtpCode = '';
 
     it('/auth/otp/request (POST) - rate limits after 5 requests', async () => {
       // Send 5 requests
@@ -93,14 +101,15 @@ describe('AuthController (e2e)', () => {
     });
 
     it('Protected route rejects missing token', async () => {
-      await request(app.getHttpServer())
-        .get('/users/me')
-        .expect(401);
+      await request(app.getHttpServer()).get('/users/me').expect(401);
     });
 
     it('Protected route rejects expired token', async () => {
       const jwtService = app.get(JwtService);
-      const expiredToken = jwtService.sign({ sub: 'some-uuid', role: 'member' }, { expiresIn: '-1h', secret: 'test_jwt_secret_do_not_use_in_prod' });
+      const expiredToken = jwtService.sign(
+        { sub: 'some-uuid', role: 'member' },
+        { expiresIn: '-1h', secret: 'test_jwt_secret_do_not_use_in_prod' },
+      );
 
       await request(app.getHttpServer())
         .get('/users/me')

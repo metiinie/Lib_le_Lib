@@ -27,7 +27,9 @@ export class VideoCallsController {
     @Body() dto: ScheduleVideoCallDto,
     @Req() req: any,
   ) {
-    const scheduledAt = dto.scheduledAt ? new Date(dto.scheduledAt) : new Date();
+    const scheduledAt = dto.scheduledAt
+      ? new Date(dto.scheduledAt)
+      : new Date();
     const call = await this.videoCallsService.scheduleCall(
       matchId,
       req.user.id,

@@ -7,20 +7,18 @@ import { MessagesService } from './messages.service';
 import { MessagesGateway } from './messages.gateway';
 import { Message } from './entities/message.entity';
 import { MessageAttachment } from './entities/message-attachment.entity';
-import { Match } from '../matches/entities/match.entity';
 import { Device } from '../users/entities/device.entity';
 import { Profile } from '../profiles/entities/profile.entity';
 import { PhotosModule } from '../photos/photos.module';
+import { SafetyModule } from '../safety/safety.module';
+import { MatchesModule } from '../matches/matches.module';
+
+import { MessagesRepository } from './repositories/messages.repository';
+import { MessageAttachmentsRepository } from './repositories/message-attachments.repository';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      Message,
-      MessageAttachment,
-      Match,
-      Device,
-      Profile,
-    ]),
+    TypeOrmModule.forFeature([Message, MessageAttachment, Device, Profile]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
@@ -30,9 +28,15 @@ import { PhotosModule } from '../photos/photos.module';
       inject: [ConfigService],
     }),
     PhotosModule, // For StorageService
+    SafetyModule,
+    MatchesModule,
   ],
   controllers: [MessagesController],
-  providers: [MessagesService, MessagesGateway]
+  providers: [
+    MessagesService,
+    MessagesGateway,
+    MessagesRepository,
+    MessageAttachmentsRepository,
+  ],
 })
 export class MessagesModule {}
-

@@ -1,4 +1,13 @@
-import { IsOptional, IsInt, Min, Max, IsUUID, IsString, IsArray, IsEnum } from 'class-validator';
+import {
+  IsOptional,
+  IsInt,
+  Min,
+  Max,
+  IsUUID,
+  IsString,
+  IsArray,
+  IsEnum,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class DiscoveryFiltersDto {

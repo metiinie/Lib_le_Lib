@@ -3,12 +3,17 @@
  *
  * Wraps AWS S3 client specifically for the isolated verification bucket.
  * Uses SSE-KMS + Object Lock (configured at the bucket level).
- * 
+ *
  * Strict separation from the public photos bucket is a core privacy constraint.
  */
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
+import {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+  DeleteObjectCommand,
+} from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 @Injectable()
@@ -24,18 +29,30 @@ export class VerificationStorageService {
       region: config.get<string>('VERIFICATION_AWS_REGION', 'us-east-1'),
       credentials: {
         accessKeyId: config.get<string>('VERIFICATION_AWS_ACCESS_KEY_ID', ''),
-        secretAccessKey: config.get<string>('VERIFICATION_AWS_SECRET_ACCESS_KEY', ''),
+        secretAccessKey: config.get<string>(
+          'VERIFICATION_AWS_SECRET_ACCESS_KEY',
+          '',
+        ),
       },
       forcePathStyle: false,
     });
-    this.bucketName = config.get<string>('VERIFICATION_S3_BUCKET', 'lib-le-lib-verification');
-    this.presignTtl = config.get<number>('VERIFICATION_PRESIGN_TTL_SECONDS', 900); // 15 mins max
+    this.bucketName = config.get<string>(
+      'VERIFICATION_S3_BUCKET',
+      'lib-le-lib-verification',
+    );
+    this.presignTtl = config.get<number>(
+      'VERIFICATION_PRESIGN_TTL_SECONDS',
+      900,
+    ); // 15 mins max
   }
 
   /**
    * Returns a short-lived signed PUT URL for the client to upload a document directly.
    */
-  async getDocumentUploadUrl(storageRef: string, contentType = 'application/pdf'): Promise<string> {
+  async getDocumentUploadUrl(
+    storageRef: string,
+    contentType = 'application/pdf',
+  ): Promise<string> {
     const command = new PutObjectCommand({
       Bucket: this.bucketName,
       Key: storageRef,
@@ -67,7 +84,10 @@ export class VerificationStorageService {
       });
       await this.s3Client.send(command);
     } catch (error) {
-      this.logger.error(`Failed to delete document ${storageRef} from S3`, error);
+      this.logger.error(
+        `Failed to delete document ${storageRef} from S3`,
+        error,
+      );
       throw error;
     }
   }

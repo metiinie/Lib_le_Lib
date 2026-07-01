@@ -30,12 +30,14 @@ export class MessagesController {
   ) {}
 
   @Get('devices/public-keys')
-  @ApiOperation({ summary: 'Get public keys of the matched user for E2E setup' })
-  async getMatchPublicKeys(
-    @Param('matchId') matchId: string,
-    @Req() req: any,
-  ) {
-    const keys = await this.messagesService.getMatchPublicKeys(matchId, req.user.id);
+  @ApiOperation({
+    summary: 'Get public keys of the matched user for E2E setup',
+  })
+  async getMatchPublicKeys(@Param('matchId') matchId: string, @Req() req: any) {
+    const keys = await this.messagesService.getMatchPublicKeys(
+      matchId,
+      req.user.id,
+    );
     return { publicKeys: keys };
   }
 
@@ -98,7 +100,7 @@ export class MessagesController {
         // Map over attachments to provide signed URLs
         const attachments = await Promise.all(
           msg.attachments?.map(async (att) => {
-            let readUrl = null;
+            let readUrl: string | null = null;
             // Reveal logic: if revoked, it's blurred. If revealed, original.
             // By default, chat attachments are blurred until revealed.
             const isRevealed = att.revealedAt && !att.revokedAt;
@@ -108,9 +110,13 @@ export class MessagesController {
             // If the StorageService requires a different key for blurred, we handle it there.
             // For now, we will return the URL only if revealed, or a placeholder/blurred key.
             if (isRevealed) {
-              readUrl = await this.storageService.getPhotoReadUrl(att.storageRef);
+              readUrl = await this.storageService.getPhotoReadUrl(
+                att.storageRef,
+              );
             } else {
-              readUrl = await this.storageService.getPhotoReadUrl(`blurred/${att.storageRef}`);
+              readUrl = await this.storageService.getPhotoReadUrl(
+                `blurred/${att.storageRef}`,
+              );
             }
 
             return {
@@ -151,12 +157,13 @@ export class MessagesController {
     @Param('messageId') messageId: string,
     @Req() req: any,
   ) {
-    const { message, suppressReceipt } = await this.messagesService.markMessageAsRead(
-      matchId,
-      messageId,
-      req.user.id,
-    );
-    
+    const { message, suppressReceipt } =
+      await this.messagesService.markMessageAsRead(
+        matchId,
+        messageId,
+        req.user.id,
+      );
+
     if (!suppressReceipt) {
       this.messagesGateway.notifyMessageRead(matchId, messageId, req.user.id);
     }
@@ -187,7 +194,10 @@ export class MessagesController {
   ) {
     await this.messagesService.validateMatchMembership(matchId, req.user.id);
     // ensure message belongs to match and sender
-    const attachment = await this.messagesService.registerAttachment(messageId, storageRef);
+    const attachment = await this.messagesService.registerAttachment(
+      messageId,
+      storageRef,
+    );
     return { id: attachment.id };
   }
 

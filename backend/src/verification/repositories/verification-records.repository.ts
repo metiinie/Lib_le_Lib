@@ -10,7 +10,10 @@ export class VerificationRecordsRepository {
     this.repo = this.dataSource.getRepository(VerificationRecord);
   }
 
-  async create(userId: string, method: string = 'self_upload'): Promise<VerificationRecord> {
+  async create(
+    userId: string,
+    method: string = 'self_upload',
+  ): Promise<VerificationRecord> {
     const record = this.repo.create({ userId, method, status: 'submitted' });
     return this.repo.save(record);
   }
@@ -29,10 +32,7 @@ export class VerificationRecordsRepository {
 
   async findQueue(): Promise<VerificationRecord[]> {
     return this.repo.find({
-      where: [
-        { status: 'submitted' },
-        { status: 'in_review' }
-      ],
+      where: [{ status: 'submitted' }, { status: 'in_review' }],
       order: { submittedAt: 'ASC' },
       relations: ['user'], // Likely need some user details for the officer to review
     });
@@ -46,7 +46,7 @@ export class VerificationRecordsRepository {
       reviewerId?: string;
       rejectionReason?: string;
       expiryDate?: string; // string because of DATE column mapping
-    }
+    },
   ): Promise<void> {
     await this.repo.update({ id }, patch);
   }

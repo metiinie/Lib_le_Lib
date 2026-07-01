@@ -11,6 +11,7 @@ import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
 import { OtpCodesRepository } from './repositories/otp-codes.repository';
 import { UsersRepository } from '../users/repositories/users.repository';
+import { AuditLogsRepository } from '../verification/repositories/audit-logs.repository';
 
 /** OTP validity window in minutes. */
 const OTP_EXPIRY_MINUTES = 5;
@@ -37,6 +38,7 @@ export class AuthService {
   constructor(
     private readonly otpCodesRepository: OtpCodesRepository,
     private readonly usersRepository: UsersRepository,
+    private readonly auditLogsRepository: AuditLogsRepository,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
   ) {}
@@ -47,7 +49,10 @@ export class AuthService {
    * In development, the OTP is logged (but NOT in production — per
    * conventions.md, never log sensitive payloads).
    */
-  async requestOtp(destination: string, isSignUp: boolean): Promise<{ message: string }> {
+  async requestOtp(
+    destination: string,
+    isSignUp: boolean,
+  ): Promise<{ message: string }> {
     // Intent check
     const user = await this.usersRepository.findByDestination(destination);
     if (isSignUp && user) {
@@ -116,7 +121,8 @@ export class AuthService {
     isSignUp: boolean,
   ): Promise<{ accessToken: string; refreshToken: string; userId: string }> {
     // Re-verify intent to prevent race conditions or mismatched flows
-    const userExists = await this.usersRepository.findByDestination(destination);
+    const userExists =
+      await this.usersRepository.findByDestination(destination);
     if (isSignUp && userExists) {
       throw new ConflictException({
         error: {
@@ -148,6 +154,11 @@ export class AuthService {
 
     // Check expiry
     if (new Date() > otpRecord.expiresAt) {
+      await this.auditLogsRepository.insertWithManager({
+        action: 'auth.otp.expired',
+        targetType: 'otp',
+        metadata: { destination },
+      });
       throw new UnauthorizedException({
         error: {
           code: 'OTP_EXPIRED',
@@ -158,6 +169,11 @@ export class AuthService {
 
     // Check attempt limit
     if (otpRecord.attempts >= MAX_OTP_ATTEMPTS) {
+      await this.auditLogsRepository.insertWithManager({
+        action: 'auth.otp.max_attempts',
+        targetType: 'otp',
+        metadata: { destination },
+      });
       throw new UnauthorizedException({
         error: {
           code: 'OTP_MAX_ATTEMPTS',
@@ -171,6 +187,11 @@ export class AuthService {
     const codeHash = crypto.createHash('sha256').update(code).digest('hex');
     if (codeHash !== otpRecord.codeHash) {
       await this.otpCodesRepository.incrementAttempts(otpRecord.id);
+      await this.auditLogsRepository.insertWithManager({
+        action: 'auth.otp.invalid',
+        targetType: 'otp',
+        metadata: { destination },
+      });
       throw new UnauthorizedException({
         error: {
           code: 'OTP_INVALID',

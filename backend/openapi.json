@@ -1,0 +1,1577 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/": {
+      "get": {
+        "operationId": "AppController_getHello",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "App"
+        ]
+      }
+    },
+    "/auth/otp/request": {
+      "post": {
+        "operationId": "AuthController_requestOtp",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestOtpDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OTP sent successfully."
+          },
+          "429": {
+            "description": "Rate limit exceeded."
+          }
+        },
+        "summary": "Request an OTP to the given phone number or email.",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/otp/verify": {
+      "post": {
+        "operationId": "AuthController_verifyOtp",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyOtpDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully verified, returns tokens."
+          },
+          "401": {
+            "description": "Invalid or expired OTP."
+          }
+        },
+        "summary": "Verify the received OTP code.",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "operationId": "AuthController_refreshTokens",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshTokenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully refreshed tokens."
+          },
+          "401": {
+            "description": "Invalid refresh token."
+          }
+        },
+        "summary": "Rotate the refresh token for new access/refresh tokens.",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/users/me": {
+      "get": {
+        "operationId": "UsersController_getMe",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "User profile returned."
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get current user profile.",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/users/devices": {
+      "post": {
+        "operationId": "UsersController_registerDevice",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterDeviceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Device registered successfully."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Register a device for push notifications and E2E keys.",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/regions": {
+      "get": {
+        "operationId": "ProfilesController_getRegions",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "List of all regions."
+          }
+        },
+        "tags": [
+          "profiles"
+        ]
+      }
+    },
+    "/interest-tags": {
+      "get": {
+        "operationId": "ProfilesController_getInterestTags",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "List of all interest tags."
+          }
+        },
+        "tags": [
+          "profiles"
+        ]
+      }
+    },
+    "/profiles/me": {
+      "get": {
+        "operationId": "ProfilesController_getMyProfile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Returns the current user profile."
+          },
+          "404": {
+            "description": "Profile not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "profiles"
+        ]
+      },
+      "post": {
+        "operationId": "ProfilesController_createMyProfile",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateProfileDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Profile created."
+          },
+          "400": {
+            "description": "Underage."
+          },
+          "409": {
+            "description": "Profile already exists."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "profiles"
+        ]
+      },
+      "patch": {
+        "operationId": "ProfilesController_updateMyProfile",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProfileDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Profile updated."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "profiles"
+        ]
+      }
+    },
+    "/photos/upload-url": {
+      "post": {
+        "operationId": "PhotosController_getUploadUrl",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestUploadUrlDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Signed upload URL generated."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "photos"
+        ]
+      }
+    },
+    "/photos": {
+      "post": {
+        "operationId": "PhotosController_registerPhoto",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterPhotoDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Photo registered."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "photos"
+        ]
+      }
+    },
+    "/photos/{id}": {
+      "get": {
+        "operationId": "PhotosController_getPhoto",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a signed URL (blurred or original)."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "photos"
+        ]
+      }
+    },
+    "/photos/{id}/reveal-grants": {
+      "post": {
+        "operationId": "PhotosController_grantReveal",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GrantRevealDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Reveal grant created."
+          },
+          "403": {
+            "description": "Not the photo owner."
+          },
+          "409": {
+            "description": "Grant already exists."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "photos"
+        ]
+      }
+    },
+    "/photos/{id}/reveal-grants/{viewerUserId}": {
+      "delete": {
+        "operationId": "PhotosController_revokeReveal",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "viewerUserId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Grant revoked."
+          },
+          "403": {
+            "description": "Not the photo owner."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "photos"
+        ]
+      }
+    },
+    "/discovery": {
+      "get": {
+        "operationId": "DiscoveryController_getDiscoveryFeed",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Discovery"
+        ]
+      }
+    },
+    "/blocks": {
+      "post": {
+        "operationId": "SafetyController_blockUser",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BlockUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Block a user",
+        "tags": [
+          "safety"
+        ]
+      }
+    },
+    "/blocks/{id}": {
+      "delete": {
+        "operationId": "SafetyController_unblockUser",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Unblock a user",
+        "tags": [
+          "safety"
+        ]
+      }
+    },
+    "/swipes": {
+      "post": {
+        "operationId": "MatchesController_swipe",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SwipeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Matches"
+        ]
+      }
+    },
+    "/matches": {
+      "get": {
+        "operationId": "MatchesController_getMatches",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Matches"
+        ]
+      }
+    },
+    "/matches/{matchId}/devices/public-keys": {
+      "get": {
+        "operationId": "MessagesController_getMatchPublicKeys",
+        "parameters": [
+          {
+            "name": "matchId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get public keys of the matched user for E2E setup",
+        "tags": [
+          "messages"
+        ]
+      }
+    },
+    "/matches/{matchId}/messages": {
+      "post": {
+        "operationId": "MessagesController_createMessage",
+        "parameters": [
+          {
+            "name": "matchId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMessageDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Send a new encrypted message",
+        "tags": [
+          "messages"
+        ]
+      },
+      "get": {
+        "operationId": "MessagesController_getMessages",
+        "parameters": [
+          {
+            "name": "matchId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "offset",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get paginated messages for a match",
+        "tags": [
+          "messages"
+        ]
+      }
+    },
+    "/matches/{matchId}/messages/{messageId}/read": {
+      "patch": {
+        "operationId": "MessagesController_markAsRead",
+        "parameters": [
+          {
+            "name": "matchId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "messageId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Mark a message as read",
+        "tags": [
+          "messages"
+        ]
+      }
+    },
+    "/matches/{matchId}/messages/attachments/upload-url": {
+      "post": {
+        "operationId": "MessagesController_getAttachmentUploadUrl",
+        "parameters": [
+          {
+            "name": "matchId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get signed URL to upload an attachment",
+        "tags": [
+          "messages"
+        ]
+      }
+    },
+    "/matches/{matchId}/messages/{messageId}/attachments": {
+      "post": {
+        "operationId": "MessagesController_registerAttachment",
+        "parameters": [
+          {
+            "name": "matchId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "messageId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Register an uploaded attachment",
+        "tags": [
+          "messages"
+        ]
+      }
+    },
+    "/matches/{matchId}/messages/{messageId}/attachments/{attachmentId}/reveal": {
+      "post": {
+        "operationId": "MessagesController_revealAttachment",
+        "parameters": [
+          {
+            "name": "matchId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "attachmentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Reveal an attachment",
+        "tags": [
+          "messages"
+        ]
+      },
+      "delete": {
+        "operationId": "MessagesController_revokeAttachment",
+        "parameters": [
+          {
+            "name": "matchId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "attachmentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Revoke an attachment reveal",
+        "tags": [
+          "messages"
+        ]
+      }
+    },
+    "/resources": {
+      "get": {
+        "operationId": "ResourcesController_getPublishedResources",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Resources"
+        ]
+      },
+      "post": {
+        "operationId": "ResourcesController_createResource",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateResourceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Resources"
+        ]
+      }
+    },
+    "/resources/{id}": {
+      "patch": {
+        "operationId": "ResourcesController_updateResource",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateResourceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Resources"
+        ]
+      }
+    },
+    "/qa/threads": {
+      "get": {
+        "operationId": "QaController_getThreads",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Qa"
+        ]
+      },
+      "post": {
+        "operationId": "QaController_createThread",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateQaThreadDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Qa"
+        ]
+      }
+    },
+    "/qa/threads/{id}/reply": {
+      "post": {
+        "operationId": "QaController_replyToThread",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReplyQaThreadDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Qa"
+        ]
+      }
+    },
+    "/qa/threads/{id}/assign": {
+      "post": {
+        "operationId": "QaController_assignThread",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Qa"
+        ]
+      }
+    },
+    "/subscriptions/webhook/{provider}": {
+      "post": {
+        "operationId": "SubscriptionsController_handleWebhook",
+        "parameters": [
+          {
+            "name": "provider",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Subscriptions"
+        ]
+      }
+    },
+    "/compatibility-quiz/questions": {
+      "get": {
+        "operationId": "CompatibilityQuizController_getQuestions",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "CompatibilityQuiz"
+        ]
+      }
+    },
+    "/compatibility-quiz/responses": {
+      "post": {
+        "operationId": "CompatibilityQuizController_submitResponse",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitResponseDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "CompatibilityQuiz"
+        ]
+      }
+    },
+    "/matches/{matchId}/video-calls": {
+      "post": {
+        "operationId": "VideoCallsController_scheduleCall",
+        "parameters": [
+          {
+            "name": "matchId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScheduleVideoCallDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Schedule a video verification call",
+        "tags": [
+          "video-calls"
+        ]
+      }
+    },
+    "/matches/{matchId}/video-calls/{callId}": {
+      "patch": {
+        "operationId": "VideoCallsController_updateStatus",
+        "parameters": [
+          {
+            "name": "matchId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "callId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateVideoCallStatusDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update video call status",
+        "tags": [
+          "video-calls"
+        ]
+      }
+    },
+    "/success-stories": {
+      "get": {
+        "operationId": "SuccessStoriesController_getPublishedStories",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "SuccessStories"
+        ]
+      },
+      "post": {
+        "operationId": "SuccessStoriesController_submitStory",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSuccessStoryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "SuccessStories"
+        ]
+      }
+    },
+    "/success-stories/{id}/approve": {
+      "post": {
+        "operationId": "SuccessStoriesController_approveStory",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "SuccessStories"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Lib le Lib API",
+    "description": "API documentation for the Lib le Lib application.",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      }
+    },
+    "schemas": {
+      "RequestOtpDto": {
+        "type": "object",
+        "properties": {
+          "destination": {
+            "type": "string",
+            "description": "Phone number or email address to send the OTP to.",
+            "example": "+251911000000"
+          },
+          "isSignUp": {
+            "type": "boolean",
+            "description": "True if this is a signup attempt, false if login.",
+            "example": true
+          }
+        },
+        "required": [
+          "destination",
+          "isSignUp"
+        ]
+      },
+      "VerifyOtpDto": {
+        "type": "object",
+        "properties": {
+          "destination": {
+            "type": "string",
+            "description": "Phone number or email address the OTP was sent to.",
+            "example": "+251911000000"
+          },
+          "code": {
+            "type": "string",
+            "description": "The 6-digit OTP code.",
+            "example": "123456"
+          },
+          "isSignUp": {
+            "type": "boolean",
+            "description": "True if this is a signup attempt, false if login.",
+            "example": true
+          }
+        },
+        "required": [
+          "destination",
+          "code",
+          "isSignUp"
+        ]
+      },
+      "RefreshTokenDto": {
+        "type": "object",
+        "properties": {
+          "refreshToken": {
+            "type": "string",
+            "description": "The refresh token issued at login."
+          }
+        },
+        "required": [
+          "refreshToken"
+        ]
+      },
+      "RegisterDeviceDto": {
+        "type": "object",
+        "properties": {
+          "platform": {
+            "type": "string",
+            "description": "Device platform: 'ios' or 'android'.",
+            "example": "android"
+          },
+          "pushToken": {
+            "type": "string",
+            "description": "FCM/APNs push notification token."
+          },
+          "publicKey": {
+            "type": "string",
+            "description": "E2E key-exchange public key for this device."
+          }
+        },
+        "required": [
+          "platform"
+        ]
+      },
+      "CreateProfileDto": {
+        "type": "object",
+        "properties": {
+          "nickname": {
+            "type": "string",
+            "example": "Alex"
+          },
+          "dateOfBirth": {
+            "type": "string",
+            "example": "1995-10-15"
+          },
+          "gender": {
+            "type": "string",
+            "enum": [
+              "man",
+              "woman",
+              "other"
+            ]
+          },
+          "regionId": {
+            "type": "string",
+            "description": "UUID of the region"
+          },
+          "relationshipGoals": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "marriage",
+                "serious_relationship",
+                "friendship"
+              ]
+            }
+          },
+          "bio": {
+            "type": "string"
+          },
+          "discreetMode": {
+            "type": "boolean"
+          },
+          "lowBandwidthMode": {
+            "type": "boolean"
+          },
+          "preferredLanguage": {
+            "type": "string",
+            "enum": [
+              "am",
+              "en"
+            ]
+          },
+          "interestTagIds": {
+            "description": "Array of InterestTag UUIDs",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "nickname",
+          "dateOfBirth",
+          "gender",
+          "regionId",
+          "relationshipGoals"
+        ]
+      },
+      "UpdateProfileDto": {
+        "type": "object",
+        "properties": {
+          "nickname": {
+            "type": "string",
+            "example": "Alex"
+          },
+          "dateOfBirth": {
+            "type": "string",
+            "example": "1995-10-15"
+          },
+          "gender": {
+            "type": "string",
+            "enum": [
+              "man",
+              "woman",
+              "other"
+            ]
+          },
+          "regionId": {
+            "type": "string",
+            "description": "UUID of the region"
+          },
+          "relationshipGoals": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "marriage",
+                "serious_relationship",
+                "friendship"
+              ]
+            }
+          },
+          "bio": {
+            "type": "string"
+          },
+          "discreetMode": {
+            "type": "boolean"
+          },
+          "lowBandwidthMode": {
+            "type": "boolean"
+          },
+          "preferredLanguage": {
+            "type": "string",
+            "enum": [
+              "am",
+              "en"
+            ]
+          },
+          "interestTagIds": {
+            "description": "Array of InterestTag UUIDs",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "RequestUploadUrlDto": {
+        "type": "object",
+        "properties": {
+          "contentType": {
+            "type": "string",
+            "example": "image/jpeg"
+          }
+        }
+      },
+      "RegisterPhotoDto": {
+        "type": "object",
+        "properties": {
+          "storageRef": {
+            "type": "string",
+            "description": "The storage_ref key returned by /photos/upload-url"
+          },
+          "position": {
+            "type": "number",
+            "example": 0
+          },
+          "isPrimary": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "storageRef"
+        ]
+      },
+      "GrantRevealDto": {
+        "type": "object",
+        "properties": {
+          "viewerUserId": {
+            "type": "string",
+            "description": "UUID of the user to grant reveal access to"
+          }
+        },
+        "required": [
+          "viewerUserId"
+        ]
+      },
+      "BlockUserDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "SwipeDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "CreateMessageDto": {
+        "type": "object",
+        "properties": {
+          "messageType": {
+            "type": "string",
+            "enum": [
+              "text",
+              "image"
+            ],
+            "default": "text"
+          },
+          "ciphertext": {
+            "type": "string",
+            "description": "Base64 encoded ciphertext"
+          },
+          "nonce": {
+            "type": "string",
+            "description": "Base64 encoded nonce"
+          }
+        },
+        "required": [
+          "messageType",
+          "ciphertext",
+          "nonce"
+        ]
+      },
+      "CreateResourceDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "UpdateResourceDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "CreateQaThreadDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "ReplyQaThreadDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "SubmitResponseDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "ScheduleVideoCallDto": {
+        "type": "object",
+        "properties": {
+          "scheduledAt": {
+            "type": "string",
+            "description": "Scheduled time for the video call"
+          }
+        }
+      },
+      "UpdateVideoCallStatusDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "scheduled",
+              "completed",
+              "canceled"
+            ]
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "CreateSuccessStoryDto": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  }
+}

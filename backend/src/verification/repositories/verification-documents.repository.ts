@@ -19,14 +19,22 @@ export class VerificationDocumentsRepository {
     return this.repo.save(doc);
   }
 
-  async findByRecordId(verificationRecordId: string): Promise<VerificationDocument[]> {
+  async findByRecordId(
+    verificationRecordId: string,
+  ): Promise<VerificationDocument[]> {
     return this.repo.find({ where: { verificationRecordId } });
   }
 
-  async nullStorageRef(id: string): Promise<void> {
-    await this.repo.update(
+  async nullStorageRef(
+    id: string,
+    manager?: import('typeorm').EntityManager,
+  ): Promise<void> {
+    const targetRepo = manager
+      ? manager.getRepository(VerificationDocument)
+      : this.repo;
+    await targetRepo.update(
       { id },
-      { storageRef: undefined, deletedAt: new Date() }
+      { storageRef: null as any, deletedAt: new Date() },
     );
   }
 

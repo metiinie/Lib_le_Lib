@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ScheduleModule } from '@nestjs/schedule';
 
 import { VerificationRecord } from './entities/verification-record.entity';
 import { VerificationDocument } from './entities/verification-document.entity';
@@ -24,7 +23,6 @@ import { VerificationScheduler } from './verification.scheduler';
       LivenessCheck,
       AuditLog,
     ]),
-    ScheduleModule.forRoot(), // Setup schedule module for the cron jobs
   ],
   controllers: [VerificationController],
   providers: [
@@ -35,6 +33,6 @@ import { VerificationScheduler } from './verification.scheduler';
     VerificationService,
     VerificationScheduler,
   ],
-  exports: [VerificationService],
+  exports: [VerificationService, AuditLogsRepository],
 })
 export class VerificationModule {}

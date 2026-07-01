@@ -33,17 +33,33 @@ export class User {
 
   @Column({
     type: 'enum',
-    enum: ['member', 'verification_officer', 'moderator', 'admin', 'health_professional'],
+    enum: [
+      'member',
+      'verification_officer',
+      'moderator',
+      'admin',
+      'health_professional',
+    ],
     default: 'member',
   })
-  role: 'member' | 'verification_officer' | 'moderator' | 'admin' | 'health_professional';
+  role:
+    | 'member'
+    | 'verification_officer'
+    | 'moderator'
+    | 'admin'
+    | 'health_professional';
 
   @Column({
     type: 'enum',
     enum: ['pending_verification', 'active', 'suspended', 'banned', 'deleted'],
     default: 'pending_verification',
   })
-  status: 'pending_verification' | 'active' | 'suspended' | 'banned' | 'deleted';
+  status:
+    | 'pending_verification'
+    | 'active'
+    | 'suspended'
+    | 'banned'
+    | 'deleted';
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;

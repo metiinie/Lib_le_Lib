@@ -10,6 +10,10 @@ export class MatchesRepository {
     this.repo = this.dataSource.getRepository(Match);
   }
 
+  async findById(id: string): Promise<Match | null> {
+    return this.repo.findOne({ where: { id } });
+  }
+
   /**
    * Returns all active matches for the user.
    */
@@ -28,10 +32,7 @@ export class MatchesRepository {
    */
   async getMatchedUserIds(userId: string): Promise<string[]> {
     const matches = await this.repo.find({
-      where: [
-        { userAId: userId },
-        { userBId: userId },
-      ],
+      where: [{ userAId: userId }, { userBId: userId }],
     });
 
     const excludedIds = new Set<string>();
@@ -48,8 +49,12 @@ export class MatchesRepository {
   /**
    * Fetches active matches and joins profile/photo data in a single query
    */
-  async getActiveMatchesWithProfileData(userId: string, excludedIds: string[]): Promise<any[]> {
-    const qb = this.dataSource.createQueryBuilder()
+  async getActiveMatchesWithProfileData(
+    userId: string,
+    excludedIds: string[],
+  ): Promise<any[]> {
+    const qb = this.dataSource
+      .createQueryBuilder()
       .select([
         'm.id as "matchId"',
         'm.matched_at as "matchedAt"',
@@ -65,10 +70,14 @@ export class MatchesRepository {
         'profiles',
         'p',
         'p.user_id = CASE WHEN m.user_a_id = :userId THEN m.user_b_id ELSE m.user_a_id END',
-        { userId }
+        { userId },
       )
       // Left join photos for the primary photo of the other user
-      .leftJoin('photos', 'ph', 'ph.profile_id = p.user_id AND ph.is_primary = true')
+      .leftJoin(
+        'photos',
+        'ph',
+        'ph.profile_id = p.user_id AND ph.is_primary = true',
+      )
       .where('m.status = :status', { status: 'active' })
       .andWhere('(m.user_a_id = :userId OR m.user_b_id = :userId)', { userId });
 

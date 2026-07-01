@@ -58,7 +58,7 @@ export class OtpCodesRepository {
     return this.repo.count({
       where: {
         destination,
-        createdAt: LessThan(since) as any, // TypeORM quirk: we actually want MoreThan
+        createdAt: LessThan(since), // TypeORM quirk: we actually want MoreThan
       },
     });
   }

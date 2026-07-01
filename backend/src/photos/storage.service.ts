@@ -14,7 +14,11 @@
  */
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
+import {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+} from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 @Injectable()
@@ -30,12 +34,18 @@ export class StorageService {
       region: config.get<string>('PHOTO_BUCKET_REGION', 'auto'),
       credentials: {
         accessKeyId: config.get<string>('PHOTO_BUCKET_ACCESS_KEY_ID', ''),
-        secretAccessKey: config.get<string>('PHOTO_BUCKET_SECRET_ACCESS_KEY', ''),
+        secretAccessKey: config.get<string>(
+          'PHOTO_BUCKET_SECRET_ACCESS_KEY',
+          '',
+        ),
       },
       // Required for Cloudflare R2 path-style URLs
       forcePathStyle: false,
     });
-    this.photoBucket = config.get<string>('PHOTO_BUCKET_NAME', 'lib-le-lib-photos');
+    this.photoBucket = config.get<string>(
+      'PHOTO_BUCKET_NAME',
+      'lib-le-lib-photos',
+    );
     this.photoTtl = config.get<number>('PHOTO_PRESIGN_TTL_SECONDS', 900);
   }
 
@@ -43,13 +53,18 @@ export class StorageService {
    * Returns a short-lived signed PUT URL for the client to upload directly.
    * The backend never touches the raw bytes — only the storage key is stored.
    */
-  async getPhotoUploadUrl(storageRef: string, contentType = 'image/jpeg'): Promise<string> {
+  async getPhotoUploadUrl(
+    storageRef: string,
+    contentType = 'image/jpeg',
+  ): Promise<string> {
     const command = new PutObjectCommand({
       Bucket: this.photoBucket,
       Key: storageRef,
       ContentType: contentType,
     });
-    return getSignedUrl(this.photoClient, command, { expiresIn: this.photoTtl });
+    return getSignedUrl(this.photoClient, command, {
+      expiresIn: this.photoTtl,
+    });
   }
 
   /**
@@ -63,6 +78,8 @@ export class StorageService {
       Bucket: this.photoBucket,
       Key: storageRef,
     });
-    return getSignedUrl(this.photoClient, command, { expiresIn: this.photoTtl });
+    return getSignedUrl(this.photoClient, command, {
+      expiresIn: this.photoTtl,
+    });
   }
 }

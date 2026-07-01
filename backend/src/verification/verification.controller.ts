@@ -8,6 +8,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth, ApiExcludeController } from '@nestjs/swagger';
 import { VerificationService } from './verification.service';
 import { SubmitVerificationDto } from './dto/submit-verification.dto';
 import { DecideVerificationDto } from './dto/decide-verification.dto';
@@ -16,6 +17,9 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
+@ApiTags('verification')
+@ApiBearerAuth()
+@ApiExcludeController()
 @Controller('verification')
 @UseGuards(JwtAuthGuard)
 export class VerificationController {

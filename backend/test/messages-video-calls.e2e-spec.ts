@@ -6,7 +6,11 @@ import { StorageService } from '../src/photos/storage.service';
 import { JwtService } from '@nestjs/jwt';
 import { DataSource } from 'typeorm';
 
-function makeToken(app: INestApplication, userId: string, role: string = 'member'): string {
+function makeToken(
+  app: INestApplication,
+  userId: string,
+  role: string = 'member',
+): string {
   const jwt = app.get(JwtService);
   return jwt.sign(
     { sub: userId, role },
@@ -26,10 +30,14 @@ describe('Phase 5 — Messaging & Video Calls (e2e)', () => {
 
   beforeAll(async () => {
     storageMock = {
-      getPhotoUploadUrl: jest.fn().mockResolvedValue('https://s3.example.com/put-signed-url'),
-      getPhotoReadUrl: jest.fn().mockImplementation((key: string) =>
-        Promise.resolve(`https://s3.example.com/get/${key}`),
-      ),
+      getPhotoUploadUrl: jest
+        .fn()
+        .mockResolvedValue('https://s3.example.com/put-signed-url'),
+      getPhotoReadUrl: jest
+        .fn()
+        .mockImplementation((key: string) =>
+          Promise.resolve(`https://s3.example.com/get/${key}`),
+        ),
     };
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -40,40 +48,74 @@ describe('Phase 5 — Messaging & Video Calls (e2e)', () => {
       .compile();
 
     app = moduleFixture.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+    app.useGlobalPipes(
+      new ValidationPipe({ whitelist: true, transform: true }),
+    );
     await app.init();
-    
+
     dataSource = app.get(DataSource);
 
     // Setup: Create 2 users and 1 active match
     const phoneA = `+19${Math.floor(100000000 + Math.random() * 900000000)}`;
-    const userARes = await dataSource.query(`INSERT INTO users (phone, role, status) VALUES ($1, 'member', 'active') RETURNING id`, [phoneA]);
+    const userARes = await dataSource.query(
+      `INSERT INTO users (phone, role, status) VALUES ($1, 'member', 'active') RETURNING id`,
+      [phoneA],
+    );
     userAId = userARes[0].id;
     userAToken = makeToken(app, userAId);
 
     const phoneB = `+19${Math.floor(100000000 + Math.random() * 900000000)}`;
-    const userBRes = await dataSource.query(`INSERT INTO users (phone, role, status) VALUES ($1, 'member', 'active') RETURNING id`, [phoneB]);
+    const userBRes = await dataSource.query(
+      `INSERT INTO users (phone, role, status) VALUES ($1, 'member', 'active') RETURNING id`,
+      [phoneB],
+    );
     userBId = userBRes[0].id;
     userBToken = makeToken(app, userBId);
 
     // Create a match
     const matchRes = await dataSource.query(
       `INSERT INTO matches (user_a_id, user_b_id, status) VALUES ($1, $2, 'active') RETURNING id`,
-      [userAId < userBId ? userAId : userBId, userAId < userBId ? userBId : userAId]
+      [
+        userAId < userBId ? userAId : userBId,
+        userAId < userBId ? userBId : userAId,
+      ],
     );
     matchId = matchRes[0].id;
 
     // Create profiles for discreet_mode checks
-    await dataSource.query(`INSERT INTO profiles (user_id, nickname, date_of_birth, gender, discreet_mode) VALUES ($1, 'UserA', '1990-01-01', 'other', false)`, [userAId]);
-    await dataSource.query(`INSERT INTO profiles (user_id, nickname, date_of_birth, gender, discreet_mode) VALUES ($1, 'UserB', '1990-01-01', 'other', true)`, [userBId]);
+    await dataSource.query(
+      `INSERT INTO profiles (user_id, nickname, date_of_birth, gender, discreet_mode) VALUES ($1, 'UserA', '1990-01-01', 'other', false)`,
+      [userAId],
+    );
+    await dataSource.query(
+      `INSERT INTO profiles (user_id, nickname, date_of_birth, gender, discreet_mode) VALUES ($1, 'UserB', '1990-01-01', 'other', true)`,
+      [userBId],
+    );
   });
 
   afterAll(async () => {
-    await dataSource.query(`DELETE FROM video_verification_calls WHERE match_id = $1`, [matchId]);
-    await dataSource.query(`DELETE FROM messages WHERE match_id = $1`, [matchId]);
-    await dataSource.query(`DELETE FROM matches WHERE id = $1`, [matchId]);
-    await dataSource.query(`DELETE FROM users WHERE id IN ($1, $2)`, [userAId, userBId]);
-    await app.close();
+    try {
+      if (dataSource?.isInitialized) {
+        await dataSource.query(
+          `DELETE FROM video_verification_calls WHERE match_id = $1`,
+          [matchId],
+        );
+        await dataSource.query(`DELETE FROM messages WHERE match_id = $1`, [
+          matchId,
+        ]);
+        await dataSource.query(`DELETE FROM matches WHERE id = $1`, [matchId]);
+        await dataSource.query(`DELETE FROM users WHERE id IN ($1, $2)`, [
+          userAId,
+          userBId,
+        ]);
+      }
+    } catch (e) {
+      console.error('Teardown cleanup error:', e);
+    } finally {
+      if (app) {
+        await app.close();
+      }
+    }
   });
 
   describe('Messaging (Chat confidentiality)', () => {
@@ -97,22 +139,27 @@ describe('Phase 5 — Messaging & Video Calls (e2e)', () => {
     });
 
     it('Direct DB check: ciphertext is a buffer and not plaintext (Chat confidentiality)', async () => {
-      const dbMsg = await dataSource.query(`SELECT ciphertext, nonce FROM messages WHERE id = $1`, [messageId]);
+      const dbMsg = await dataSource.query(
+        `SELECT ciphertext, nonce FROM messages WHERE id = $1`,
+        [messageId],
+      );
       expect(dbMsg.length).toBe(1);
-      
+
       // Node pg driver returns BYTEA as Buffer
       expect(Buffer.isBuffer(dbMsg[0].ciphertext)).toBe(true);
       expect(Buffer.isBuffer(dbMsg[0].nonce)).toBe(true);
 
       const dbCiphertextBase64 = dbMsg[0].ciphertext.toString('base64');
       const dbNonceBase64 = dbMsg[0].nonce.toString('base64');
-      
+
       expect(dbCiphertextBase64).toBe(testCiphertext);
       expect(dbNonceBase64).toBe(testNonce);
 
       // The key requirement: The service has NO code path that attempts to read plaintext.
       // And the row is unintelligible without the clients' own keys.
-      expect(dbMsg[0].ciphertext.toString('utf-8')).not.toContain('Hello World'); // Just to be sure it's raw bytes
+      expect(dbMsg[0].ciphertext.toString('utf-8')).not.toContain(
+        'Hello World',
+      ); // Just to be sure it's raw bytes
     });
 
     it('GET /matches/:id/messages returns paginated messages', async () => {
@@ -147,7 +194,7 @@ describe('Phase 5 — Messaging & Video Calls (e2e)', () => {
         .post(`/matches/${matchId}/messages/attachments/upload-url`)
         .set('Authorization', `Bearer ${userAToken}`)
         .expect(201);
-      
+
       expect(res.body.uploadUrl).toBeDefined();
       expect(res.body.storageRef).toContain(`chat/${matchId}/`);
     });
@@ -162,7 +209,7 @@ describe('Phase 5 — Messaging & Video Calls (e2e)', () => {
         .set('Authorization', `Bearer ${userAToken}`)
         .send({ scheduledAt: new Date().toISOString() })
         .expect(201);
-      
+
       expect(res.body.id).toBeDefined();
       callId = res.body.id;
     });
@@ -173,7 +220,7 @@ describe('Phase 5 — Messaging & Video Calls (e2e)', () => {
         .set('Authorization', `Bearer ${userBToken}`)
         .send({ status: 'completed' })
         .expect(200);
-      
+
       expect(res.body.status).toBe('completed');
     });
   });

@@ -29,7 +29,10 @@ export class CreateProfileDto {
   @IsOptional()
   regionId?: string;
 
-  @ApiProperty({ enum: ['marriage', 'serious_relationship', 'friendship'], isArray: true })
+  @ApiProperty({
+    enum: ['marriage', 'serious_relationship', 'friendship'],
+    isArray: true,
+  })
   @IsArray()
   @IsEnum(['marriage', 'serious_relationship', 'friendship'], { each: true })
   relationshipGoals: string[];
@@ -54,7 +57,11 @@ export class CreateProfileDto {
   @IsOptional()
   preferredLanguage?: string;
 
-  @ApiProperty({ type: [String], description: 'Array of InterestTag UUIDs', required: false })
+  @ApiProperty({
+    type: [String],
+    description: 'Array of InterestTag UUIDs',
+    required: false,
+  })
   @IsArray()
   @IsUUID('all', { each: true })
   @IsOptional()

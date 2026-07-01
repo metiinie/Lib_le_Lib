@@ -22,7 +22,10 @@ export class PhotosRepository {
     return this.photoRepo.save(entity);
   }
 
-  async findActiveGrant(photoId: string, viewerId: string): Promise<PhotoRevealGrant | null> {
+  async findActiveGrant(
+    photoId: string,
+    viewerId: string,
+  ): Promise<PhotoRevealGrant | null> {
     return this.grantRepo.findOne({
       where: {
         photoId,
@@ -32,7 +35,10 @@ export class PhotosRepository {
     });
   }
 
-  async createGrant(photoId: string, viewerId: string): Promise<PhotoRevealGrant> {
+  async createGrant(
+    photoId: string,
+    viewerId: string,
+  ): Promise<PhotoRevealGrant> {
     const grant = this.grantRepo.create({
       photoId,
       grantedToUserId: viewerId,

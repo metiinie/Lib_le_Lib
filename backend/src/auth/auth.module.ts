@@ -8,11 +8,13 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { UsersModule } from '../users/users.module';
+import { VerificationModule } from '../verification/verification.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([OtpCode]),
     UsersModule,
+    VerificationModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({

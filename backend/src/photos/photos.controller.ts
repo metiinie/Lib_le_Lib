@@ -12,7 +12,11 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 import { PhotosService } from './photos.service';
-import { RegisterPhotoDto, RequestUploadUrlDto, GrantRevealDto } from './dto/photos.dto';
+import {
+  RegisterPhotoDto,
+  RequestUploadUrlDto,
+  GrantRevealDto,
+} from './dto/photos.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
@@ -54,7 +58,10 @@ export class PhotosController {
    * active, non-revoked photo_reveal_grants row exists for that exact viewer."
    */
   @Get(':id')
-  @ApiResponse({ status: 200, description: 'Returns a signed URL (blurred or original).' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns a signed URL (blurred or original).',
+  })
   async getPhoto(
     @CurrentUser() user: { id: string },
     @Param('id', ParseUUIDPipe) photoId: string,

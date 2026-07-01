@@ -10,14 +10,22 @@ export class SwipesRepository {
     this.repo = this.dataSource.getRepository(Swipe);
   }
 
-  async insertSwipe(actorId: string, targetId: string, action: string): Promise<Swipe> {
+  async insertSwipe(
+    actorId: string,
+    targetId: string,
+    action: string,
+  ): Promise<Swipe> {
     try {
       const swipe = this.repo.create({ actorId, targetId, action });
       return await this.repo.save(swipe);
-    } catch (error) {
-      if (error.code === '23505') { // Postgres unique violation (actor_id, target_id)
+    } catch (error: any) {
+      if (error.code === '23505') {
+        // Postgres unique violation (actor_id, target_id)
         throw new ConflictException({
-          error: { code: 'ALREADY_SWIPED', message: 'You have already swiped on this user.' },
+          error: {
+            code: 'ALREADY_SWIPED',
+            message: 'You have already swiped on this user.',
+          },
         });
       }
       throw error;

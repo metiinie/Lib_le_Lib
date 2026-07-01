@@ -25,11 +25,14 @@ export class QuizRepository {
     });
   }
 
-  async saveResponse(userId: string, dto: SubmitResponseDto): Promise<QuizResponse> {
+  async saveResponse(
+    userId: string,
+    dto: SubmitResponseDto,
+  ): Promise<QuizResponse> {
     // We treat profile_id as user_id because they share the same ID.
     // Ensure existing responses are overwritten or handle uniqueness.
     // The DB constraint UNIQUE (profile_id, question_id) means we should update or delete first.
-    
+
     await this.responseRepo.delete({
       profileId: userId,
       questionId: dto.questionId,
@@ -44,7 +47,7 @@ export class QuizRepository {
 
     if (dto.optionIds && dto.optionIds.length > 0) {
       const options = await this.optionRepo.find({
-        where: { id: In(dto.optionIds) }
+        where: { id: In(dto.optionIds) },
       });
       response.options = options;
     }
@@ -65,7 +68,11 @@ export class QuizRepository {
     const savedQ1 = await this.questionRepo.save(q1);
 
     await this.optionRepo.save([
-      { questionId: savedQ1.id, optionText: 'Serious Relationship', orderIndex: 1 },
+      {
+        questionId: savedQ1.id,
+        optionText: 'Serious Relationship',
+        orderIndex: 1,
+      },
       { questionId: savedQ1.id, optionText: 'Friendship', orderIndex: 2 },
     ]);
 

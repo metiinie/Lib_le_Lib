@@ -26,7 +26,10 @@ export class ProfilesController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @Get('profiles/me')
-  @ApiResponse({ status: 200, description: 'Returns the current user profile.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns the current user profile.',
+  })
   @ApiResponse({ status: 404, description: 'Profile not found.' })
   async getMyProfile(@CurrentUser() user: { id: string }) {
     return this.profilesService.getProfile(user.id);

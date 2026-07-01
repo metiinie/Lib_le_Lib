@@ -1,7 +1,11 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { LoggerModule } from 'nestjs-pino';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { ScheduleModule } from '@nestjs/schedule';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard } from '@nestjs/throttler';
 import { AppDataSource } from './config/typeorm.config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -21,18 +25,30 @@ import { QaModule } from './qa/qa.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { CompatibilityQuizModule } from './compatibility-quiz/compatibility-quiz.module';
 import { VideoCallsModule } from './video-calls/video-calls.module';
+import { ModerationModule } from './moderation/moderation.module';
+import { SuccessStoriesModule } from './success-stories/success-stories.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 100, // Default 100 requests per minute
+        skipIf: () => process.env.NODE_ENV === 'test',
+      },
+    ]),
     TypeOrmModule.forRoot({
       ...AppDataSource.options,
       autoLoadEntities: true,
     }),
+    ScheduleModule.forRoot(),
     LoggerModule.forRoot({
       pinoHttp: {
+        autoLogging: process.env.NODE_ENV !== 'test',
+        level: process.env.NODE_ENV === 'test' ? 'silent' : 'info',
         redact: {
           paths: [
             'req.headers.authorization',
@@ -62,7 +78,8 @@ import { VideoCallsModule } from './video-calls/video-calls.module';
           censor: '[REDACTED]',
         },
         transport:
-          process.env.NODE_ENV !== 'production'
+          process.env.NODE_ENV !== 'production' &&
+          process.env.NODE_ENV !== 'test'
             ? { target: 'pino-pretty', options: { colorize: true } }
             : undefined,
       },
@@ -81,8 +98,16 @@ import { VideoCallsModule } from './video-calls/video-calls.module';
     SubscriptionsModule,
     CompatibilityQuizModule,
     VideoCallsModule,
+    ModerationModule,
+    SuccessStoriesModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}

@@ -11,7 +11,8 @@ export class DiscoveryRepository {
     excludedIds: string[],
     filters: DiscoveryFiltersDto,
   ): Promise<any[]> {
-    const qb = this.dataSource.createQueryBuilder()
+    const qb = this.dataSource
+      .createQueryBuilder()
       .select([
         'p.user_id as "userId"',
         'p.nickname as "nickname"',
@@ -23,7 +24,11 @@ export class DiscoveryRepository {
       ])
       .from('profiles', 'p')
       .innerJoin('users', 'u', 'u.id = p.user_id')
-      .leftJoin('photos', 'ph', 'ph.profile_id = p.user_id AND ph.is_primary = true')
+      .leftJoin(
+        'photos',
+        'ph',
+        'ph.profile_id = p.user_id AND ph.is_primary = true',
+      )
       .where('u.status = :status', { status: 'active' });
 
     if (excludedIds.length > 0) {
@@ -33,13 +38,17 @@ export class DiscoveryRepository {
     if (filters.minAge) {
       const maxDob = new Date();
       maxDob.setFullYear(maxDob.getFullYear() - filters.minAge);
-      qb.andWhere('p.date_of_birth <= :maxDob', { maxDob: maxDob.toISOString().split('T')[0] });
+      qb.andWhere('p.date_of_birth <= :maxDob', {
+        maxDob: maxDob.toISOString().split('T')[0],
+      });
     }
 
     if (filters.maxAge) {
       const minDob = new Date();
       minDob.setFullYear(minDob.getFullYear() - filters.maxAge - 1);
-      qb.andWhere('p.date_of_birth > :minDob', { minDob: minDob.toISOString().split('T')[0] });
+      qb.andWhere('p.date_of_birth > :minDob', {
+        minDob: minDob.toISOString().split('T')[0],
+      });
     }
 
     if (filters.gender) {
@@ -51,9 +60,12 @@ export class DiscoveryRepository {
     }
 
     if (filters.relationshipGoals && filters.relationshipGoals.length > 0) {
-      qb.andWhere('p.relationship_goals && ARRAY[:...relationshipGoals]::relationship_goal[]', {
-        relationshipGoals: filters.relationshipGoals,
-      });
+      qb.andWhere(
+        'p.relationship_goals && ARRAY[:...relationshipGoals]::relationship_goal[]',
+        {
+          relationshipGoals: filters.relationshipGoals,
+        },
+      );
     }
 
     // Sort by newest users first for now

@@ -12,7 +12,9 @@ export class MessageAttachment {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => Message, (message) => message.attachments, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Message, (message) => message.attachments, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'message_id' })
   message: Message;
 
@@ -26,8 +28,8 @@ export class MessageAttachment {
   blurredDefault: boolean;
 
   @Column({ name: 'revealed_at', type: 'timestamptz', nullable: true })
-  revealedAt: Date;
+  revealedAt: Date | null;
 
   @Column({ name: 'revoked_at', type: 'timestamptz', nullable: true })
-  revokedAt: Date;
+  revokedAt: Date | null;
 }

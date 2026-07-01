@@ -1,4 +1,9 @@
-import { Injectable, BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 import { ProfilesRepository } from './repositories/profiles.repository';
 import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
@@ -31,11 +36,16 @@ export class ProfilesService {
     const ageInYears = ageInMilliseconds / (1000 * 60 * 60 * 24 * 365.25);
     if (ageInYears < 18) {
       throw new BadRequestException({
-        error: { code: 'UNDERAGE', message: 'You must be at least 18 years old.' },
+        error: {
+          code: 'UNDERAGE',
+          message: 'You must be at least 18 years old.',
+        },
       });
     }
 
-    const interestTags = await this.profilesRepository.findTagsByIds(dto.interestTagIds || []);
+    const interestTags = await this.profilesRepository.findTagsByIds(
+      dto.interestTagIds || [],
+    );
 
     const profileData = {
       userId,
@@ -68,7 +78,10 @@ export class ProfilesService {
       const ageInYears = ageInMilliseconds / (1000 * 60 * 60 * 24 * 365.25);
       if (ageInYears < 18) {
         throw new BadRequestException({
-          error: { code: 'UNDERAGE', message: 'You must be at least 18 years old.' },
+          error: {
+            code: 'UNDERAGE',
+            message: 'You must be at least 18 years old.',
+          },
         });
       }
       profile.dateOfBirth = dto.dateOfBirth;
@@ -77,14 +90,19 @@ export class ProfilesService {
     if (dto.nickname !== undefined) profile.nickname = dto.nickname;
     if (dto.gender !== undefined) profile.gender = dto.gender;
     if (dto.regionId !== undefined) profile.regionId = dto.regionId;
-    if (dto.relationshipGoals !== undefined) profile.relationshipGoals = dto.relationshipGoals;
+    if (dto.relationshipGoals !== undefined)
+      profile.relationshipGoals = dto.relationshipGoals;
     if (dto.bio !== undefined) profile.bio = dto.bio;
     if (dto.discreetMode !== undefined) profile.discreetMode = dto.discreetMode;
-    if (dto.lowBandwidthMode !== undefined) profile.lowBandwidthMode = dto.lowBandwidthMode;
-    if (dto.preferredLanguage !== undefined) profile.preferredLanguage = dto.preferredLanguage;
+    if (dto.lowBandwidthMode !== undefined)
+      profile.lowBandwidthMode = dto.lowBandwidthMode;
+    if (dto.preferredLanguage !== undefined)
+      profile.preferredLanguage = dto.preferredLanguage;
 
     if (dto.interestTagIds !== undefined) {
-      profile.interestTags = await this.profilesRepository.findTagsByIds(dto.interestTagIds);
+      profile.interestTags = await this.profilesRepository.findTagsByIds(
+        dto.interestTagIds,
+      );
     }
 
     return this.profilesRepository.saveProfile(profile);

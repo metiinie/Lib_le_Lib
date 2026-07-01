@@ -9,7 +9,9 @@ export class RequestUploadUrlDto {
 }
 
 export class RegisterPhotoDto {
-  @ApiProperty({ description: 'The storage_ref key returned by /photos/upload-url' })
+  @ApiProperty({
+    description: 'The storage_ref key returned by /photos/upload-url',
+  })
   @IsString()
   storageRef: string;
 

@@ -44,10 +44,14 @@ describe('Phase 2 — Profiles & Photos (e2e)', () => {
   beforeAll(async () => {
     // Mock StorageService so tests don't hit real cloud storage.
     storageMock = {
-      getPhotoUploadUrl: jest.fn().mockResolvedValue('https://r2.example.com/put-signed-url'),
-      getPhotoReadUrl: jest.fn().mockImplementation((key: string) =>
-        Promise.resolve(`https://r2.example.com/get/${key}`),
-      ),
+      getPhotoUploadUrl: jest
+        .fn()
+        .mockResolvedValue('https://r2.example.com/put-signed-url'),
+      getPhotoReadUrl: jest
+        .fn()
+        .mockImplementation((key: string) =>
+          Promise.resolve(`https://r2.example.com/get/${key}`),
+        ),
     };
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -58,24 +62,32 @@ describe('Phase 2 — Profiles & Photos (e2e)', () => {
       .compile();
 
     app = moduleFixture.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+    app.useGlobalPipes(
+      new ValidationPipe({ whitelist: true, transform: true }),
+    );
     await app.init();
   });
 
   afterAll(async () => {
-    await app.close();
+    if (app) {
+      await app.close();
+    }
   });
 
   // ── Reference data ──────────────────────────────────────────────────────────
 
   describe('Reference data', () => {
     it('GET /regions returns an array', async () => {
-      const res = await request(app.getHttpServer()).get('/regions').expect(200);
+      const res = await request(app.getHttpServer())
+        .get('/regions')
+        .expect(200);
       expect(Array.isArray(res.body)).toBe(true);
     });
 
     it('GET /interest-tags returns an array', async () => {
-      const res = await request(app.getHttpServer()).get('/interest-tags').expect(200);
+      const res = await request(app.getHttpServer())
+        .get('/interest-tags')
+        .expect(200);
       expect(Array.isArray(res.body)).toBe(true);
     });
   });
@@ -212,7 +224,9 @@ describe('Phase 2 — Profiles & Photos (e2e)', () => {
         .send({ contentType: 'image/jpeg' })
         .expect(201);
 
-      expect(res.body.uploadUrl).toContain('https://r2.example.com/put-signed-url');
+      expect(res.body.uploadUrl).toContain(
+        'https://r2.example.com/put-signed-url',
+      );
       expect(res.body.storageRef).toContain('_original');
     });
 

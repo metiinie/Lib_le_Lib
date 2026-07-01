@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DataSource } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
@@ -30,16 +34,26 @@ export class VerificationService {
     const existing = await this.recordsRepo.findByUserId(userId);
     if (existing && ['submitted', 'in_review'].includes(existing.status)) {
       throw new ConflictException({
-        error: { code: 'VERIFICATION_PENDING', message: 'You already have a verification request pending.' },
+        error: {
+          code: 'VERIFICATION_PENDING',
+          message: 'You already have a verification request pending.',
+        },
       });
     }
 
     if (existing && existing.status === 'rejected' && existing.decisionAt) {
-      const hoursSinceRejection = (Date.now() - existing.decisionAt.getTime()) / (1000 * 60 * 60);
-      const cooldownHours = this.configService.get<number>('VERIFICATION_RESUBMISSION_COOLDOWN_HOURS', 24);
+      const hoursSinceRejection =
+        (Date.now() - existing.decisionAt.getTime()) / (1000 * 60 * 60);
+      const cooldownHours = this.configService.get<number>(
+        'VERIFICATION_RESUBMISSION_COOLDOWN_HOURS',
+        24,
+      );
       if (hoursSinceRejection < cooldownHours) {
         throw new ConflictException({
-          error: { code: 'VERIFICATION_RATE_LIMITED', message: `Please wait ${cooldownHours} hours before resubmitting after a rejection.` },
+          error: {
+            code: 'VERIFICATION_RATE_LIMITED',
+            message: `Please wait ${cooldownHours} hours before resubmitting after a rejection.`,
+          },
         });
       }
     }
@@ -51,8 +65,11 @@ export class VerificationService {
     const ext = dto.contentType ? dto.contentType.split('/')[1] : 'pdf';
     const key = uuidv4();
     const storageRef = `verification/${userId}/${key}.${ext}`;
-    
-    const uploadUrl = await this.storageService.getDocumentUploadUrl(storageRef, dto.contentType);
+
+    const uploadUrl = await this.storageService.getDocumentUploadUrl(
+      storageRef,
+      dto.contentType,
+    );
 
     // Create document row
     await this.documentsRepo.create({
@@ -75,7 +92,11 @@ export class VerificationService {
     if (!record) {
       return { status: 'none' };
     }
-    return { status: record.status, rejectionReason: record.rejectionReason, expiryDate: record.expiryDate };
+    return {
+      status: record.status,
+      rejectionReason: record.rejectionReason,
+      expiryDate: record.expiryDate,
+    };
   }
 
   /**
@@ -84,7 +105,7 @@ export class VerificationService {
    */
   async getQueue() {
     const queue = await this.recordsRepo.findQueue();
-    
+
     // We map over each record to fetch its documents and generate signed URLs
     const result = await Promise.all(
       queue.map(async (record) => {
@@ -92,14 +113,16 @@ export class VerificationService {
         const mappedDocs = await Promise.all(
           docs.map(async (doc) => {
             if (!doc.storageRef) return { ...doc, url: null };
-            const url = await this.storageService.getDocumentReadUrl(doc.storageRef);
+            const url = await this.storageService.getDocumentReadUrl(
+              doc.storageRef,
+            );
             return {
               id: doc.id,
               documentType: doc.documentType,
               uploadedAt: doc.uploadedAt,
               url, // Temporary signed URL
             };
-          })
+          }),
         );
         return {
           id: record.id,
@@ -109,7 +132,7 @@ export class VerificationService {
           method: record.method,
           documents: mappedDocs,
         };
-      })
+      }),
     );
     return result;
   }
@@ -118,24 +141,37 @@ export class VerificationService {
    * Processes an officer's decision on a verification record.
    * Wrapped in a transaction to guarantee the audit log is always written.
    */
-  async decide(officerId: string, recordId: string, dto: DecideVerificationDto) {
+  async decide(
+    officerId: string,
+    recordId: string,
+    dto: DecideVerificationDto,
+  ) {
     const record = await this.recordsRepo.findById(recordId);
     if (!record) {
       throw new NotFoundException({
-        error: { code: 'RECORD_NOT_FOUND', message: 'Verification record not found.' },
+        error: {
+          code: 'RECORD_NOT_FOUND',
+          message: 'Verification record not found.',
+        },
       });
     }
 
     if (!['submitted', 'in_review'].includes(record.status)) {
       throw new ConflictException({
-        error: { code: 'INVALID_STATUS', message: 'Record is not pending review.' },
+        error: {
+          code: 'INVALID_STATUS',
+          message: 'Record is not pending review.',
+        },
       });
     }
 
     let expiryDateString: string | undefined;
 
     if (dto.decision === 'approved') {
-      const expiryMonths = this.configService.get<number>('VERIFICATION_EXPIRY_MONTHS', 12);
+      const expiryMonths = this.configService.get<number>(
+        'VERIFICATION_EXPIRY_MONTHS',
+        12,
+      );
       const date = new Date();
       date.setMonth(date.getMonth() + expiryMonths);
       // Format as YYYY-MM-DD for PostgreSQL DATE column
@@ -144,27 +180,35 @@ export class VerificationService {
 
     await this.dataSource.transaction(async (manager) => {
       // 1. Update record status
-      await manager.update(VerificationRecord, { id: recordId }, {
-        status: dto.decision,
-        decisionAt: new Date(),
-        reviewerId: officerId,
-        rejectionReason: dto.decision === 'rejected' ? dto.rejectionReason : undefined,
-        expiryDate: expiryDateString as any, // TypeORM type issue with date column string/Date
-        updatedAt: new Date(),
-      });
+      await manager.update(
+        VerificationRecord,
+        { id: recordId },
+        {
+          status: dto.decision,
+          decisionAt: new Date(),
+          reviewerId: officerId,
+          rejectionReason:
+            dto.decision === 'rejected' ? dto.rejectionReason : undefined,
+          expiryDate: expiryDateString as any, // TypeORM type issue with date column string/Date
+          updatedAt: new Date(),
+        },
+      );
 
       // 2. Write audit log
-      await this.auditLogsRepo.insertWithManager({
-        actorId: officerId,
-        actorRole: 'verification_officer',
-        action: 'verification_decision',
-        targetType: 'verification_record',
-        targetId: recordId,
-        metadata: {
-          decision: dto.decision,
-          rejectionReason: dto.rejectionReason,
+      await this.auditLogsRepo.insertWithManager(
+        {
+          actorId: officerId,
+          actorRole: 'verification_officer',
+          action: 'verification_decision',
+          targetType: 'verification_record',
+          targetId: recordId,
+          metadata: {
+            decision: dto.decision,
+            rejectionReason: dto.rejectionReason,
+          },
         },
-      }, manager);
+        manager,
+      );
     });
 
     return { message: `Verification request ${dto.decision}.` };

@@ -16,7 +16,7 @@ export class AuditLogsRepository {
    */
   async insertWithManager(
     entry: Partial<AuditLog>,
-    manager?: EntityManager
+    manager?: EntityManager,
   ): Promise<AuditLog> {
     const activeManager = manager || this.dataSource.manager;
     const log = activeManager.create(AuditLog, entry);

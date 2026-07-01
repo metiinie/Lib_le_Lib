@@ -1,10 +1,10 @@
-import { MigrationInterface, QueryRunner } from "typeorm";
+import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class InitialSchema1719540000000 implements MigrationInterface {
-    name = 'InitialSchema1719540000000'
+  name = 'InitialSchema1719540000000';
 
-    public async up(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`
+  public async up(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`
 -- ============================================================================
 -- LIB LE LIB — DATABASE SCHEMA
 -- PostgreSQL 14+
@@ -537,11 +537,11 @@ CREATE INDEX idx_subscriptions_user_id ON subscriptions(user_id);
 --   );
 
 `);
-    }
+  }
 
-    public async down(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`DROP SCHEMA IF EXISTS verification CASCADE;`);
-        await queryRunner.query(`
+  public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`DROP SCHEMA IF EXISTS verification CASCADE;`);
+    await queryRunner.query(`
             DROP TABLE IF EXISTS public.subscriptions CASCADE;
             DROP TABLE IF EXISTS public.success_stories CASCADE;
             DROP TABLE IF EXISTS public.qa_messages CASCADE;
@@ -568,7 +568,7 @@ CREATE INDEX idx_subscriptions_user_id ON subscriptions(user_id);
             DROP TABLE IF EXISTS public.otp_codes CASCADE;
             DROP TABLE IF EXISTS public.users CASCADE;
         `);
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP TYPE IF EXISTS public.user_status;
             DROP TYPE IF EXISTS public.user_role;
             DROP TYPE IF EXISTS public.gender_type;
@@ -591,5 +591,5 @@ CREATE INDEX idx_subscriptions_user_id ON subscriptions(user_id);
             DROP TYPE IF EXISTS public.subscription_plan;
             DROP TYPE IF EXISTS public.subscription_status;
         `);
-    }
+  }
 }

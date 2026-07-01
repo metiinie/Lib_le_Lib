@@ -19,13 +19,21 @@ export class DiscoveryService {
 
   async getDiscoveryFeed(userId: string, filters: DiscoveryFiltersDto) {
     // 1. Gather all IDs we MUST exclude (self, blocked, swiped, matched)
-    const blockedIds = await this.blocksRepo.getExcludedUserIds(userId);
-    const swipedIds = await this.swipesRepo.getSwipedUserIds(userId);
-    const matchedIds = await this.matchesRepo.getMatchedUserIds(userId);
+    const [blockedIds, swipedIds, matchedIds] = await Promise.all([
+      this.blocksRepo.getExcludedUserIds(userId),
+      this.swipesRepo.getSwipedUserIds(userId),
+      this.matchesRepo.getMatchedUserIds(userId),
+    ]);
 
-    const excludedIds = [...new Set([userId, ...blockedIds, ...swipedIds, ...matchedIds])];
+    const excludedIds = [
+      ...new Set([userId, ...blockedIds, ...swipedIds, ...matchedIds]),
+    ];
 
     // 2. Fetch the paged and filtered results using the repository
-    return this.discoveryRepo.findDiscoverablePaged(userId, excludedIds, filters);
+    return this.discoveryRepo.findDiscoverablePaged(
+      userId,
+      excludedIds,
+      filters,
+    );
   }
 }

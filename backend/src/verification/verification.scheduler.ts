@@ -6,6 +6,8 @@ import { VerificationDocumentsRepository } from './repositories/verification-doc
 import { AuditLogsRepository } from './repositories/audit-logs.repository';
 import { VerificationStorageService } from './verification-storage.service';
 
+import { DataSource } from 'typeorm';
+
 @Injectable()
 export class VerificationScheduler {
   private readonly logger = new Logger(VerificationScheduler.name);
@@ -16,6 +18,7 @@ export class VerificationScheduler {
     private readonly auditLogsRepo: AuditLogsRepository,
     private readonly storageService: VerificationStorageService,
     private readonly configService: ConfigService,
+    private readonly dataSource: DataSource,
   ) {}
 
   /**
@@ -25,17 +28,23 @@ export class VerificationScheduler {
   @Cron('0 9 * * *')
   async handleExpiryReminders() {
     this.logger.log('Running Expiry Reminder Cron...');
-    const daysBefore = this.configService.get<number>('VERIFICATION_REMINDER_DAYS_BEFORE', 30);
-    
+    const daysBefore = this.configService.get<number>(
+      'VERIFICATION_REMINDER_DAYS_BEFORE',
+      30,
+    );
+
     const targetDate = new Date();
     targetDate.setDate(targetDate.getDate() + daysBefore);
     const targetDateString = targetDate.toISOString().split('T')[0];
 
-    const expiringRecords = await this.recordsRepo.findExpiringBefore(targetDateString);
+    const expiringRecords =
+      await this.recordsRepo.findExpiringBefore(targetDateString);
 
     for (const record of expiringRecords) {
       // Logic for sending push notification reminder goes here in later phases
-      this.logger.log(`Verification for user ${record.userId} expires on ${record.expiryDate}. Reminder sent.`);
+      this.logger.log(
+        `Verification for user ${record.userId} expires on ${record.expiryDate}. Reminder sent.`,
+      );
     }
   }
 
@@ -47,7 +56,10 @@ export class VerificationScheduler {
   @Cron('0 2 * * *')
   async handleDocumentRetentionPurge() {
     this.logger.log('Running Document Retention Purge Cron...');
-    const retentionDays = this.configService.get<number>('VERIFICATION_RETENTION_DAYS', 30);
+    const retentionDays = this.configService.get<number>(
+      'VERIFICATION_RETENTION_DAYS',
+      30,
+    );
 
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
@@ -58,22 +70,30 @@ export class VerificationScheduler {
       if (!doc.storageRef) continue;
 
       try {
-        // 1. Delete from S3
+        // 1. Delete from S3 (cannot be rolled back if DB fails, so we do it first or handle separately.
+        // If DB fails, file is lost but DB says it exists. If we do DB first, file might not be deleted.
+        // Let's do S3 first, then DB transaction. If S3 fails, we abort.
         await this.storageService.deleteDocument(doc.storageRef);
 
-        // 2. Null out storage_ref in DB
-        await this.documentsRepo.nullStorageRef(doc.id);
+        // 2. DB Transaction
+        await this.dataSource.transaction(async (manager) => {
+          // Null out storage_ref in DB
+          await this.documentsRepo.nullStorageRef(doc.id, manager);
 
-        // 3. Write audit log (system action -> actorId = null)
-        await this.auditLogsRepo.insertWithManager({
-          actorId: undefined,
-          action: 'document_retention_purge',
-          targetType: 'verification_document',
-          targetId: doc.id,
-          metadata: {
-            storageRef: doc.storageRef, // Store what we deleted just in case
-            deletedAt: new Date(),
-          },
+          // Write audit log (system action -> actorId = null)
+          await this.auditLogsRepo.insertWithManager(
+            {
+              actorId: undefined,
+              action: 'document_retention_purge',
+              targetType: 'verification_document',
+              targetId: doc.id,
+              metadata: {
+                storageRef: doc.storageRef, // Store what we deleted just in case
+                deletedAt: new Date(),
+              },
+            },
+            manager,
+          );
         });
 
         this.logger.log(`Successfully purged document ${doc.id}`);

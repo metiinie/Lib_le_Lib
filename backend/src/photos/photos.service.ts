@@ -31,7 +31,10 @@ export class PhotosService {
     const key = uuidv4();
     // Original key — this is the unblurred version
     const storageRef = `photos/${userId}/${key}_original.${ext}`;
-    const uploadUrl = await this.storageService.getPhotoUploadUrl(storageRef, contentType);
+    const uploadUrl = await this.storageService.getPhotoUploadUrl(
+      storageRef,
+      contentType,
+    );
     return { uploadUrl, storageRef };
   }
 
@@ -74,7 +77,10 @@ export class PhotosService {
       });
     }
 
-    const grant = await this.photosRepository.findActiveGrant(photoId, viewerUserId);
+    const grant = await this.photosRepository.findActiveGrant(
+      photoId,
+      viewerUserId,
+    );
     const isOwner = photo.profileId === viewerUserId;
 
     let storageRef: string;
@@ -107,13 +113,22 @@ export class PhotosService {
     }
     if (photo.profileId !== ownerId) {
       throw new ForbiddenException({
-        error: { code: 'NOT_PHOTO_OWNER', message: 'Only the photo owner can grant reveals.' },
+        error: {
+          code: 'NOT_PHOTO_OWNER',
+          message: 'Only the photo owner can grant reveals.',
+        },
       });
     }
-    const existing = await this.photosRepository.findActiveGrant(photoId, dto.viewerUserId);
+    const existing = await this.photosRepository.findActiveGrant(
+      photoId,
+      dto.viewerUserId,
+    );
     if (existing) {
       throw new ConflictException({
-        error: { code: 'GRANT_EXISTS', message: 'Reveal grant already exists.' },
+        error: {
+          code: 'GRANT_EXISTS',
+          message: 'Reveal grant already exists.',
+        },
       });
     }
     return this.photosRepository.createGrant(photoId, dto.viewerUserId);
@@ -123,7 +138,11 @@ export class PhotosService {
    * Revokes a reveal grant.
    * Ownership check: only the photo's profile owner may revoke.
    */
-  async revokeReveal(photoId: string, ownerId: string, viewerUserId: string): Promise<void> {
+  async revokeReveal(
+    photoId: string,
+    ownerId: string,
+    viewerUserId: string,
+  ): Promise<void> {
     const photo = await this.photosRepository.findPhotoById(photoId);
     if (!photo) {
       throw new NotFoundException({
@@ -132,7 +151,10 @@ export class PhotosService {
     }
     if (photo.profileId !== ownerId) {
       throw new ForbiddenException({
-        error: { code: 'NOT_PHOTO_OWNER', message: 'Only the photo owner can revoke reveals.' },
+        error: {
+          code: 'NOT_PHOTO_OWNER',
+          message: 'Only the photo owner can revoke reveals.',
+        },
       });
     }
     await this.photosRepository.revokeGrant(photoId, viewerUserId);

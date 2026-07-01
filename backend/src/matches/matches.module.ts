@@ -14,11 +14,7 @@ import { SafetyModule } from '../safety/safety.module';
     SafetyModule, // Provides BlocksRepository
   ],
   controllers: [MatchesController],
-  providers: [
-    SwipesRepository,
-    MatchesRepository,
-    MatchesService,
-  ],
+  providers: [SwipesRepository, MatchesRepository, MatchesService],
   exports: [MatchesService, MatchesRepository, SwipesRepository], // Exported for Discovery to use
 })
 export class MatchesModule {}

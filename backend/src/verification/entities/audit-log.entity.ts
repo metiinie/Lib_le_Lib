@@ -23,7 +23,13 @@ export class AuditLog {
   @Column({
     name: 'actor_role',
     type: 'enum',
-    enum: ['member', 'verification_officer', 'moderator', 'admin', 'health_professional'],
+    enum: [
+      'member',
+      'verification_officer',
+      'moderator',
+      'admin',
+      'health_professional',
+    ],
     nullable: true,
   })
   actorRole: string;

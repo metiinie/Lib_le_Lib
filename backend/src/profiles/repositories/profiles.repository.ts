@@ -40,7 +40,8 @@ export class ProfilesRepository {
 
   async findTagsByIds(tagIds: string[]): Promise<InterestTag[]> {
     if (!tagIds || tagIds.length === 0) return [];
-    return this.tagRepo.createQueryBuilder('tag')
+    return this.tagRepo
+      .createQueryBuilder('tag')
       .where('tag.id IN (:...tagIds)', { tagIds })
       .getMany();
   }

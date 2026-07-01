@@ -20,7 +20,11 @@ import { UsersRepository } from '../src/users/repositories/users.repository';
 import { JwtService } from '@nestjs/jwt';
 import { DataSource } from 'typeorm';
 
-function makeToken(app: INestApplication, userId: string, role: string = 'member'): string {
+function makeToken(
+  app: INestApplication,
+  userId: string,
+  role: string = 'member',
+): string {
   const jwt = app.get(JwtService);
   return jwt.sign(
     { sub: userId, role },
@@ -38,14 +42,18 @@ describe('Phase 4 — Discovery & Matching (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+    app.useGlobalPipes(
+      new ValidationPipe({ whitelist: true, transform: true }),
+    );
     await app.init();
 
     dataSource = app.get(DataSource);
   });
 
   afterAll(async () => {
-    await app.close();
+    if (app) {
+      await app.close();
+    }
   });
 
   // ──────────────────────────────────────────────────────────────────────────
@@ -92,7 +100,10 @@ describe('Phase 4 — Discovery & Matching (e2e)', () => {
           [uid, nickname, dob, 'other'],
         );
         // Discovery query filters by u.status = 'active'; new users default to 'pending'
-        await dataSource.query(`UPDATE users SET status = 'active' WHERE id = $1`, [uid]);
+        await dataSource.query(
+          `UPDATE users SET status = 'active' WHERE id = $1`,
+          [uid],
+        );
       }
     });
 
@@ -100,11 +111,25 @@ describe('Phase 4 — Discovery & Matching (e2e)', () => {
       // Clean up all test data
       const ids = [userA_id, userB_id, userC_id].filter(Boolean);
       if (ids.length > 0) {
-        await dataSource.query(`DELETE FROM swipes WHERE actor_id = ANY($1::uuid[]) OR target_id = ANY($1::uuid[])`, [ids]);
-        await dataSource.query(`DELETE FROM matches WHERE user_a_id = ANY($1::uuid[]) OR user_b_id = ANY($1::uuid[])`, [ids]);
-        await dataSource.query(`DELETE FROM blocks WHERE blocker_id = ANY($1::uuid[]) OR blocked_id = ANY($1::uuid[])`, [ids]);
-        await dataSource.query(`DELETE FROM profiles WHERE user_id = ANY($1::uuid[])`, [ids]);
-        await dataSource.query(`DELETE FROM users WHERE id = ANY($1::uuid[])`, [ids]);
+        await dataSource.query(
+          `DELETE FROM swipes WHERE actor_id = ANY($1::uuid[]) OR target_id = ANY($1::uuid[])`,
+          [ids],
+        );
+        await dataSource.query(
+          `DELETE FROM matches WHERE user_a_id = ANY($1::uuid[]) OR user_b_id = ANY($1::uuid[])`,
+          [ids],
+        );
+        await dataSource.query(
+          `DELETE FROM blocks WHERE blocker_id = ANY($1::uuid[]) OR blocked_id = ANY($1::uuid[])`,
+          [ids],
+        );
+        await dataSource.query(
+          `DELETE FROM profiles WHERE user_id = ANY($1::uuid[])`,
+          [ids],
+        );
+        await dataSource.query(`DELETE FROM users WHERE id = ANY($1::uuid[])`, [
+          ids,
+        ]);
       }
     });
 
@@ -134,10 +159,13 @@ describe('Phase 4 — Discovery & Matching (e2e)', () => {
       expect(res.body.matched).toBe(false);
 
       // Verify that NO match row exists in the DB yet (testing.md requirement)
-      const count = await dataSource.query(`
+      const count = await dataSource.query(
+        `
         SELECT COUNT(*) as count FROM matches 
         WHERE (user_a_id = $1 AND user_b_id = $2) OR (user_a_id = $2 AND user_b_id = $1)
-      `, [userA_id, userB_id]);
+      `,
+        [userA_id, userB_id],
+      );
       expect(parseInt(count[0].count)).toBe(0);
     });
 
@@ -287,9 +315,16 @@ describe('Phase 4 — Discovery & Matching (e2e)', () => {
 
     afterAll(async () => {
       if (quizUser_id) {
-        await dataSource.query(`DELETE FROM compatibility_quiz_responses WHERE profile_id = $1`, [quizUser_id]);
-        await dataSource.query(`DELETE FROM profiles WHERE user_id = $1`, [quizUser_id]);
-        await dataSource.query(`DELETE FROM users WHERE id = $1`, [quizUser_id]);
+        await dataSource.query(
+          `DELETE FROM compatibility_quiz_responses WHERE profile_id = $1`,
+          [quizUser_id],
+        );
+        await dataSource.query(`DELETE FROM profiles WHERE user_id = $1`, [
+          quizUser_id,
+        ]);
+        await dataSource.query(`DELETE FROM users WHERE id = $1`, [
+          quizUser_id,
+        ]);
       }
     });
 

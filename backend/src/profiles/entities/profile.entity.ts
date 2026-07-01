@@ -57,7 +57,12 @@ export class Profile {
   @Column({ name: 'low_bandwidth_mode', type: 'boolean', default: false })
   lowBandwidthMode: boolean;
 
-  @Column({ name: 'preferred_language', type: 'enum', enum: ['am', 'en'], default: 'en' })
+  @Column({
+    name: 'preferred_language',
+    type: 'enum',
+    enum: ['am', 'en'],
+    default: 'en',
+  })
   preferredLanguage: string;
 
   @ManyToMany(() => InterestTag)

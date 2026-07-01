@@ -18,5 +18,22 @@ services:
       timeout: 5s
       retries: 5
 
+  api:
+    build: .
+    container_name: lib-le-lib-api
+    ports:
+      - '3000:3000'
+    environment:
+      - DATABASE_URL=postgresql://postgres:1832@postgres:5432/lib_le_lib?schema=public
+      - JWT_SECRET=test_jwt_secret_do_not_use_in_prod
+      - PHOTO_BUCKET_ENDPOINT=https://test-account.r2.cloudflarestorage.com
+      - PHOTO_BUCKET_REGION=auto
+      - PHOTO_BUCKET_NAME=lib-le-lib-photos
+      - PHOTO_BUCKET_ACCESS_KEY_ID=test_key
+      - PHOTO_BUCKET_SECRET_ACCESS_KEY=test_secret
+    depends_on:
+      postgres:
+        condition: service_healthy
+
 volumes:
   pgdata:

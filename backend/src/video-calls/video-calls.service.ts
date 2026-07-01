@@ -1,49 +1,33 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { VideoVerificationCall, VideoCallStatus } from './entities/video-verification-call.entity';
-import { Match } from '../matches/entities/match.entity';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { VideoCallsRepository } from './repositories/video-calls.repository';
+import {
+  VideoVerificationCall,
+  VideoCallStatus,
+} from './entities/video-verification-call.entity';
+import { MatchesService } from '../matches/matches.service';
 
 @Injectable()
 export class VideoCallsService {
   constructor(
-    @InjectRepository(VideoVerificationCall)
-    private readonly videoCallsRepository: Repository<VideoVerificationCall>,
-    @InjectRepository(Match)
-    private readonly matchesRepository: Repository<Match>,
+    private readonly videoCallsRepository: VideoCallsRepository,
+    private readonly matchesService: MatchesService,
   ) {}
 
-  private async validateMatchMembership(matchId: string, userId: string): Promise<Match> {
-    const match = await this.matchesRepository.findOne({
-      where: { id: matchId },
-    });
+  async scheduleCall(
+    matchId: string,
+    initiatorId: string,
+    scheduledAt: Date,
+  ): Promise<VideoVerificationCall> {
+    await this.matchesService.validateMatchMembership(matchId, initiatorId);
 
-    if (!match) {
-      throw new NotFoundException('Match not found');
-    }
-
-    if (match.status !== 'active') {
-      throw new ForbiddenException('Match is no longer active');
-    }
-
-    if (match.userAId !== userId && match.userBId !== userId) {
-      throw new ForbiddenException('You are not part of this match');
-    }
-
-    return match;
-  }
-
-  async scheduleCall(matchId: string, initiatorId: string, scheduledAt: Date): Promise<VideoVerificationCall> {
-    await this.validateMatchMembership(matchId, initiatorId);
-
-    const call = this.videoCallsRepository.create({
+    const call = this.videoCallsRepository.createCall({
       matchId,
       initiatedById: initiatorId,
       status: VideoCallStatus.SCHEDULED,
       scheduledAt,
     });
 
-    return this.videoCallsRepository.save(call);
+    return this.videoCallsRepository.saveCall(call);
   }
 
   async updateStatus(
@@ -52,11 +36,12 @@ export class VideoCallsService {
     userId: string,
     status: VideoCallStatus,
   ): Promise<VideoVerificationCall> {
-    await this.validateMatchMembership(matchId, userId);
+    await this.matchesService.validateMatchMembership(matchId, userId);
 
-    const call = await this.videoCallsRepository.findOne({
-      where: { id: callId, matchId },
-    });
+    const call = await this.videoCallsRepository.findByIdAndMatchId(
+      callId,
+      matchId,
+    );
 
     if (!call) {
       throw new NotFoundException('Video call not found');
@@ -67,6 +52,6 @@ export class VideoCallsService {
       call.completedAt = new Date();
     }
 
-    return this.videoCallsRepository.save(call);
+    return this.videoCallsRepository.saveCall(call);
   }
 }

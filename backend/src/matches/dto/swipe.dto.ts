@@ -1,7 +1,7 @@
 import { IsIn, IsUUID } from 'class-validator';
 
 export const SWIPE_ACTIONS = ['like', 'pass'] as const;
-export type SwipeActionType = typeof SWIPE_ACTIONS[number];
+export type SwipeActionType = (typeof SWIPE_ACTIONS)[number];
 
 export class SwipeDto {
   @IsUUID()
