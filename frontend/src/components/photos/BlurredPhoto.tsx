@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { View, TouchableOpacity, StyleSheet, Text } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Text, ActivityIndicator } from 'react-native';
 import { Image } from 'expo-image';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing } from 'react-native-reanimated';
+import { usePreferencesStore } from '@/stores/preferences.store';
 
 interface BlurredPhotoProps {
   blurhash: string;
@@ -23,10 +24,14 @@ export const BlurredPhoto = ({
   className,
 }: BlurredPhotoProps) => {
   const [currentUrl, setCurrentUrl] = useState<string | undefined>(undefined);
+  const [loading, setLoading] = useState(false);
   const blurOpacity = useSharedValue(1);
+  
+  const isLowBandwidthMode = usePreferencesStore(state => state.isLowBandwidthMode);
 
   useEffect(() => {
-    if (revealGranted && photoUrl) {
+    if (revealGranted && photoUrl && !isLowBandwidthMode) {
+      setLoading(true);
       setCurrentUrl(photoUrl);
       // Crossfade from blurhash to full image
       blurOpacity.value = withTiming(0, {
@@ -37,7 +42,7 @@ export const BlurredPhoto = ({
       setCurrentUrl(undefined);
       blurOpacity.value = withTiming(1, { duration: 200 });
     }
-  }, [revealGranted, photoUrl]);
+  }, [revealGranted, photoUrl, isLowBandwidthMode]);
 
   const animatedBlurStyle = useAnimatedStyle(() => ({
     opacity: blurOpacity.value,

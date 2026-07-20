@@ -26,9 +26,11 @@ export default function DiscoverScreen() {
 
   const renderItem = ({ item }: { item: DiscoveryProfile }) => (
     <TouchableOpacity
-      className="flex-1 m-2 aspect-[3/4] bg-slate-100 rounded-2xl overflow-hidden shadow-sm"
+      className="flex-1 m-2 aspect-[3/4] bg-slate-100 rounded-2xl overflow-hidden shadow-sm min-h-[48px] min-w-[48px]"
       onPress={() => router.push(`/profiles/${item.id}`)}
       activeOpacity={0.9}
+      accessibilityRole="button"
+      accessibilityLabel={`View profile of ${item.nickname}, ${item.age} years old from ${item.region}`}
     >
       <BlurredPhoto
         blurhash={item.photos[0]?.blurhash || 'LEHV6nWB2yk8pyo0adR*.7kCMdnj'}
@@ -46,7 +48,11 @@ export default function DiscoverScreen() {
     <View className="flex-1 bg-white">
       <View className="px-4 pt-4 pb-2 flex-row justify-between items-center border-b border-slate-100">
         <Text className="text-2xl font-bold text-slate-900">Discover</Text>
-        <TouchableOpacity className="bg-slate-100 px-4 py-2 rounded-full">
+        <TouchableOpacity 
+          className="bg-slate-100 px-4 py-2 rounded-full min-h-[48px] min-w-[48px] justify-center items-center"
+          accessibilityRole="button"
+          accessibilityLabel="Filter profiles"
+        >
           <Text className="text-slate-700 font-semibold text-sm">Filters</Text>
         </TouchableOpacity>
       </View>
@@ -63,6 +69,9 @@ export default function DiscoverScreen() {
           numColumns={2}
           contentContainerStyle={{ padding: 8 }}
           showsVerticalScrollIndicator={false}
+          removeClippedSubviews={true}
+          initialNumToRender={6}
+          maxToRenderPerBatch={10}
         />
       )}
     </View>

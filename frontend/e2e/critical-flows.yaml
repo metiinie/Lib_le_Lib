@@ -1,0 +1,22 @@
+appId: com.liblelib.app
+---
+- launchApp
+- tapOn: "Get Started"
+- tapOn: "Phone Number"
+- inputText: "+251911234567"
+- tapOn: "Continue"
+- assertVisible: "Verification Code"
+- inputText: "123456"
+- tapOn: "Verify"
+- assertVisible: "Discovery"
+# Match Flow
+- tapOn: "Heart Icon"
+- assertVisible: "It's a Match!"
+# Messaging Flow
+- tapOn: "Matches Tab"
+- tapOn: "Alex"
+- assertVisible: "End-to-End Encrypted"
+- tapOn: "Message Input"
+- inputText: "Hello, safe space!"
+- tapOn: "Send"
+- assertVisible: "Hello, safe space!"
