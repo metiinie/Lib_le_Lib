@@ -16,8 +16,8 @@ export const profileSchema = z.object({
   dateOfBirth: z.string().refine(is18OrOlder, {
     message: 'You must be at least 18 years old to use this app.',
   }),
-  gender: z.enum(['man', 'woman', 'non_binary', 'other']),
-  region: z.string().min(1, 'Please select a region'),
+  gender: z.enum(['man', 'woman', 'other']),
+  regionId: z.string().optional(),
   relationshipGoals: z
     .array(z.enum(['marriage', 'serious_relationship', 'friendship']))
     .min(1, 'Select at least one relationship goal'),

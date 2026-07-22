@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -7,18 +7,62 @@ import { profileSchema, ProfileDto } from '@/lib/zod-schemas';
 import { profileService } from '@/services/profile.service';
 import { Picker } from '@react-native-picker/picker';
 
+const RELATIONS_OPTIONS = [
+  { label: 'Marriage', value: 'marriage' },
+  { label: 'Serious Relationship', value: 'serious_relationship' },
+  { label: 'Friendship', value: 'friendship' },
+] as const;
+
 export default function ProfileCreateScreen() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [regions, setRegions] = useState<{ id: string; name: string }[]>([]);
+  const [isLoadingRegions, setIsLoadingRegions] = useState(true);
 
-  const { control, handleSubmit, formState: { errors } } = useForm<ProfileDto>({
+  const { control, handleSubmit, setValue, watch, formState: { errors } } = useForm<ProfileDto>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      relationshipGoals: [],
+      nickname: '',
+      dateOfBirth: '',
       gender: 'man',
-      region: 'Addis Ababa',
+      relationshipGoals: [],
+      bio: '',
     },
   });
+
+  useEffect(() => {
+    let mounted = true;
+    async function fetchRegions() {
+      try {
+        const data = await profileService.getRegions();
+        if (mounted && Array.isArray(data)) {
+          setRegions(data);
+          if (data.length > 0) {
+            setValue('regionId', data[0].id);
+          }
+        }
+      } catch (err) {
+        console.warn('Failed to load regions', err);
+      } finally {
+        if (mounted) setIsLoadingRegions(false);
+      }
+    }
+    fetchRegions();
+    return () => { mounted = false; };
+  }, [setValue]);
+
+  const selectedGoals = watch('relationshipGoals') || [];
+
+  const toggleGoal = (goalValue: 'marriage' | 'serious_relationship' | 'friendship') => {
+    const current = [...selectedGoals];
+    const index = current.indexOf(goalValue);
+    if (index > -1) {
+      current.splice(index, 1);
+    } else {
+      current.push(goalValue);
+    }
+    setValue('relationshipGoals', current, { shouldValidate: true });
+  };
 
   const onSubmit = async (data: ProfileDto) => {
     setIsSubmitting(true);
@@ -26,7 +70,8 @@ export default function ProfileCreateScreen() {
       await profileService.createProfile(data);
       router.push('/(onboarding)/doc-upload');
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to create profile');
+      const msg = error?.response?.data?.error?.message || error?.message || 'Failed to create profile';
+      Alert.alert('Error', msg);
     } finally {
       setIsSubmitting(false);
     }
@@ -84,7 +129,6 @@ export default function ProfileCreateScreen() {
               <Picker selectedValue={value} onValueChange={onChange}>
                 <Picker.Item label="Man" value="man" />
                 <Picker.Item label="Woman" value="woman" />
-                <Picker.Item label="Non-binary" value="non_binary" />
                 <Picker.Item label="Other" value="other" />
               </Picker>
             </View>
@@ -98,20 +142,60 @@ export default function ProfileCreateScreen() {
         <Text className="text-slate-700 font-semibold mb-2">Region</Text>
         <Controller
           control={control}
-          name="region"
+          name="regionId"
           render={({ field: { onChange, value } }) => (
             <View className="bg-slate-50 border border-slate-200 rounded-xl overflow-hidden">
-              <Picker selectedValue={value} onValueChange={onChange}>
-                <Picker.Item label="Addis Ababa" value="Addis Ababa" />
-                <Picker.Item label="Dire Dawa" value="Dire Dawa" />
-                <Picker.Item label="Amhara" value="Amhara" />
-                <Picker.Item label="Oromia" value="Oromia" />
-                <Picker.Item label="Tigray" value="Tigray" />
-              </Picker>
+              {isLoadingRegions ? (
+                <View className="p-4 items-center">
+                  <ActivityIndicator size="small" color="#208AEF" />
+                </View>
+              ) : (
+                <Picker selectedValue={value} onValueChange={onChange}>
+                  {regions.length > 0 ? (
+                    regions.map((reg) => (
+                      <Picker.Item key={reg.id} label={reg.name} value={reg.id} />
+                    ))
+                  ) : (
+                    <Picker.Item label="Select Region" value="" />
+                  )}
+                </Picker>
+              )}
             </View>
           )}
         />
-        {errors.region && <Text className="text-red-500 mt-1">{errors.region.message}</Text>}
+        {errors.regionId && <Text className="text-red-500 mt-1">{errors.regionId.message}</Text>}
+      </View>
+
+      {/* Relationship Goals */}
+      <View className="mb-6">
+        <Text className="text-slate-700 font-semibold mb-2">Relationship Goals</Text>
+        <View className="flex-row flex-wrap gap-2">
+          {RELATIONS_OPTIONS.map((item) => {
+            const isSelected = selectedGoals.includes(item.value);
+            return (
+              <TouchableOpacity
+                key={item.value}
+                onPress={() => toggleGoal(item.value)}
+                className={`px-4 py-3 rounded-xl border ${
+                  isSelected
+                    ? 'bg-blue-600 border-blue-600'
+                    : 'bg-slate-50 border-slate-200'
+                }`}
+              >
+                <Text
+                  className={`font-semibold ${
+                    isSelected ? 'text-white' : 'text-slate-700'
+                  }`}
+                >
+                  {item.label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+        {errors.relationshipGoals && (
+          <Text className="text-red-500 mt-1">{errors.relationshipGoals.message}</Text>
+        )}
       </View>
 
       {/* Bio */}

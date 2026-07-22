@@ -1,14 +1,21 @@
 import { api } from '@/lib/api';
 
 export const authService = {
-  requestOtp: async (identifier: string) => {
-    // identifier can be phone or email based on backend implementation
-    const response = await api.post('/auth/otp/request', { identifier });
+  /**
+   * Request an OTP. Pass isSignUp=true for registration, false for login.
+   * The backend field is `destination` (not `identifier`).
+   */
+  requestOtp: async (destination: string, isSignUp: boolean) => {
+    const response = await api.post('/auth/otp/request', { destination, isSignUp });
     return response.data;
   },
 
-  verifyOtp: async (identifier: string, code: string) => {
-    const response = await api.post('/auth/otp/verify', { identifier, code });
-    return response.data; // Expected to contain { token: string }
+  /**
+   * Verify an OTP. The backend field is `destination` (not `identifier`).
+   * Returns { accessToken, refreshToken, userId }.
+   */
+  verifyOtp: async (destination: string, code: string, isSignUp: boolean) => {
+    const response = await api.post('/auth/otp/verify', { destination, code, isSignUp });
+    return response.data;
   },
 };

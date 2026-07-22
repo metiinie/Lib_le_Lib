@@ -26,7 +26,7 @@ describe('Zod Schemas - 18+ Age Gate', () => {
       nickname: 'TestUser',
       dateOfBirth: '2010-01-01', // Under 18
       gender: 'man',
-      region: 'Addis Ababa',
+      regionId: '123e4567-e89b-12d3-a456-426614174000',
       relationshipGoals: ['friendship'],
     };
 
@@ -42,7 +42,7 @@ describe('Zod Schemas - 18+ Age Gate', () => {
       nickname: 'TestUser',
       dateOfBirth: '2000-01-01', // 26 years old
       gender: 'man',
-      region: 'Addis Ababa',
+      regionId: '123e4567-e89b-12d3-a456-426614174000',
       relationshipGoals: ['serious_relationship'],
       bio: 'Hello world',
     };

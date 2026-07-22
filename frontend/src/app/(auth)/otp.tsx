@@ -16,6 +16,9 @@ export default function OtpScreen() {
   const [code, setCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
+  // Track whether this is a sign-up or sign-in flow.
+  // We attempt sign-in first; if the backend returns USER_NOT_FOUND we retry as sign-up.
+  const [isSignUp, setIsSignUp] = useState(false);
 
   useEffect(() => {
     if (timeLeft > 0) {
@@ -24,24 +27,49 @@ export default function OtpScreen() {
     }
   }, [timeLeft]);
 
-  const handleRequestOtp = async () => {
+  const handleRequestOtp = async (forceSignUp?: boolean) => {
     if (!identifier) {
       Alert.alert('Error', 'Please enter your phone number or email.');
       return;
     }
-    
+
     // Throttle check
     if (timeLeft > 0) {
       return;
     }
-    
+
     setIsLoading(true);
+    const signUpFlag = forceSignUp ?? isSignUp;
     try {
-      await authService.requestOtp(identifier);
+      await authService.requestOtp(identifier, signUpFlag);
+      setIsSignUp(signUpFlag);
       setStep(2);
-      setTimeLeft(RESEND_TIMEOUT); // Start the timer
-    } catch (error) {
-      Alert.alert('Error', 'Failed to send OTP. Please try again.');
+      setTimeLeft(RESEND_TIMEOUT);
+    } catch (error: any) {
+      const code = error?.response?.data?.error?.code;
+
+      if (code === 'USER_NOT_FOUND' && !signUpFlag) {
+        // Account doesn't exist yet — switch to sign-up automatically
+        setIsSignUp(true);
+        handleRequestOtp(true);
+        return;
+      }
+
+      if (code === 'USER_ALREADY_EXISTS') {
+        // Account already exists — switch to sign-in
+        setIsSignUp(false);
+        handleRequestOtp(false);
+        return;
+      }
+
+      if (code === 'OTP_RATE_LIMITED') {
+        Alert.alert('Too many attempts', 'Please wait a moment before requesting another code.');
+      } else {
+        Alert.alert(
+          'Error',
+          `Failed to send OTP: ${error?.response?.data?.error?.message ?? 'Please try again.'}`,
+        );
+      }
     } finally {
       setIsLoading(false);
     }
@@ -55,11 +83,21 @@ export default function OtpScreen() {
 
     setIsLoading(true);
     try {
-      const { token } = await authService.verifyOtp(identifier, code);
-      signIn(token);
+      // Backend returns { accessToken, refreshToken, userId }
+      const { accessToken } = await authService.verifyOtp(identifier, code, isSignUp);
+      signIn(accessToken);
       // The _layout route guard will automatically redirect us once authenticated.
-    } catch (error) {
-      Alert.alert('Error', 'Incorrect code. Please try again.');
+    } catch (error: any) {
+      const errCode = error?.response?.data?.error?.code;
+      if (errCode === 'OTP_EXPIRED') {
+        Alert.alert('Code expired', 'Your code has expired. Please request a new one.');
+        setStep(1);
+      } else if (errCode === 'OTP_MAX_ATTEMPTS') {
+        Alert.alert('Too many attempts', 'Please request a new code.');
+        setStep(1);
+      } else {
+        Alert.alert('Error', 'Incorrect code. Please try again.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -73,7 +111,7 @@ export default function OtpScreen() {
             {step === 1 ? 'Enter your details' : 'Enter the code'}
           </Text>
           <Text className="text-base text-slate-500 dark:text-slate-400">
-            {step === 1 
+            {step === 1
               ? 'We will send you a one-time password to verify your account.'
               : `We sent a 6-digit code to ${identifier}.`}
           </Text>
@@ -92,7 +130,7 @@ export default function OtpScreen() {
               editable={!isLoading}
             />
             <TouchableOpacity
-              onPress={handleRequestOtp}
+              onPress={() => handleRequestOtp()}
               disabled={isLoading || timeLeft > 0}
               className={`w-full py-4 rounded-full flex-row justify-center items-center ${isLoading || timeLeft > 0 ? 'bg-blue-400' : 'bg-blue-600 active:bg-blue-700'}`}
             >
@@ -129,8 +167,8 @@ export default function OtpScreen() {
               )}
             </TouchableOpacity>
 
-            <TouchableOpacity 
-              onPress={handleRequestOtp} 
+            <TouchableOpacity
+              onPress={() => handleRequestOtp()}
               className="mt-6 p-2"
               disabled={isLoading || timeLeft > 0}
             >
@@ -138,9 +176,9 @@ export default function OtpScreen() {
                 {timeLeft > 0 ? `Resend code in ${timeLeft}s` : 'Resend code'}
               </Text>
             </TouchableOpacity>
-            
-            <TouchableOpacity 
-              onPress={() => setStep(1)} 
+
+            <TouchableOpacity
+              onPress={() => setStep(1)}
               className="mt-4 p-2"
               disabled={isLoading}
             >
