@@ -163,13 +163,11 @@ export const VerificationQueue: React.FC = () => {
                     <td className="p-4 pl-6">
                       <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-full bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 font-semibold text-sm">
-                          {item.user?.profile?.displayName?.[0]?.toUpperCase() ||
-                            item.user?.email?.[0]?.toUpperCase() ||
-                            'A'}
+                          {(item.user?.profile?.nickname || item.user?.profile?.displayName || item.user?.email || 'A')[0].toUpperCase()}
                         </div>
                         <div>
                           <p className="font-semibold text-slate-200">
-                            {item.user?.profile?.displayName || 'Applicant'}
+                            {item.user?.profile?.nickname || item.user?.profile?.displayName || 'Applicant'}
                           </p>
                           <p className="font-mono text-xs text-slate-500">{item.userId}</p>
                         </div>

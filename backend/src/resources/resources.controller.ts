@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Patch,
+  Delete,
   Body,
   Param,
   UseGuards,
@@ -50,4 +51,12 @@ export class ResourcesController {
   ) {
     return this.resourcesService.updateResource(id, updateDto);
   }
+
+  @Delete(':id')
+  @UseGuards(RolesGuard)
+  @Roles('admin')
+  async deleteResource(@Param('id') id: string) {
+    return this.resourcesService.deleteResource(id);
+  }
 }
+

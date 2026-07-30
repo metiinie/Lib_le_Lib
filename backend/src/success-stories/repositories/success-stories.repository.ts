@@ -20,6 +20,24 @@ export class SuccessStoriesRepository {
     });
   }
 
+  async findPending(limit: number, offset: number): Promise<SuccessStory[]> {
+    return this.repo.find({
+      where: { published: false },
+      order: { createdAt: 'DESC' },
+      take: limit,
+      skip: offset,
+    });
+  }
+
+  async findAll(limit: number, offset: number): Promise<SuccessStory[]> {
+    return this.repo.find({
+      order: { createdAt: 'DESC' },
+      take: limit,
+      skip: offset,
+    });
+  }
+
+
   async createStory(
     userId: string,
     createDto: CreateSuccessStoryDto,

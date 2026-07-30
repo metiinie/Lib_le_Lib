@@ -29,6 +29,15 @@ export class SuccessStoriesService {
     );
   }
 
+  async getPendingStories(limit = 50, offset = 0) {
+    return this.successStoriesRepository.findPending(limit, offset);
+  }
+
+  async getAllStories(limit = 50, offset = 0) {
+    return this.successStoriesRepository.findAll(limit, offset);
+  }
+
+
   async submitStory(
     userId: string,
     createDto: CreateSuccessStoryDto,

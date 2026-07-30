@@ -17,11 +17,14 @@ export interface User {
   createdAt: string;
   updatedAt: string;
   profile?: {
-    displayName: string;
+    nickname?: string;
+    displayName?: string;
+    dateOfBirth?: string;
     birthDate?: string;
+    regionId?: string;
     city?: string;
     bio?: string;
-  };
+  } | null;
 }
 
 export interface VerificationDocument {
@@ -106,13 +109,17 @@ export interface QAThread {
 
 export interface SuccessStory {
   id: string;
-  submittedByUserId: string;
+  submittedByUserId?: string;
   title: string;
-  storyContent: string;
-  isApproved: boolean;
+  storyContent?: string;
+  storyText?: string;
+  isApproved?: boolean;
+  published?: boolean;
   approvedByUserId?: string;
-  createdAt: string;
+  createdAt?: string;
+  publishedAt?: string;
 }
+
 
 export interface AuditLog {
   id: string;

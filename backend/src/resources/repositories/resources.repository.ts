@@ -38,4 +38,9 @@ export class ResourcesRepository {
   async saveResource(resource: Resource): Promise<Resource> {
     return this.repo.save(resource);
   }
+
+  async deleteResource(id: string): Promise<void> {
+    await this.repo.delete(id);
+  }
 }
+

@@ -56,13 +56,13 @@ export const SuccessStories: React.FC = () => {
               <div key={story.id} className="p-6 space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-bold text-white">{story.title}</h3>
-                  <StatusBadge status={story.isApproved ? 'approved' : 'pending'} />
+                  <StatusBadge status={story.published || story.isApproved ? 'approved' : 'pending'} />
                 </div>
                 <p className="text-sm text-slate-300 leading-relaxed bg-slate-950 p-4 rounded-xl border border-slate-800">
-                  {story.storyContent}
+                  {story.storyText || story.storyContent}
                 </p>
 
-                {!story.isApproved && (
+                {!(story.published || story.isApproved) && (
                   <button
                     onClick={() => handleApprove(story.id)}
                     className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-xl transition-colors flex items-center gap-2"

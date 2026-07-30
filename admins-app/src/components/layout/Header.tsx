@@ -44,11 +44,11 @@ export const Header: React.FC<HeaderProps> = ({ user }) => {
         {/* User Info */}
         <div className="flex items-center gap-3 pl-4 border-l border-slate-800">
           <div className="w-9 h-9 rounded-full bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 font-semibold text-sm">
-            {user?.email?.[0]?.toUpperCase() || user?.profile?.displayName?.[0]?.toUpperCase() || 'S'}
+            {(user?.profile?.nickname || user?.profile?.displayName || user?.email || 'S')[0].toUpperCase()}
           </div>
           <div className="text-left">
             <p className="text-sm font-medium text-slate-200">
-              {user?.profile?.displayName || user?.email || 'Staff Member'}
+              {user?.profile?.nickname || user?.profile?.displayName || user?.email || 'Staff Member'}
             </p>
             <p className="text-xs text-slate-400">{user?.email || 'Authenticated'}</p>
           </div>

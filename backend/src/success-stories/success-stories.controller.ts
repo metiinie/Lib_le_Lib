@@ -33,6 +33,27 @@ export class SuccessStoriesController {
     return this.successStoriesService.getPublishedStories(limit, offset);
   }
 
+  @Get('pending')
+  @UseGuards(RolesGuard)
+  @Roles('admin')
+  async getPendingStories(
+    @Query('limit', new DefaultValuePipe(50), ParseIntPipe) limit: number,
+    @Query('offset', new DefaultValuePipe(0), ParseIntPipe) offset: number,
+  ) {
+    return this.successStoriesService.getPendingStories(limit, offset);
+  }
+
+  @Get('admin/all')
+  @UseGuards(RolesGuard)
+  @Roles('admin')
+  async getAllStories(
+    @Query('limit', new DefaultValuePipe(50), ParseIntPipe) limit: number,
+    @Query('offset', new DefaultValuePipe(0), ParseIntPipe) offset: number,
+  ) {
+    return this.successStoriesService.getAllStories(limit, offset);
+  }
+
+
   @Post()
   @UseGuards(RolesGuard, ActiveMemberGuard)
   @Roles('member')

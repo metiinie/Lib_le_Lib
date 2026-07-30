@@ -18,7 +18,7 @@ export const resourcesService = {
   },
 
   getSuccessStories: async (): Promise<SuccessStory[]> => {
-    const res = await api.get('/success-stories');
+    const res = await api.get('/success-stories/pending');
     return res.data;
   },
 

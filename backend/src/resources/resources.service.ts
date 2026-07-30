@@ -31,4 +31,14 @@ export class ResourcesService {
     Object.assign(resource, updateDto);
     return this.resourcesRepository.saveResource(resource);
   }
+
+  async deleteResource(id: string): Promise<{ success: boolean }> {
+    const resource = await this.resourcesRepository.findById(id);
+    if (!resource) {
+      throw new NotFoundException('Resource not found');
+    }
+    await this.resourcesRepository.deleteResource(id);
+    return { success: true };
+  }
 }
+

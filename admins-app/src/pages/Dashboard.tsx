@@ -151,7 +151,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onNavigate }) => {
             Lib le Lib Staff Console
           </span>
           <h1 className="text-3xl font-bold text-white mt-3">
-            Welcome back, {user?.profile?.displayName || user?.email || 'Staff Member'} 👋
+            Welcome back, {user?.profile?.nickname || user?.profile?.displayName || user?.email || 'Staff Member'} 👋
           </h1>
           <p className="text-slate-400 mt-2 text-sm leading-relaxed">
             Your role is assigned as{' '}
