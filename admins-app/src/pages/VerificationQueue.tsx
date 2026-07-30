@@ -3,6 +3,9 @@ import { verificationService } from '../services/verification.service';
 import { VerificationSubmission } from '../types';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { SecureDocumentViewer } from '../components/ui/SecureDocumentViewer';
+import { Pagination } from '../components/ui/Pagination';
+import { TableSkeleton } from '../components/ui/TableSkeleton';
+import { useToast } from '../context/ToastContext';
 import {
   ShieldCheck,
   Check,
@@ -15,17 +18,19 @@ import {
   ZoomOut,
   RotateCcw,
   Calendar,
-  Mail,
-  Phone,
-  AlertCircle,
   FileQuestion,
 } from 'lucide-react';
 
 export const VerificationQueue: React.FC = () => {
+  const { showToast } = useToast();
   const [items, setItems] = useState<VerificationSubmission[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<'submitted' | 'approved' | 'rejected' | 'all'>('submitted');
   const [selectedItem, setSelectedItem] = useState<VerificationSubmission | null>(null);
+
+  // Pagination state
+  const [limit, setLimit] = useState(10);
+  const [offset, setOffset] = useState(0);
 
   // Inspector state
   const [zoomLevel, setZoomLevel] = useState(1);
@@ -38,32 +43,38 @@ export const VerificationQueue: React.FC = () => {
     try {
       const queue = await verificationService.getQueue(statusFilter);
       setItems(queue || []);
-    } catch (err) {
-      console.error('Failed to load verification queue:', err);
+    } catch (err: any) {
+      showToast('Failed to load queue', err?.message || 'Error fetching verification data', 'error');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
+    setOffset(0);
     loadQueue();
   }, [statusFilter]);
 
   const handleDecision = async (decision: 'approved' | 'rejected') => {
     if (!selectedItem) return;
     if (decision === 'rejected' && !rejectionReason.trim()) {
-      alert('Please specify a rejection reason before rejecting.');
+      showToast('Rejection Note Required', 'Please specify a rejection reason before rejecting.', 'warning');
       return;
     }
     setActionLoading(true);
     try {
       await verificationService.decide(selectedItem.id, decision, rejectionReason);
+      showToast(
+        `Verification ${decision.toUpperCase()}`,
+        `Application ${selectedItem.id} marked as ${decision}.`,
+        decision === 'approved' ? 'success' : 'info'
+      );
       setSelectedItem(null);
       setRejectionReason('');
       setZoomLevel(1);
       await loadQueue();
-    } catch (err) {
-      console.error('Decision failed:', err);
+    } catch (err: any) {
+      showToast('Decision Failed', err?.response?.data?.error?.message || 'Failed to submit decision.', 'error');
     } finally {
       setActionLoading(false);
     }
@@ -136,7 +147,7 @@ export const VerificationQueue: React.FC = () => {
       {/* Main Queue Table */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
         {loading ? (
-          <div className="p-12 text-center text-slate-500">Loading verification submissions...</div>
+          <TableSkeleton rows={5} columns={6} />
         ) : items.length === 0 ? (
           <div className="p-12 text-center text-slate-500">
             <UserCheck className="w-12 h-12 text-slate-700 mx-auto mb-3" />
@@ -144,71 +155,81 @@ export const VerificationQueue: React.FC = () => {
             <p className="text-xs text-slate-600 mt-1">Try switching status filter tabs.</p>
           </div>
         ) : (
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-slate-800 bg-slate-950/50 text-slate-400 text-xs font-semibold uppercase tracking-wider">
-                <th className="p-4 pl-6">Applicant</th>
-                <th className="p-4">Submission ID</th>
-                <th className="p-4">Documents</th>
-                <th className="p-4">Submitted At</th>
-                <th className="p-4">Status</th>
-                <th className="p-4 pr-6 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-800/60 text-sm">
-              {items.map((item) => {
-                const docImages = getDocImages(item);
-                return (
-                  <tr key={item.id} className="hover:bg-slate-800/40 transition-colors">
-                    <td className="p-4 pl-6">
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 font-semibold text-sm">
-                          {(item.user?.profile?.nickname || item.user?.profile?.displayName || item.user?.email || 'A')[0].toUpperCase()}
+          <>
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-slate-800 bg-slate-950/50 text-slate-400 text-xs font-semibold uppercase tracking-wider">
+                  <th className="p-4 pl-6">Applicant</th>
+                  <th className="p-4">Submission ID</th>
+                  <th className="p-4">Documents</th>
+                  <th className="p-4">Submitted At</th>
+                  <th className="p-4">Status</th>
+                  <th className="p-4 pr-6 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800/60 text-sm">
+                {items.slice(offset, offset + limit).map((item) => {
+                  const docImages = getDocImages(item);
+                  return (
+                    <tr key={item.id} className="hover:bg-slate-800/40 transition-colors">
+                      <td className="p-4 pl-6">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-full bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 font-semibold text-sm">
+                            {(item.user?.profile?.nickname || item.user?.profile?.displayName || item.user?.email || 'A')[0].toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="font-semibold text-slate-200">
+                              {item.user?.profile?.nickname || item.user?.profile?.displayName || 'Applicant'}
+                            </p>
+                            <p className="font-mono text-xs text-slate-500">{item.userId}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-semibold text-slate-200">
-                            {item.user?.profile?.nickname || item.user?.profile?.displayName || 'Applicant'}
-                          </p>
-                          <p className="font-mono text-xs text-slate-500">{item.userId}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="p-4 font-mono text-xs text-indigo-400">{item.id}</td>
-                    <td className="p-4">
-                      <span className="px-2.5 py-1 bg-slate-950 border border-slate-800 rounded-md text-xs font-semibold text-slate-300">
-                        {docImages.length} Document(s)
-                      </span>
-                    </td>
-                    <td className="p-4 text-xs text-slate-400">
-                      <div className="flex items-center gap-1.5">
-                        <Calendar className="w-3.5 h-3.5 text-slate-500" />
-                        <span>
-                          {new Date(item.submittedAt || item.createdAt || Date.now()).toLocaleDateString()}
+                      </td>
+                      <td className="p-4 font-mono text-xs text-indigo-400">{item.id}</td>
+                      <td className="p-4">
+                        <span className="px-2.5 py-1 bg-slate-950 border border-slate-800 rounded-md text-xs font-semibold text-slate-300">
+                          {docImages.length} Document(s)
                         </span>
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <StatusBadge status={item.status} />
-                    </td>
-                    <td className="p-4 pr-6 text-right">
-                      <button
-                        onClick={() => {
-                          setSelectedItem(item);
-                          setZoomLevel(1);
-                          setActiveImageIndex(0);
-                          setRejectionReason(item.rejectionReason || '');
-                        }}
-                        className="px-3.5 py-1.5 bg-indigo-600/10 border border-indigo-500/20 hover:bg-indigo-600/20 text-indigo-400 font-medium rounded-lg text-xs transition-colors inline-flex items-center gap-1.5"
-                      >
-                        <Eye className="w-3.5 h-3.5" />
-                        <span>Inspect Documents</span>
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                      </td>
+                      <td className="p-4 text-xs text-slate-400">
+                        <div className="flex items-center gap-1.5">
+                          <Calendar className="w-3.5 h-3.5 text-slate-500" />
+                          <span>
+                            {new Date(item.submittedAt || item.createdAt || Date.now()).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="p-4">
+                        <StatusBadge status={item.status} />
+                      </td>
+                      <td className="p-4 pr-6 text-right">
+                        <button
+                          onClick={() => {
+                            setSelectedItem(item);
+                            setZoomLevel(1);
+                            setActiveImageIndex(0);
+                            setRejectionReason(item.rejectionReason || '');
+                          }}
+                          className="px-3.5 py-1.5 bg-indigo-600/10 border border-indigo-500/20 hover:bg-indigo-600/20 text-indigo-400 font-medium rounded-lg text-xs transition-colors inline-flex items-center gap-1.5"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          <span>Inspect Documents</span>
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+
+            <Pagination
+              total={items.length}
+              limit={limit}
+              offset={offset}
+              onPageChange={setOffset}
+              onLimitChange={setLimit}
+            />
+          </>
         )}
       </div>
 

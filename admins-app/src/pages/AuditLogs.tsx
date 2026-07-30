@@ -1,12 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { usersService } from '../services/users.service';
 import { AuditLog } from '../types';
-import { ShieldAlert, RefreshCw, Eye, Calendar, User, Code, X } from 'lucide-react';
+import { Pagination } from '../components/ui/Pagination';
+import { TableSkeleton } from '../components/ui/TableSkeleton';
+import { ShieldAlert, RefreshCw, Calendar, Code, X } from 'lucide-react';
 
 export const AuditLogs: React.FC = () => {
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
+
+  // Pagination state
+  const [limit, setLimit] = useState(10);
+  const [offset, setOffset] = useState(0);
 
   const loadLogs = async () => {
     setLoading(true);
@@ -58,71 +64,81 @@ export const AuditLogs: React.FC = () => {
       {/* Main Logs Table */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
         {loading ? (
-          <div className="p-12 text-center text-slate-500">Loading audit log events...</div>
+          <TableSkeleton rows={5} columns={6} />
         ) : logs.length === 0 ? (
           <div className="p-12 text-center text-slate-500">
             <ShieldAlert className="w-12 h-12 text-slate-700 mx-auto mb-3" />
             <p className="text-base font-semibold text-slate-400">No audit log entries recorded yet.</p>
           </div>
         ) : (
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-slate-800 bg-slate-950/50 text-slate-400 text-xs font-semibold uppercase tracking-wider">
-                <th className="p-4 pl-6">Action</th>
-                <th className="p-4">Actor</th>
-                <th className="p-4">Target Type</th>
-                <th className="p-4">Target ID</th>
-                <th className="p-4">Timestamp</th>
-                <th className="p-4 pr-6 text-right">Metadata</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-800/60 text-sm">
-              {logs.map((log) => (
-                <tr key={log.id} className="hover:bg-slate-800/40 transition-colors">
-                  <td className="p-4 pl-6">
-                    <span
-                      className={`px-2.5 py-1 text-xs font-mono font-semibold rounded-full border ${getActionBadgeStyle(
-                        log.action
-                      )}`}
-                    >
-                      {log.action}
-                    </span>
-                  </td>
-                  <td className="p-4 text-xs font-mono text-slate-300">
-                    {log.actorRole ? (
-                      <span className="capitalize font-semibold text-indigo-400">
-                        {log.actorRole.replace('_', ' ')}
-                      </span>
-                    ) : (
-                      <span className="text-slate-500">System</span>
-                    )}
-                    {log.actorId && <p className="text-[10px] text-slate-500 mt-0.5">{log.actorId}</p>}
-                  </td>
-                  <td className="p-4 text-xs font-medium text-slate-300 capitalize">
-                    {log.targetType}
-                  </td>
-                  <td className="p-4 font-mono text-xs text-slate-400">
-                    {log.targetId || '—'}
-                  </td>
-                  <td className="p-4 text-xs text-slate-400">
-                    <div className="flex items-center gap-1.5">
-                      <Calendar className="w-3.5 h-3.5 text-slate-500" />
-                      <span>{new Date(log.createdAt).toLocaleString()}</span>
-                    </div>
-                  </td>
-                  <td className="p-4 pr-6 text-right">
-                    <button
-                      onClick={() => setSelectedLog(log)}
-                      className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium rounded-lg transition-colors inline-flex items-center gap-1.5"
-                    >
-                      <Code className="w-3.5 h-3.5" />
-                      <span>Inspect JSON</span>
-                    </button>
-                  </td>
+          <>
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-slate-800 bg-slate-950/50 text-slate-400 text-xs font-semibold uppercase tracking-wider">
+                  <th className="p-4 pl-6">Action</th>
+                  <th className="p-4">Actor</th>
+                  <th className="p-4">Target Type</th>
+                  <th className="p-4">Target ID</th>
+                  <th className="p-4">Timestamp</th>
+                  <th className="p-4 pr-6 text-right">Metadata</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-slate-800/60 text-sm">
+                {logs.slice(offset, offset + limit).map((log) => (
+                  <tr key={log.id} className="hover:bg-slate-800/40 transition-colors">
+                    <td className="p-4 pl-6">
+                      <span
+                        className={`px-2.5 py-1 text-xs font-mono font-semibold rounded-full border ${getActionBadgeStyle(
+                          log.action
+                        )}`}
+                      >
+                        {log.action}
+                      </span>
+                    </td>
+                    <td className="p-4 text-xs font-mono text-slate-300">
+                      {log.actorRole ? (
+                        <span className="capitalize font-semibold text-indigo-400">
+                          {log.actorRole.replace('_', ' ')}
+                        </span>
+                      ) : (
+                        <span className="text-slate-500">System</span>
+                      )}
+                      {log.actorId && <p className="text-[10px] text-slate-500 mt-0.5">{log.actorId}</p>}
+                    </td>
+                    <td className="p-4 text-xs font-medium text-slate-300 capitalize">
+                      {log.targetType}
+                    </td>
+                    <td className="p-4 font-mono text-xs text-slate-400">
+                      {log.targetId || '—'}
+                    </td>
+                    <td className="p-4 text-xs text-slate-400">
+                      <div className="flex items-center gap-1.5">
+                        <Calendar className="w-3.5 h-3.5 text-slate-500" />
+                        <span>{new Date(log.createdAt).toLocaleString()}</span>
+                      </div>
+                    </td>
+                    <td className="p-4 pr-6 text-right">
+                      <button
+                        onClick={() => setSelectedLog(log)}
+                        className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium rounded-lg transition-colors inline-flex items-center gap-1.5"
+                      >
+                        <Code className="w-3.5 h-3.5" />
+                        <span>Inspect JSON</span>
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            <Pagination
+              total={logs.length}
+              limit={limit}
+              offset={offset}
+              onPageChange={setOffset}
+              onLimitChange={setLimit}
+            />
+          </>
         )}
       </div>
 

@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { usersService } from '../services/users.service';
 import { User, UserRole } from '../types';
 import { StatusBadge } from '../components/ui/StatusBadge';
+import { Pagination } from '../components/ui/Pagination';
+import { TableSkeleton } from '../components/ui/TableSkeleton';
+import { useToast } from '../context/ToastContext';
 import {
   Users,
   Search,
-  ShieldCheck,
-  CheckCircle2,
-  AlertCircle,
   Filter,
   RefreshCw,
   UserCog,
@@ -18,33 +18,35 @@ import {
 } from 'lucide-react';
 
 export const UserManagement: React.FC = () => {
+  const { showToast } = useToast();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState<UserRole | 'all'>('all');
   const [totalCount, setTotalCount] = useState(0);
 
+  // Pagination state
+  const [limit, setLimit] = useState(10);
+  const [offset, setOffset] = useState(0);
+
   // Selected User for Role Modal
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [newRole, setNewRole] = useState<UserRole>('verification_officer');
   const [actionLoading, setActionLoading] = useState(false);
-  const [statusMsg, setStatusMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(
-    null
-  );
 
   const loadUsers = async () => {
     setLoading(true);
     try {
       const res = await usersService.getUsers(
-        50,
-        0,
+        limit,
+        offset,
         search,
         roleFilter === 'all' ? undefined : roleFilter
       );
       setUsers(res.data || []);
       setTotalCount(res.total || 0);
-    } catch (err) {
-      console.error('Failed to load users:', err);
+    } catch (err: any) {
+      showToast('Error Loading Users', err?.message || 'Failed to fetch directory data', 'error');
     } finally {
       setLoading(false);
     }
@@ -52,33 +54,33 @@ export const UserManagement: React.FC = () => {
 
   useEffect(() => {
     loadUsers();
-  }, [search, roleFilter]);
+  }, [search, roleFilter, limit, offset]);
 
   const handleOpenEdit = (u: User) => {
     setEditingUser(u);
     setNewRole(u.role);
-    setStatusMsg(null);
   };
 
   const handleUpdateRole = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingUser) return;
     setActionLoading(true);
-    setStatusMsg(null);
 
     try {
       await usersService.updateUserRole(editingUser.id, newRole);
-      setStatusMsg({
-        type: 'success',
-        text: `Role for ${editingUser.email || editingUser.id} updated to "${newRole}".`,
-      });
+      showToast(
+        'Role Updated',
+        `Role for ${editingUser.profile?.nickname || editingUser.email || editingUser.id} updated to "${newRole}".`,
+        'success'
+      );
       setEditingUser(null);
       await loadUsers();
     } catch (err: any) {
-      setStatusMsg({
-        type: 'error',
-        text: err?.response?.data?.error?.message || err?.response?.data?.message || 'Failed to update user role.',
-      });
+      showToast(
+        'Role Update Failed',
+        err?.response?.data?.error?.message || err?.response?.data?.message || 'Failed to update user role.',
+        'error'
+      );
     } finally {
       setActionLoading(false);
     }
@@ -120,23 +122,6 @@ export const UserManagement: React.FC = () => {
         </button>
       </div>
 
-      {statusMsg && (
-        <div
-          className={`p-4 rounded-xl text-sm flex items-start gap-3 ${
-            statusMsg.type === 'success'
-              ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
-              : 'bg-rose-500/10 border border-rose-500/20 text-rose-400'
-          }`}
-        >
-          {statusMsg.type === 'success' ? (
-            <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5" />
-          ) : (
-            <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
-          )}
-          <span>{statusMsg.text}</span>
-        </div>
-      )}
-
       {/* Filters Bar */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col md:flex-row gap-4 items-center justify-between shadow-lg">
         {/* Search input */}
@@ -175,7 +160,7 @@ export const UserManagement: React.FC = () => {
       {/* Main Directory Table */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
         {loading ? (
-          <div className="p-12 text-center text-slate-500">Loading user directory...</div>
+          <TableSkeleton rows={5} columns={6} />
         ) : users.length === 0 ? (
           <div className="p-12 text-center text-slate-500">
             <Users className="w-12 h-12 text-slate-700 mx-auto mb-3" />
@@ -183,80 +168,88 @@ export const UserManagement: React.FC = () => {
             <p className="text-xs text-slate-600 mt-1">Try adjusting search or role filters.</p>
           </div>
         ) : (
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-slate-800 bg-slate-950/50 text-slate-400 text-xs font-semibold uppercase tracking-wider">
-                <th className="p-4 pl-6">User</th>
-                <th className="p-4">Contact</th>
-                <th className="p-4">Current Role</th>
-                <th className="p-4">Status</th>
-                <th className="p-4">Joined</th>
-                <th className="p-4 pr-6 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-800/60 text-sm">
-              {users.map((u) => (
-                <tr key={u.id} className="hover:bg-slate-800/40 transition-colors">
-                  <td className="p-4 pl-6">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 font-semibold text-sm">
-                        {u.profile?.displayName?.[0]?.toUpperCase() ||
-                          u.email?.[0]?.toUpperCase() ||
-                          'U'}
-                      </div>
-                      <div>
-                        <p className="font-semibold text-slate-200">
-                          {u.profile?.displayName || 'Unnamed Profile'}
-                        </p>
-                        <p className="font-mono text-xs text-slate-500">{u.id}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="p-4 text-xs text-slate-300">
-                    {u.email && (
-                      <div className="flex items-center gap-1.5 text-slate-300">
-                        <Mail className="w-3.5 h-3.5 text-slate-500" />
-                        <span>{u.email}</span>
-                      </div>
-                    )}
-                    {(u.phoneNumber || u.phone) && (
-                      <div className="flex items-center gap-1.5 text-slate-400 mt-0.5">
-                        <Phone className="w-3.5 h-3.5 text-slate-500" />
-                        <span>{u.phoneNumber || u.phone}</span>
-                      </div>
-                    )}
-                  </td>
-                  <td className="p-4">
-                    <span
-                      className={`px-2.5 py-1 text-xs font-semibold rounded-full border capitalize ${getRoleBadgeStyle(
-                        u.role
-                      )}`}
-                    >
-                      {u.role.replace('_', ' ')}
-                    </span>
-                  </td>
-                  <td className="p-4">
-                    <StatusBadge status={u.status} />
-                  </td>
-                  <td className="p-4 text-xs text-slate-400">
-                    <div className="flex items-center gap-1.5">
-                      <Calendar className="w-3.5 h-3.5 text-slate-500" />
-                      <span>{new Date(u.createdAt).toLocaleDateString()}</span>
-                    </div>
-                  </td>
-                  <td className="p-4 pr-6 text-right">
-                    <button
-                      onClick={() => handleOpenEdit(u)}
-                      className="px-3.5 py-1.5 bg-indigo-600/10 border border-indigo-500/20 hover:bg-indigo-600/20 text-indigo-400 font-medium rounded-lg text-xs transition-colors inline-flex items-center gap-1.5"
-                    >
-                      <UserCog className="w-3.5 h-3.5" />
-                      <span>Change Role</span>
-                    </button>
-                  </td>
+          <>
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-slate-800 bg-slate-950/50 text-slate-400 text-xs font-semibold uppercase tracking-wider">
+                  <th className="p-4 pl-6">User</th>
+                  <th className="p-4">Contact</th>
+                  <th className="p-4">Current Role</th>
+                  <th className="p-4">Status</th>
+                  <th className="p-4">Joined</th>
+                  <th className="p-4 pr-6 text-right">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-slate-800/60 text-sm">
+                {users.map((u) => (
+                  <tr key={u.id} className="hover:bg-slate-800/40 transition-colors">
+                    <td className="p-4 pl-6">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-full bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 font-semibold text-sm">
+                          {(u.profile?.nickname || u.profile?.displayName || u.email || 'U')[0].toUpperCase()}
+                        </div>
+                        <div>
+                          <p className="font-semibold text-slate-200">
+                            {u.profile?.nickname || u.profile?.displayName || 'Unnamed Profile'}
+                          </p>
+                          <p className="font-mono text-xs text-slate-500">{u.id}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="p-4 text-xs text-slate-300">
+                      {u.email && (
+                        <div className="flex items-center gap-1.5 text-slate-300">
+                          <Mail className="w-3.5 h-3.5 text-slate-500" />
+                          <span>{u.email}</span>
+                        </div>
+                      )}
+                      {(u.phoneNumber || u.phone) && (
+                        <div className="flex items-center gap-1.5 text-slate-400 mt-0.5">
+                          <Phone className="w-3.5 h-3.5 text-slate-500" />
+                          <span>{u.phoneNumber || u.phone}</span>
+                        </div>
+                      )}
+                    </td>
+                    <td className="p-4">
+                      <span
+                        className={`px-2.5 py-1 text-xs font-semibold rounded-full border capitalize ${getRoleBadgeStyle(
+                          u.role
+                        )}`}
+                      >
+                        {u.role.replace('_', ' ')}
+                      </span>
+                    </td>
+                    <td className="p-4">
+                      <StatusBadge status={u.status} />
+                    </td>
+                    <td className="p-4 text-xs text-slate-400">
+                      <div className="flex items-center gap-1.5">
+                        <Calendar className="w-3.5 h-3.5 text-slate-500" />
+                        <span>{new Date(u.createdAt).toLocaleDateString()}</span>
+                      </div>
+                    </td>
+                    <td className="p-4 pr-6 text-right">
+                      <button
+                        onClick={() => handleOpenEdit(u)}
+                        className="px-3.5 py-1.5 bg-indigo-600/10 border border-indigo-500/20 hover:bg-indigo-600/20 text-indigo-400 font-medium rounded-lg text-xs transition-colors inline-flex items-center gap-1.5"
+                      >
+                        <UserCog className="w-3.5 h-3.5" />
+                        <span>Change Role</span>
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            <Pagination
+              total={totalCount}
+              limit={limit}
+              offset={offset}
+              onPageChange={setOffset}
+              onLimitChange={setLimit}
+            />
+          </>
         )}
       </div>
 

@@ -3,22 +3,16 @@ import { usersService } from '../services/users.service';
 import { reportsService } from '../services/reports.service';
 import { User, UserStatus } from '../types';
 import { StatusBadge } from '../components/ui/StatusBadge';
+import { useToast } from '../context/ToastContext';
 import {
   ShieldAlert,
   Search,
-  CheckCircle2,
-  AlertCircle,
   UserX,
-  ShieldCheck,
-  Ban,
   AlertTriangle,
-  RotateCcw,
-  Mail,
-  Phone,
-  Calendar,
 } from 'lucide-react';
 
 export const UserSafetyDesk: React.FC = () => {
+  const { showToast } = useToast();
   const [search, setSearch] = useState('');
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
@@ -26,24 +20,17 @@ export const UserSafetyDesk: React.FC = () => {
   const [newStatus, setNewStatus] = useState<UserStatus>('suspended');
   const [reason, setReason] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
-  const [statusMsg, setStatusMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(
-    null
-  );
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!search.trim()) return;
     setLoading(true);
-    setStatusMsg(null);
 
     try {
       const res = await usersService.getUsers(50, 0, search.trim());
       setUsers(res.data || []);
     } catch (err: any) {
-      setStatusMsg({
-        type: 'error',
-        text: err?.response?.data?.error?.message || 'Failed to search users.',
-      });
+      showToast('Search Failed', err?.response?.data?.error?.message || 'Failed to search users.', 'error');
     } finally {
       setLoading(false);
     }
@@ -53,14 +40,14 @@ export const UserSafetyDesk: React.FC = () => {
     e.preventDefault();
     if (!selectedUser) return;
     setActionLoading(true);
-    setStatusMsg(null);
 
     try {
       await reportsService.updateUserStatus(selectedUser.id, newStatus, reason);
-      setStatusMsg({
-        type: 'success',
-        text: `Successfully updated ${selectedUser.email || selectedUser.id} account status to "${newStatus}".`,
-      });
+      showToast(
+        'Account Status Updated',
+        `Successfully updated ${selectedUser.profile?.nickname || selectedUser.email || selectedUser.id} account status to "${newStatus}".`,
+        'success'
+      );
       setSelectedUser(null);
       setReason('');
       // Refresh list
@@ -69,10 +56,7 @@ export const UserSafetyDesk: React.FC = () => {
         setUsers(res.data || []);
       }
     } catch (err: any) {
-      setStatusMsg({
-        type: 'error',
-        text: err?.response?.data?.error?.message || 'Failed to update user status.',
-      });
+      showToast('Enforcement Failed', err?.response?.data?.error?.message || 'Failed to update user status.', 'error');
     } finally {
       setActionLoading(false);
     }
@@ -89,23 +73,6 @@ export const UserSafetyDesk: React.FC = () => {
           Directly inspect member account standings, issue safety suspensions, or revoke account bans.
         </p>
       </div>
-
-      {statusMsg && (
-        <div
-          className={`p-4 rounded-xl text-sm flex items-start gap-3 ${
-            statusMsg.type === 'success'
-              ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
-              : 'bg-rose-500/10 border border-rose-500/20 text-rose-400'
-          }`}
-        >
-          {statusMsg.type === 'success' ? (
-            <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5" />
-          ) : (
-            <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
-          )}
-          <span>{statusMsg.text}</span>
-        </div>
-      )}
 
       {/* Search Header */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
