@@ -36,26 +36,30 @@ export const SecureDocumentViewer: React.FC<SecureDocumentViewerProps> = ({
 
     // Fetch image data as a Blob to prevent persistent browser caching
     // and allow clean memory revocation on unmount.
+    // Use native fetch() for absolute URLs (pre-signed S3/GCS links) since
+    // the Axios `api` client would incorrectly prepend its backend baseURL.
     const fetchBlob = async () => {
       try {
-        const response = await api.get(url, {
-          responseType: 'blob',
-        });
+        const isAbsoluteUrl = /^https?:\/\//i.test(url);
+        let blob: Blob;
+
+        if (isAbsoluteUrl) {
+          const response = await fetch(url);
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          blob = await response.blob();
+        } else {
+          const response = await api.get(url, { responseType: 'blob' });
+          const contentTypeHeader = response.headers['content-type'];
+          const contentType = typeof contentTypeHeader === 'string' ? contentTypeHeader : 'image/jpeg';
+          blob = new Blob([response.data], { type: contentType });
+        }
 
         if (!active) return;
-
-        const contentTypeHeader = response.headers['content-type'];
-        const contentType = typeof contentTypeHeader === 'string' ? contentTypeHeader : 'image/jpeg';
-
-        const blob = new Blob([response.data], {
-          type: contentType,
-        });
         createdObjectUrl = URL.createObjectURL(blob);
         setBlobUrl(createdObjectUrl);
       } catch (err) {
         if (!active) return;
-        // Fallback: If blob fetch directly fails (e.g. cross-origin pre-signed URL),
-        // use URL directly with security event listeners attached.
+        // Fallback: use URL directly if blob fetch fails
         setBlobUrl(url);
       } finally {
         if (active) setLoading(false);

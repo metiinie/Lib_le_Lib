@@ -11,7 +11,6 @@ export const verificationService = {
   decide: async (id: string, decision: 'approved' | 'rejected', rejectionReason?: string) => {
     const res = await api.post(`/verification/${id}/decision`, {
       decision,
-      status: decision,
       rejectionReason,
     });
     return res.data;
