@@ -50,17 +50,17 @@ export const discoveryService = {
   },
 
   likeProfile: async (targetId: string) => {
-    const response = await api.post(`/interactions/${targetId}/like`);
+    const response = await api.post('/swipes', { targetId, action: 'like' });
     return response.data;
   },
 
   passProfile: async (targetId: string) => {
-    const response = await api.post(`/interactions/${targetId}/pass`);
+    const response = await api.post('/swipes', { targetId, action: 'pass' });
     return response.data;
   },
 
   blockProfile: async (targetId: string) => {
-    const response = await api.post(`/interactions/${targetId}/block`);
+    const response = await api.post('/blocks', { blockedId: targetId });
     return response.data;
   },
 };
