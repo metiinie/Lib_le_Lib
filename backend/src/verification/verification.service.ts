@@ -13,6 +13,7 @@ import { VerificationStorageService } from './verification-storage.service';
 import { SubmitVerificationDto } from './dto/submit-verification.dto';
 import { DecideVerificationDto } from './dto/decide-verification.dto';
 import { VerificationRecord } from './entities/verification-record.entity';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class VerificationService {
@@ -211,7 +212,19 @@ export class VerificationService {
         },
       );
 
-      // 2. Write audit log
+      // 2. If approved, activate member account status
+      if (dto.decision === 'approved') {
+        await manager.update(
+          User,
+          { id: record.userId },
+          {
+            status: 'active',
+            updatedAt: new Date(),
+          },
+        );
+      }
+
+      // 3. Write audit log
       await this.auditLogsRepo.insertWithManager(
         {
           actorId: officerId,
