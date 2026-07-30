@@ -4,6 +4,7 @@ import {
   Get,
   Body,
   Param,
+  Query,
   UseGuards,
   HttpCode,
   HttpStatus,
@@ -41,14 +42,14 @@ export class VerificationController {
 
   @Get('queue')
   @UseGuards(RolesGuard)
-  @Roles('verification_officer')
-  async getQueue() {
-    return this.verificationService.getQueue();
+  @Roles('verification_officer', 'admin')
+  async getQueue(@Query('status') status: string) {
+    return this.verificationService.getQueue(status);
   }
 
   @Post(':id/decision')
   @UseGuards(RolesGuard)
-  @Roles('verification_officer')
+  @Roles('verification_officer', 'admin')
   @HttpCode(HttpStatus.OK)
   async decide(
     @Param('id') recordId: string,

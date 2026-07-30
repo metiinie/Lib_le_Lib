@@ -100,13 +100,12 @@ export class VerificationService {
   }
 
   /**
-   * Returns the queue of pending verifications for officers.
-   * Resolves signed GET URLs for the attached documents.
+   * Returns the queue of verifications for officers.
+   * Resolves signed GET URLs for the attached documents & user profile.
    */
-  async getQueue() {
-    const queue = await this.recordsRepo.findQueue();
+  async getQueue(status?: string) {
+    const queue = await this.recordsRepo.findQueue(status);
 
-    // We map over each record to fetch its documents and generate signed URLs
     const result = await Promise.all(
       queue.map(async (record) => {
         const docs = await this.documentsRepo.findByRecordId(record.id);
@@ -120,7 +119,7 @@ export class VerificationService {
               id: doc.id,
               documentType: doc.documentType,
               uploadedAt: doc.uploadedAt,
-              url, // Temporary signed URL
+              url,
             };
           }),
         );
@@ -128,8 +127,27 @@ export class VerificationService {
           id: record.id,
           userId: record.userId,
           status: record.status,
+          rejectionReason: record.rejectionReason,
           submittedAt: record.submittedAt,
+          decisionAt: record.decisionAt,
           method: record.method,
+          user: record.user
+            ? {
+                id: record.user.id,
+                email: record.user.email,
+                phone: record.user.phone,
+                role: record.user.role,
+                status: record.user.status,
+                createdAt: record.user.createdAt,
+                profile: record.user.profile
+                  ? {
+                      nickname: record.user.profile.nickname,
+                      dateOfBirth: record.user.profile.dateOfBirth,
+                      regionId: record.user.profile.regionId,
+                    }
+                  : null,
+              }
+            : null,
           documents: mappedDocs,
         };
       }),
@@ -174,7 +192,6 @@ export class VerificationService {
       );
       const date = new Date();
       date.setMonth(date.getMonth() + expiryMonths);
-      // Format as YYYY-MM-DD for PostgreSQL DATE column
       expiryDateString = date.toISOString().split('T')[0];
     }
 
@@ -189,7 +206,7 @@ export class VerificationService {
           reviewerId: officerId,
           rejectionReason:
             dto.decision === 'rejected' ? dto.rejectionReason : undefined,
-          expiryDate: expiryDateString as any, // TypeORM type issue with date column string/Date
+          expiryDate: expiryDateString as any,
           updatedAt: new Date(),
         },
       );

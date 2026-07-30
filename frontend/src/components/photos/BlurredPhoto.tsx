@@ -4,14 +4,13 @@ import { Image } from 'expo-image';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing } from 'react-native-reanimated';
 import { usePreferencesStore } from '@/stores/preferences.store';
 
-interface BlurredPhotoProps {
+export interface BlurredPhotoProps {
   blurhash: string;
   photoUrl?: string; // Optional full URL, only fetched if revealGranted is true
   revealGranted: boolean;
   onRevealRequest?: () => void;
   width?: number | string;
   height?: number | string;
-  className?: string; // Tapping into our NativeWind augmented types
 }
 
 export const BlurredPhoto = ({
@@ -21,7 +20,6 @@ export const BlurredPhoto = ({
   onRevealRequest,
   width = '100%',
   height = '100%',
-  className,
 }: BlurredPhotoProps) => {
   const [currentUrl, setCurrentUrl] = useState<string | undefined>(undefined);
   const [loading, setLoading] = useState(false);
@@ -49,7 +47,7 @@ export const BlurredPhoto = ({
   }));
 
   return (
-    <View style={[{ width: width as any, height: height as any }, styles.container]} className={className}>
+    <View style={[{ width: width as any, height: height as any }, styles.container]}>
       {/* Base Layer: Full Image (Only rendered if reveal is granted and URL exists) */}
       {revealGranted && currentUrl && (
         <Image
@@ -70,12 +68,12 @@ export const BlurredPhoto = ({
         {/* Overlay for reveal request prompt if applicable */}
         {!revealGranted && onRevealRequest && (
           <TouchableOpacity 
-            className="absolute inset-0 items-center justify-center bg-black/30"
+            style={styles.revealOverlay}
             onPress={onRevealRequest}
             activeOpacity={0.8}
           >
-            <View className="bg-white/20 px-4 py-2 rounded-full backdrop-blur-md border border-white/30">
-              <Text className="text-white font-semibold">Tap to request reveal</Text>
+            <View style={styles.revealButton}>
+              <Text style={styles.revealText}>Tap to request reveal</Text>
             </View>
           </TouchableOpacity>
         )}
@@ -89,5 +87,23 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: '#cbd5e1', // slate-300 fallback
     borderRadius: 8,
+  },
+  revealOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+  },
+  revealButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 999,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+  },
+  revealText: {
+    color: '#ffffff',
+    fontWeight: '600',
   },
 });

@@ -4,11 +4,26 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
-  OneToOne,
   OneToMany,
+  OneToOne,
 } from 'typeorm';
 import { OtpCode } from '../../auth/entities/otp-code.entity';
 import { Device } from '../../users/entities/device.entity';
+import { Profile } from '../../profiles/entities/profile.entity';
+
+export type UserRole =
+  | 'member'
+  | 'verification_officer'
+  | 'moderator'
+  | 'admin'
+  | 'health_professional';
+
+export type UserStatus =
+  | 'pending_verification'
+  | 'active'
+  | 'suspended'
+  | 'banned'
+  | 'deleted';
 
 /**
  * Core auth identity. No legal name field by design (doc 4.2).
@@ -42,24 +57,14 @@ export class User {
     ],
     default: 'member',
   })
-  role:
-    | 'member'
-    | 'verification_officer'
-    | 'moderator'
-    | 'admin'
-    | 'health_professional';
+  role: UserRole;
 
   @Column({
     type: 'enum',
     enum: ['pending_verification', 'active', 'suspended', 'banned', 'deleted'],
     default: 'pending_verification',
   })
-  status:
-    | 'pending_verification'
-    | 'active'
-    | 'suspended'
-    | 'banned'
-    | 'deleted';
+  status: UserStatus;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
@@ -69,6 +74,12 @@ export class User {
 
   @Column({ name: 'last_login_at', type: 'timestamptz', nullable: true })
   lastLoginAt: Date | null;
+
+  // Inverse side of the Profile → User OneToOne relation.
+  // Required so TypeORM can resolve `relations: ['user.profile']`
+  // in the verification repository without throwing EntityPropertyNotFoundError.
+  @OneToOne(() => Profile, (profile) => profile.user)
+  profile: Profile | null;
 
   // ── Relations ──
 

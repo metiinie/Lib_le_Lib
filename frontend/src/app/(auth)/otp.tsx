@@ -28,47 +28,66 @@ export default function OtpScreen() {
   }, [timeLeft]);
 
   const handleRequestOtp = async (forceSignUp?: boolean) => {
-    if (!identifier) {
+    const cleanIdentifier = identifier.trim();
+    if (!cleanIdentifier) {
       Alert.alert('Error', 'Please enter your phone number or email.');
       return;
     }
 
-    // Throttle check
     if (timeLeft > 0) {
       return;
     }
 
     setIsLoading(true);
-    const signUpFlag = forceSignUp ?? isSignUp;
+    let targetSignUp = forceSignUp ?? isSignUp;
+
     try {
-      await authService.requestOtp(identifier, signUpFlag);
-      setIsSignUp(signUpFlag);
+      await authService.requestOtp(cleanIdentifier, targetSignUp);
+      setIsSignUp(targetSignUp);
       setStep(2);
       setTimeLeft(RESEND_TIMEOUT);
     } catch (error: any) {
-      const code = error?.response?.data?.error?.code;
+      const rawErr = error?.response?.data;
+      const code = rawErr?.error?.code;
 
-      if (code === 'USER_NOT_FOUND' && !signUpFlag) {
-        // Account doesn't exist yet — switch to sign-up automatically
-        setIsSignUp(true);
-        handleRequestOtp(true);
-        return;
+      // Auto-fallback if signup/login mode mismatches account existence
+      if (code === 'USER_NOT_FOUND' && !targetSignUp) {
+        try {
+          targetSignUp = true;
+          await authService.requestOtp(cleanIdentifier, true);
+          setIsSignUp(true);
+          setStep(2);
+          setTimeLeft(RESEND_TIMEOUT);
+          return;
+        } catch (retryErr: any) {
+          error = retryErr;
+        }
+      } else if (code === 'USER_ALREADY_EXISTS' && targetSignUp) {
+        try {
+          targetSignUp = false;
+          await authService.requestOtp(cleanIdentifier, false);
+          setIsSignUp(false);
+          setStep(2);
+          setTimeLeft(RESEND_TIMEOUT);
+          return;
+        } catch (retryErr: any) {
+          error = retryErr;
+        }
       }
 
-      if (code === 'USER_ALREADY_EXISTS') {
-        // Account already exists — switch to sign-in
-        setIsSignUp(false);
-        handleRequestOtp(false);
-        return;
-      }
+      // Extract accurate message from NestJS error response
+      const errRes = error?.response?.data;
+      const errCode = errRes?.error?.code;
+      const errMsg =
+        errRes?.error?.message ||
+        (Array.isArray(errRes?.message) ? errRes.message.join(', ') : errRes?.message) ||
+        error?.message ||
+        'Please try again.';
 
-      if (code === 'OTP_RATE_LIMITED') {
-        Alert.alert('Too many attempts', 'Please wait a moment before requesting another code.');
+      if (errCode === 'OTP_RATE_LIMITED' || error?.response?.status === 429) {
+        Alert.alert('Too many attempts', 'Please wait a minute before requesting another code.');
       } else {
-        Alert.alert(
-          'Error',
-          `Failed to send OTP: ${error?.response?.data?.error?.message ?? 'Please try again.'}`,
-        );
+        Alert.alert('Error', `Failed to send OTP: ${errMsg}`);
       }
     } finally {
       setIsLoading(false);
@@ -82,9 +101,10 @@ export default function OtpScreen() {
     }
 
     setIsLoading(true);
+    const cleanIdentifier = identifier.trim();
     try {
       // Backend returns { accessToken, refreshToken, userId }
-      const { accessToken } = await authService.verifyOtp(identifier, code, isSignUp);
+      const { accessToken } = await authService.verifyOtp(cleanIdentifier, code.trim(), isSignUp);
       signIn(accessToken);
       // The _layout route guard will automatically redirect us once authenticated.
     } catch (error: any) {

@@ -284,6 +284,15 @@ describe('Safety & Trust (e2e)', () => {
 
       reportId = response.body.id;
       expect(reportId).toBeDefined();
+
+      // Check report_created audit log in DB
+      const reportAudit = await dataSource.query(
+        'SELECT * FROM audit_logs WHERE target_id = $1 AND action = $2',
+        [reportId, 'report_created'],
+      );
+      expect(reportAudit.length).toBe(1);
+      expect(reportAudit[0].actor_id).toBe(memberAId);
+      expect(reportAudit[0].target_type).toBe('report');
     });
 
     it('Moderator fetches report queue', async () => {

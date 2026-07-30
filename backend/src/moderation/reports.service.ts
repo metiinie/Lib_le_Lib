@@ -13,7 +13,7 @@ import {
 import { AuditLogsService } from './audit-logs.service';
 import { CreateReportDto } from './dto/create-report.dto';
 import { ModerationActionDto } from './dto/moderation-action.dto';
-import { User } from '../users/entities/user.entity';
+import { User, UserStatus } from '../users/entities/user.entity';
 import { ReportsRepository } from './repositories/reports.repository';
 
 @Injectable()
@@ -48,46 +48,93 @@ export class ReportsService {
       severity = ReportSeverity.HIGH;
     }
 
-    const report = this.reportsRepository.create({
-      reporterId,
-      reportedId: dto.reportedId,
-      matchId: dto.matchId,
-      category: dto.category,
-      description: dto.description,
-      evidenceRef: dto.evidenceRef,
-      severity,
+    return this.dataSource.transaction(async (manager) => {
+      const report = manager.create(Report, {
+        reporterId,
+        reportedId: dto.reportedId,
+        matchId: dto.matchId,
+        category: dto.category,
+        description: dto.description,
+        evidenceRef: dto.evidenceRef,
+        severity,
+      });
+
+      const savedReport = await manager.save(report);
+
+      // Audit log for report creation
+      await this.auditLogsService.logAction(manager, {
+        actorId: reporterId,
+        actorRole: 'member',
+        action: 'report_created',
+        targetType: 'report',
+        targetId: savedReport.id,
+        metadata: { reportedId: dto.reportedId, category: dto.category },
+      });
+
+      return savedReport;
     });
-
-    const savedReport = await this.reportsRepository.save(report);
-
-    // Audit log for report creation
-    await this.auditLogsService.logAction(this.dataSource.manager, {
-      actorId: reporterId,
-      actorRole: 'member', // Assuming reporter is always a member
-      action: 'report_created',
-      targetType: 'report',
-      targetId: savedReport.id,
-      metadata: { reportedId: dto.reportedId, category: dto.category },
-    });
-
-    return savedReport;
   }
 
   async getQueue(
     limit: number = 50,
     offset: number = 0,
+    status?: ReportStatus,
+    severity?: ReportSeverity,
+    category?: ReportCategory,
   ): Promise<[Report[], number]> {
-    return this.reportsRepository.findAndCount({
-      where: { status: ReportStatus.OPEN },
-      order: {
-        // Enums aren't easily sortable directly in TypeORM without custom queries,
-        // but for simplicity, we will just sort by createdAt. Ideally, high severity first.
-        severity: 'DESC',
-        createdAt: 'ASC',
-      },
-      take: limit,
-      skip: offset,
-      relations: ['reporter', 'reported'],
+    return this.reportsRepository.findFilteredQueue(
+      limit,
+      offset,
+      status,
+      severity,
+      category,
+    );
+  }
+
+  async getReportDetails(reportId: string): Promise<Report> {
+    const report = await this.reportsRepository.findOne({
+      where: { id: reportId },
+      relations: ['reporter', 'reporter.profile', 'reported', 'reported.profile', 'assignedTo'],
+    });
+
+    if (!report) {
+      throw new NotFoundException('Report not found');
+    }
+
+    return report;
+  }
+
+  async updateUserStatus(
+    actorId: string,
+    actorRole: string,
+    targetUserId: string,
+    status: UserStatus,
+    reason?: string,
+  ): Promise<User> {
+    return this.dataSource.transaction(async (manager) => {
+      const targetUser = await manager.findOne(User, {
+        where: { id: targetUserId },
+      });
+
+      if (!targetUser) {
+        throw new NotFoundException('User not found');
+      }
+
+      const previousStatus = targetUser.status;
+      targetUser.status = status;
+      const savedUser = await manager.save(targetUser);
+
+      await this.auditLogsService.logAction(manager, {
+        actorId,
+        actorRole,
+        action: `user_status_changed_to_${status}`,
+        targetType: 'user',
+        targetId: targetUserId,
+        metadata: { previousStatus, newStatus: status, reason },
+      });
+
+      const { passwordHash, ...safe } = savedUser;
+      return safe as User;
     });
   }
 
@@ -106,7 +153,6 @@ export class ReportsService {
       throw new NotFoundException('Report not found');
     }
 
-    // Run everything in a single transaction
     return this.dataSource.transaction(async (manager) => {
       // 1. Create the moderation action
       const moderationAction = manager.create(ModerationAction, {
@@ -137,8 +183,12 @@ export class ReportsService {
         }
       }
 
-      // 3. Mark report as resolved
-      report.status = ReportStatus.RESOLVED;
+      // 3. Mark report as resolved or dismissed
+      if (dto.action === ModerationActionType.NONE) {
+        report.status = ReportStatus.DISMISSED;
+      } else {
+        report.status = ReportStatus.RESOLVED;
+      }
       report.resolvedAt = new Date();
       report.assignedToId = actorId;
       await manager.save(report);

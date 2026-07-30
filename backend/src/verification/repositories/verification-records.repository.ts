@@ -19,23 +19,35 @@ export class VerificationRecordsRepository {
   }
 
   async findById(id: string): Promise<VerificationRecord | null> {
-    return this.repo.findOne({ where: { id } });
+    return this.repo.findOne({
+      where: { id },
+      relations: ['user', 'user.profile'],
+    });
   }
 
   async findByUserId(userId: string): Promise<VerificationRecord | null> {
-    // Return latest record for this user
     return this.repo.findOne({
       where: { userId },
       order: { submittedAt: 'DESC' },
+      relations: ['user', 'user.profile'],
     });
   }
 
-  async findQueue(): Promise<VerificationRecord[]> {
-    return this.repo.find({
-      where: [{ status: 'submitted' }, { status: 'in_review' }],
-      order: { submittedAt: 'ASC' },
-      relations: ['user'], // Likely need some user details for the officer to review
-    });
+  async findQueue(status?: string): Promise<VerificationRecord[]> {
+    const qb = this.repo.createQueryBuilder('record')
+      .leftJoinAndSelect('record.user', 'user')
+      .leftJoinAndSelect('user.profile', 'profile')
+      .orderBy('record.submittedAt', 'DESC');
+
+    if (status && status !== 'all') {
+      qb.where('record.status = :status', { status });
+    } else if (!status) {
+      qb.where('record.status IN (:...pendingStatuses)', {
+        pendingStatuses: ['submitted', 'in_review'],
+      });
+    }
+
+    return qb.getMany();
   }
 
   async updateStatus(
@@ -45,7 +57,7 @@ export class VerificationRecordsRepository {
       decisionAt?: Date;
       reviewerId?: string;
       rejectionReason?: string;
-      expiryDate?: string; // string because of DATE column mapping
+      expiryDate?: string;
     },
   ): Promise<void> {
     await this.repo.update({ id }, patch);

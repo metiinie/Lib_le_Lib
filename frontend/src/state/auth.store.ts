@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 
 interface AuthState {
@@ -8,16 +9,43 @@ interface AuthState {
   signOut: () => void;
 }
 
-// Custom storage object for Zustand persist middleware using expo-secure-store
+// Custom storage object for Zustand persist middleware supporting both Native and Web
 const secureStorage = {
   getItem: async (name: string): Promise<string | null> => {
-    return await SecureStore.getItemAsync(name);
+    if (Platform.OS === 'web') {
+      try {
+        return typeof window !== 'undefined' ? localStorage.getItem(name) : null;
+      } catch {
+        return null;
+      }
+    }
+    try {
+      return await SecureStore.getItemAsync(name);
+    } catch {
+      return null;
+    }
   },
   setItem: async (name: string, value: string): Promise<void> => {
-    await SecureStore.setItemAsync(name, value);
+    if (Platform.OS === 'web') {
+      try {
+        if (typeof window !== 'undefined') localStorage.setItem(name, value);
+      } catch {}
+      return;
+    }
+    try {
+      await SecureStore.setItemAsync(name, value);
+    } catch {}
   },
   removeItem: async (name: string): Promise<void> => {
-    await SecureStore.deleteItemAsync(name);
+    if (Platform.OS === 'web') {
+      try {
+        if (typeof window !== 'undefined') localStorage.removeItem(name);
+      } catch {}
+      return;
+    }
+    try {
+      await SecureStore.deleteItemAsync(name);
+    } catch {}
   },
 };
 
@@ -29,7 +57,7 @@ export const useAuthStore = create<AuthState>()(
       signOut: () => set({ token: null }),
     }),
     {
-      name: 'auth-storage', // unique name
+      name: 'auth-storage',
       storage: createJSONStorage(() => secureStorage),
     }
   )

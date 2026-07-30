@@ -3,7 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert, ActivityInd
 import { useRouter } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { profileSchema, ProfileDto } from '@/lib/zod-schemas';
+import { profileSchema, ProfileDto, parseAndNormalizeDate } from '@/lib/zod-schemas';
 import { profileService } from '@/services/profile.service';
 import { Picker } from '@react-native-picker/picker';
 
@@ -13,10 +13,20 @@ const RELATIONS_OPTIONS = [
   { label: 'Friendship', value: 'friendship' },
 ] as const;
 
+const FALLBACK_REGIONS = [
+  { id: 'addis-ababa', name: 'Addis Ababa' },
+  { id: 'oromia', name: 'Oromia' },
+  { id: 'amhara', name: 'Amhara' },
+  { id: 'tigray', name: 'Tigray' },
+  { id: 'sidama', name: 'Sidama' },
+  { id: 'somali', name: 'Somali' },
+  { id: 'dire-dawa', name: 'Dire Dawa' },
+];
+
 export default function ProfileCreateScreen() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [regions, setRegions] = useState<{ id: string; name: string }[]>([]);
+  const [regions, setRegions] = useState<{ id: string; name: string }[]>(FALLBACK_REGIONS);
   const [isLoadingRegions, setIsLoadingRegions] = useState(true);
 
   const { control, handleSubmit, setValue, watch, formState: { errors } } = useForm<ProfileDto>({
@@ -35,14 +45,26 @@ export default function ProfileCreateScreen() {
     async function fetchRegions() {
       try {
         const data = await profileService.getRegions();
-        if (mounted && Array.isArray(data)) {
-          setRegions(data);
-          if (data.length > 0) {
-            setValue('regionId', data[0].id);
-          }
+        if (mounted && Array.isArray(data) && data.length > 0) {
+          // Deduplicate by name for clean picker items
+          const uniqueMap = new Map<string, { id: string; name: string }>();
+          data.forEach(item => {
+            if (!uniqueMap.has(item.name)) {
+              uniqueMap.set(item.name, item);
+            }
+          });
+          const uniqueList = Array.from(uniqueMap.values());
+          setRegions(uniqueList);
+          setValue('regionId', uniqueList[0].id);
+        } else if (mounted) {
+          setValue('regionId', FALLBACK_REGIONS[0].id);
         }
       } catch (err) {
-        console.warn('Failed to load regions', err);
+        console.warn('Failed to load regions from API, using defaults:', err);
+        if (mounted) {
+          setRegions(FALLBACK_REGIONS);
+          setValue('regionId', FALLBACK_REGIONS[0].id);
+        }
       } finally {
         if (mounted) setIsLoadingRegions(false);
       }
@@ -67,7 +89,24 @@ export default function ProfileCreateScreen() {
   const onSubmit = async (data: ProfileDto) => {
     setIsSubmitting(true);
     try {
-      await profileService.createProfile(data);
+      const parsedDate = parseAndNormalizeDate(data.dateOfBirth);
+      const normalizedData = {
+        ...data,
+        dateOfBirth: parsedDate ? parsedDate.normalized : data.dateOfBirth,
+      };
+
+      try {
+        await profileService.createProfile(normalizedData);
+      } catch (err: any) {
+        const errCode = err?.response?.data?.error?.code;
+        const errStatus = err?.response?.status;
+        if (errStatus === 409 || errCode === 'PROFILE_EXISTS') {
+          await profileService.updateProfile(normalizedData);
+        } else {
+          throw err;
+        }
+      }
+
       router.push('/(onboarding)/doc-upload');
     } catch (error: any) {
       const msg = error?.response?.data?.error?.message || error?.message || 'Failed to create profile';

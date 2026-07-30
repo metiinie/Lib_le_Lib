@@ -12,12 +12,13 @@ import { Throttle } from '@nestjs/throttler';
 import { MatchesService } from './matches.service';
 import { SwipeDto } from './dto/swipe.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { ActiveMemberGuard } from '../auth/guards/active-member.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
 @ApiTags('matches')
 @ApiBearerAuth()
 @Controller()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, ActiveMemberGuard)
 export class MatchesController {
   constructor(private readonly matchesService: MatchesService) {}
 

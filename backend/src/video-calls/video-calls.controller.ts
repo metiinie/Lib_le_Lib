@@ -12,10 +12,11 @@ import { VideoCallsService } from './video-calls.service';
 import { ScheduleVideoCallDto } from './dto/schedule-video-call.dto';
 import { UpdateVideoCallStatusDto } from './dto/update-video-call-status.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { ActiveMemberGuard } from '../auth/guards/active-member.guard';
 
 @ApiTags('video-calls')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, ActiveMemberGuard)
 @Controller('matches/:matchId/video-calls')
 export class VideoCallsController {
   constructor(private readonly videoCallsService: VideoCallsService) {}

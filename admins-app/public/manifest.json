@@ -1,0 +1,17 @@
+{
+  "name": "Lib le Lib Admin & Staff Portal",
+  "short_name": "LibAdmin",
+  "description": "Secure administrative, verification, and moderation workspace for Lib le Lib",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#4f46e5",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

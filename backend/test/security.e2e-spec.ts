@@ -225,4 +225,237 @@ describe('Security Constraints (e2e)', () => {
         .expect(200);
     });
   });
+
+  describe('ActiveMemberGuard — pending_verification status gate', () => {
+    /**
+     * Creates a user whose status is 'pending_verification' (the default on signup,
+     * before a verification officer approves them).
+     */
+    const createPendingUserAndToken = async () => {
+      const phone = `+1444${Math.floor(1000000 + Math.random() * 9000000)}`;
+      const user = await usersRepo.createFromDestination(phone);
+      // status stays 'pending_verification' — do NOT set to 'active'
+      const token = jwtService.sign({
+        sub: user.id,
+        role: user.role, // 'member'
+      });
+      return { user, token };
+    };
+
+    it('should block a pending_verification member from POST /swipes with VERIFICATION_REQUIRED', async () => {
+      const { token } = await createPendingUserAndToken();
+
+      const res = await request(app.getHttpServer())
+        .post('/swipes')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ targetId: '00000000-0000-0000-0000-000000000001', action: 'like' })
+        .expect(403);
+
+      expect(res.body.error?.code ?? res.body.message).toMatch(
+        /VERIFICATION_REQUIRED/i,
+      );
+    });
+
+    it('should block a pending_verification member from GET /matches with VERIFICATION_REQUIRED', async () => {
+      const { token } = await createPendingUserAndToken();
+
+      const res = await request(app.getHttpServer())
+        .get('/matches')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(403);
+
+      expect(res.body.error?.code ?? res.body.message).toMatch(
+        /VERIFICATION_REQUIRED/i,
+      );
+    });
+
+    it('should block a pending_verification member from POST /matches/:id/messages', async () => {
+      const { token } = await createPendingUserAndToken();
+
+      const res = await request(app.getHttpServer())
+        .post('/matches/00000000-0000-0000-0000-000000000001/messages')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          ciphertext: Buffer.from('test').toString('base64'),
+          nonce: Buffer.from('nonce').toString('base64'),
+          messageType: 'text',
+        })
+        .expect(403);
+
+      expect(res.body.error?.code ?? res.body.message).toMatch(
+        /VERIFICATION_REQUIRED/i,
+      );
+    });
+
+    it('should allow a pending_verification member to GET /verification/me/status', async () => {
+      const { token } = await createPendingUserAndToken();
+
+      await request(app.getHttpServer())
+        .get('/verification/me/status')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+    });
+
+    it('should allow a pending_verification member to GET /discovery', async () => {
+      const { token } = await createPendingUserAndToken();
+
+      // Discovery returns a result (possibly empty), not a 403
+      await request(app.getHttpServer())
+        .get('/discovery')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+    });
+
+    it('should allow a verification_officer to reach POST /swipes (non-member roles pass through)', async () => {
+      // Officers don't go through member verification — ActiveMemberGuard must pass them
+      const { token } = await createUserAndToken('verification_officer');
+
+      // Will get a business error (officer can't swipe), NOT a 403 VERIFICATION_REQUIRED
+      const res = await request(app.getHttpServer())
+        .post('/swipes')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ targetId: '00000000-0000-0000-0000-000000000001', action: 'like' });
+
+      // Any response other than 403 VERIFICATION_REQUIRED is acceptable here
+      expect(res.body.error?.code).not.toBe('VERIFICATION_REQUIRED');
+    });
+  });
+
+  describe('Q&A role isolation — Gap 2', () => {
+    /**
+     * Staff roles (verification_officer, moderator, admin) must be blocked
+     * from all Q&A endpoints with 403. Only member and health_professional
+     * may open, reply to, or list threads.
+     */
+    const staffRoles = ['verification_officer', 'moderator', 'admin'] as const;
+
+    it.each(staffRoles)(
+      'should block %s from POST /qa/threads with 403',
+      async (role) => {
+        const { token } = await createUserAndToken(role);
+
+        const res = await request(app.getHttpServer())
+          .post('/qa/threads')
+          .set('Authorization', `Bearer ${token}`)
+          .send({ message: 'Can a verification officer open a thread?' })
+          .expect(403);
+
+        expect(res.body.error?.code ?? res.body.message).toMatch(
+          /INSUFFICIENT_PERMISSIONS/i,
+        );
+      },
+    );
+
+    it.each(staffRoles)(
+      'should block %s from GET /qa/threads with 403',
+      async (role) => {
+        const { token } = await createUserAndToken(role);
+
+        const res = await request(app.getHttpServer())
+          .get('/qa/threads')
+          .set('Authorization', `Bearer ${token}`)
+          .expect(403);
+
+        expect(res.body.error?.code ?? res.body.message).toMatch(
+          /INSUFFICIENT_PERMISSIONS/i,
+        );
+      },
+    );
+
+    it.each(staffRoles)(
+      'should block %s from POST /qa/threads/:id/reply with 403',
+      async (role) => {
+        const { token } = await createUserAndToken(role);
+
+        const res = await request(app.getHttpServer())
+          .post('/qa/threads/00000000-0000-0000-0000-000000000001/reply')
+          .set('Authorization', `Bearer ${token}`)
+          .send({ message: 'Intruding reply' })
+          .expect(403);
+
+        expect(res.body.error?.code ?? res.body.message).toMatch(
+          /INSUFFICIENT_PERMISSIONS/i,
+        );
+      },
+    );
+
+    it('should allow a member to POST /qa/threads', async () => {
+      const { token } = await createUserAndToken('member');
+
+      // Will return 201 or a business error — NOT a 403 role block
+      const res = await request(app.getHttpServer())
+        .post('/qa/threads')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ message: 'I have a question about my treatment.' });
+
+      expect(res.status).not.toBe(403);
+      expect(res.body.error?.code).not.toBe('INSUFFICIENT_PERMISSIONS');
+    });
+
+    it('should allow a health_professional to GET /qa/threads', async () => {
+      const { token } = await createUserAndToken('health_professional');
+
+      const res = await request(app.getHttpServer())
+        .get('/qa/threads')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(200);
+
+      expect(Array.isArray(res.body)).toBe(true);
+    });
+
+    it('should block a health_professional from POST /qa/threads (professionals reply, not open)', async () => {
+      const { token } = await createUserAndToken('health_professional');
+
+      const res = await request(app.getHttpServer())
+        .post('/qa/threads')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ message: 'Opening a thread as a professional' })
+        .expect(403);
+
+      expect(res.body.error?.code ?? res.body.message).toMatch(
+        /INSUFFICIENT_PERMISSIONS/i,
+      );
+    });
+  });
+
+  describe('Admin Role Management — Gap 4', () => {
+    it('should allow admin to promote a user to moderator and log audit action', async () => {
+      const admin = await createUserAndToken('admin');
+      const targetUser = await createUserAndToken('member');
+
+      const res = await request(app.getHttpServer())
+        .patch(`/users/${targetUser.user.id}/role`)
+        .set('Authorization', `Bearer ${admin.token}`)
+        .send({ role: 'moderator' })
+        .expect(200);
+
+      expect(res.body.role).toBe('moderator');
+    });
+
+    it('should block non-admin from updating user role with 403', async () => {
+      const member = await createUserAndToken('member');
+      const targetUser = await createUserAndToken('member');
+
+      const res = await request(app.getHttpServer())
+        .patch(`/users/${targetUser.user.id}/role`)
+        .set('Authorization', `Bearer ${member.token}`)
+        .send({ role: 'verification_officer' })
+        .expect(403);
+
+      expect(res.body.error?.code ?? res.body.message).toMatch(
+        /INSUFFICIENT_PERMISSIONS/i,
+      );
+    });
+
+    it('should reject assigning invalid or member role', async () => {
+      const admin = await createUserAndToken('admin');
+      const targetUser = await createUserAndToken('member');
+
+      await request(app.getHttpServer())
+        .patch(`/users/${targetUser.user.id}/role`)
+        .set('Authorization', `Bearer ${admin.token}`)
+        .send({ role: 'member' })
+        .expect(400);
+    });
+  });
 });

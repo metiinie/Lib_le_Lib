@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
-import { Report, ReportStatus } from '../entities/report.entity';
+import { Report, ReportStatus, ReportSeverity, ReportCategory } from '../entities/report.entity';
 
 @Injectable()
 export class ReportsRepository {
@@ -24,5 +24,37 @@ export class ReportsRepository {
 
   async findOne(options: any): Promise<Report | null> {
     return this.repo.findOne(options);
+  }
+
+  async findFilteredQueue(
+    limit = 50,
+    offset = 0,
+    status?: ReportStatus,
+    severity?: ReportSeverity,
+    category?: ReportCategory,
+  ): Promise<[Report[], number]> {
+    const qb = this.repo.createQueryBuilder('report')
+      .leftJoinAndSelect('report.reporter', 'reporter')
+      .leftJoinAndSelect('reporter.profile', 'reporterProfile')
+      .leftJoinAndSelect('report.reported', 'reported')
+      .leftJoinAndSelect('reported.profile', 'reportedProfile')
+      .leftJoinAndSelect('report.assignedTo', 'assignedTo')
+      .orderBy('report.created_at', 'DESC')
+      .take(limit)
+      .skip(offset);
+
+    if (status) {
+      qb.andWhere('report.status = :status', { status });
+    }
+
+    if (severity) {
+      qb.andWhere('report.severity = :severity', { severity });
+    }
+
+    if (category) {
+      qb.andWhere('report.category = :category', { category });
+    }
+
+    return qb.getManyAndCount();
   }
 }

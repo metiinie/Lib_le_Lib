@@ -12,11 +12,12 @@ import {
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { SafetyService } from './safety.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { ActiveMemberGuard } from '../auth/guards/active-member.guard';
 import { BlockUserDto } from './dto/block-user.dto';
 
 @ApiTags('safety')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, ActiveMemberGuard)
 @Controller('blocks')
 export class SafetyController {
   constructor(private readonly safetyService: SafetyService) {}

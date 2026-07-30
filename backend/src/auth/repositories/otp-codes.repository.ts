@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, LessThan, IsNull } from 'typeorm';
+import { Repository, LessThan, MoreThan, IsNull } from 'typeorm';
 import { OtpCode } from '../entities/otp-code.entity';
 
 /**
@@ -28,6 +28,9 @@ export class OtpCodesRepository {
       where: {
         destination,
         consumedAt: IsNull(),
+        // Only return non-expired records so that a stale OTP from a prior
+        // failed request can never shadow a freshly-generated code.
+        expiresAt: MoreThan(new Date()),
       },
       order: { createdAt: 'DESC' },
     });

@@ -3,6 +3,7 @@ import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { CompatibilityQuizService } from './compatibility-quiz.service';
 import { SubmitResponseDto } from './dto/submit-response.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { ActiveMemberGuard } from '../auth/guards/active-member.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
 @ApiTags('compatibility-quiz')
@@ -18,6 +19,7 @@ export class CompatibilityQuizController {
   }
 
   @Post('responses')
+  @UseGuards(ActiveMemberGuard)
   async submitResponse(
     @CurrentUser() user: any,
     @Body() dto: SubmitResponseDto,

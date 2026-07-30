@@ -14,6 +14,7 @@ import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { SuccessStoriesService } from './success-stories.service';
 import { CreateSuccessStoryDto } from './dto/create-success-story.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { ActiveMemberGuard } from '../auth/guards/active-member.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 
@@ -33,6 +34,8 @@ export class SuccessStoriesController {
   }
 
   @Post()
+  @UseGuards(RolesGuard, ActiveMemberGuard)
+  @Roles('member')
   async submitStory(@Request() req, @Body() createDto: CreateSuccessStoryDto) {
     await this.successStoriesService.submitStory(req.user.id, createDto);
     return { success: true, message: 'Story submitted for review.' };

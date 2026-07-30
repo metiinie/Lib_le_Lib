@@ -14,13 +14,14 @@ import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { MessagesService } from './messages.service';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { ActiveMemberGuard } from '../auth/guards/active-member.guard';
 import { StorageService } from '../photos/storage.service';
 import { randomUUID } from 'crypto';
 import { MessagesGateway } from './messages.gateway';
 
 @ApiTags('messages')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, ActiveMemberGuard)
 @Controller('matches/:matchId')
 export class MessagesController {
   constructor(

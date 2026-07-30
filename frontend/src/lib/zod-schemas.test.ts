@@ -10,15 +10,17 @@ describe('Zod Schemas - 18+ Age Gate', () => {
     jest.useRealTimers();
   });
 
-  it('is18OrOlder logic works accurately', () => {
+  it('is18OrOlder logic works accurately with full dates and 4-digit years', () => {
+    // 4-digit birth year (e.g. 1996)
+    expect(is18OrOlder('1996')).toBe(true);
     // Exactly 18 years old
     expect(is18OrOlder('2008-07-07')).toBe(true);
     // 17.9 years old
     expect(is18OrOlder('2008-07-08')).toBe(false);
     // Older
     expect(is18OrOlder('1990-01-01')).toBe(true);
-    // Way too young
-    expect(is18OrOlder('2015-01-01')).toBe(false);
+    // Way too young year
+    expect(is18OrOlder('2015')).toBe(false);
   });
 
   it('rejects profile creation if under 18', () => {

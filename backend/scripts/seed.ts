@@ -104,45 +104,103 @@ async function bootstrap() {
     }
   }
 
-  // 4. Seed Test Users
-  console.log('Seeding test users & profiles...');
+  // 4. Seed Role-based Test Users
+  console.log('Seeding role-based test users...');
   const usersRepo = dataSource.getRepository(User);
   const profilesRepo = dataSource.getRepository(Profile);
   const photosRepo = dataSource.getRepository(Photo);
-  
-  const testUsers = [
-    { phone: '+251911111111', nickname: 'Abebe', gender: 'man', dob: '1995-01-01' },
-    { phone: '+251922222222', nickname: 'Chaltu', gender: 'woman', dob: '1996-05-15' },
-    { phone: '+251933333333', nickname: 'Dawit', gender: 'man', dob: '1990-11-20' },
-    { phone: '+251944444444', nickname: 'Eyerusalem', gender: 'woman', dob: '1998-03-10' },
-    { phone: '+251955555555', nickname: 'Mekdes', gender: 'woman', dob: '1994-07-22' },
+  const crypto = await import('crypto');
+
+  const passwordHash = crypto.createHash('sha256').update('@Hiv1234').digest('hex');
+
+  const roleTestUsers = [
+    {
+      email: 'member@gmail.com',
+      phone: '+251911000001',
+      role: 'member' as const,
+      status: 'active' as const,
+      nickname: 'Abebe',
+      gender: 'man',
+      dob: '1995-01-01',
+      bio: 'Regular member profile for discovery & matching.',
+    },
+    {
+      email: 'officer@gmail.com',
+      phone: '+251911000002',
+      role: 'verification_officer' as const,
+      status: 'active' as const,
+      nickname: 'Officer',
+      gender: 'man',
+      dob: '1990-05-10',
+      bio: 'Verification officer account for ID & selfie reviews.',
+    },
+    {
+      email: 'mod@gmail.com',
+      phone: '+251911000003',
+      role: 'moderator' as const,
+      status: 'active' as const,
+      nickname: 'Moderator',
+      gender: 'woman',
+      dob: '1992-08-15',
+      bio: 'Safety & moderation manager for reports.',
+    },
+    {
+      email: 'doc@gmail.com',
+      phone: '+251911000004',
+      role: 'health_professional' as const,
+      status: 'active' as const,
+      nickname: 'Doctor',
+      gender: 'man',
+      dob: '1985-03-20',
+      bio: 'Verified healthcare provider for Q&A threads.',
+    },
+    {
+      email: 'admin@gmail.com',
+      phone: '+251911000005',
+      role: 'admin' as const,
+      status: 'active' as const,
+      nickname: 'Admin',
+      gender: 'woman',
+      dob: '1988-12-01',
+      bio: 'Platform administrator with full surface access.',
+    },
   ];
-  
-  for (const t of testUsers) {
-    let user = await usersRepo.findOneBy({ phone: t.phone });
+
+  for (const t of roleTestUsers) {
+    let user = await usersRepo.findOneBy({ email: t.email });
     if (!user) {
       user = await usersRepo.save({
+        email: t.email,
         phone: t.phone,
-        status: 'active', // Pre-verified
+        role: t.role,
+        status: t.status,
+        passwordHash,
       });
-      
-      const profile = await profilesRepo.save({
+
+      await profilesRepo.save({
         userId: user.id,
         nickname: t.nickname,
         dateOfBirth: t.dob,
         gender: t.gender,
         regionId: savedRegions[Math.floor(Math.random() * savedRegions.length)].id,
         relationshipGoals: ['serious_relationship'],
-        bio: `Hello! I am ${t.nickname}. Looking forward to connecting.`,
+        bio: t.bio,
         interestTags: [savedTags[Math.floor(Math.random() * savedTags.length)]],
       });
-      
+
       await photosRepo.save({
         profileId: user.id,
         storageRef: 'test-photo-ref_original.jpg',
         isPrimary: true,
         blurredDefault: true,
       });
+    } else {
+      // Update role/password/phone/status if user already exists
+      user.phone = t.phone;
+      user.role = t.role;
+      user.status = t.status;
+      user.passwordHash = passwordHash;
+      await usersRepo.save(user);
     }
   }
 

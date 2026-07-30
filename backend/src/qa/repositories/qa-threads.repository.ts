@@ -41,7 +41,23 @@ export class QaThreadsRepository {
         { healthProfessionalId: IsNull(), status: QaThreadStatus.OPEN },
       ],
       order: { createdAt: 'DESC' },
-      relations: ['messages'],
+      relations: ['messages', 'member', 'healthProfessional'],
     });
+  }
+
+  async findAllForAdmin(status?: string): Promise<QaThread[]> {
+    const qb = this.repo.createQueryBuilder('thread')
+      .leftJoinAndSelect('thread.member', 'member')
+      .leftJoinAndSelect('member.profile', 'memberProfile')
+      .leftJoinAndSelect('thread.healthProfessional', 'hp')
+      .leftJoinAndSelect('hp.profile', 'hpProfile')
+      .leftJoinAndSelect('thread.messages', 'messages')
+      .orderBy('thread.createdAt', 'DESC');
+
+    if (status && status !== 'all') {
+      qb.where('thread.status = :status', { status });
+    }
+
+    return qb.getMany();
   }
 }

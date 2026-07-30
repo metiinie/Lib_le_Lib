@@ -18,6 +18,7 @@ import {
   GrantRevealDto,
 } from './dto/photos.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { ActiveMemberGuard } from '../auth/guards/active-member.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
 @ApiTags('photos')
@@ -30,6 +31,7 @@ export class PhotosController {
   /**
    * Step 1: client requests a signed PUT URL.
    * Returns { uploadUrl, storageRef }. Client uploads directly to R2.
+   * Open to pending members for verification selfies and doc uploads.
    */
   @Post('upload-url')
   @ApiResponse({ status: 201, description: 'Signed upload URL generated.' })
@@ -42,8 +44,10 @@ export class PhotosController {
 
   /**
    * Step 2: client registers the photo row after upload completes.
+   * Requires active member — pending members cannot register profile photos.
    */
   @Post()
+  @UseGuards(ActiveMemberGuard)
   @ApiResponse({ status: 201, description: 'Photo registered.' })
   async registerPhoto(
     @CurrentUser() user: { id: string },
@@ -72,8 +76,10 @@ export class PhotosController {
   /**
    * Grants reveal access to another user.
    * Only the photo owner may call this endpoint.
+   * Requires active member — pending members cannot grant reveals.
    */
   @Post(':id/reveal-grants')
+  @UseGuards(ActiveMemberGuard)
   @ApiResponse({ status: 201, description: 'Reveal grant created.' })
   @ApiResponse({ status: 403, description: 'Not the photo owner.' })
   @ApiResponse({ status: 409, description: 'Grant already exists.' })
@@ -88,8 +94,10 @@ export class PhotosController {
   /**
    * Revokes a reveal grant, re-blurring the photo for that viewer.
    * Only the photo owner may call this endpoint.
+   * Requires active member — pending members cannot revoke reveals.
    */
   @Delete(':id/reveal-grants/:viewerUserId')
+  @UseGuards(ActiveMemberGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiResponse({ status: 204, description: 'Grant revoked.' })
   @ApiResponse({ status: 403, description: 'Not the photo owner.' })

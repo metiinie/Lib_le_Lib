@@ -99,6 +99,10 @@ export class QaService {
     return this.qaThreadRepository.saveThread(thread);
   }
 
+  async getAllThreadsForAdmin(status?: string): Promise<QaThread[]> {
+    return this.qaThreadRepository.findAllForAdmin(status);
+  }
+
   async getMemberThreads(memberId: string): Promise<QaThread[]> {
     return this.qaThreadRepository.findByMemberId(memberId);
   }

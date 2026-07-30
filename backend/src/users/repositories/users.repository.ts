@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from '../entities/user.entity';
+import { User, UserRole } from '../entities/user.entity';
 
 /**
  * Repository for the `users` table.
@@ -55,5 +55,43 @@ export class UsersRepository {
 
   async updateLastLogin(id: string): Promise<void> {
     await this.repo.update(id, { lastLoginAt: new Date() });
+  }
+
+  /**
+   * Returns paginated users with optional search and role filtering (Admin endpoint).
+   */
+  async findAll(
+    limit = 50,
+    offset = 0,
+    search?: string,
+    role?: UserRole,
+  ): Promise<[User[], number]> {
+    const qb = this.repo.createQueryBuilder('user')
+      .leftJoinAndSelect('user.profile', 'profile')
+      .orderBy('user.created_at', 'DESC')
+      .take(limit)
+      .skip(offset);
+
+    if (role) {
+      qb.andWhere('user.role = :role', { role });
+    }
+
+    if (search && search.trim().length > 0) {
+      const q = `%${search.trim().toLowerCase()}%`;
+      qb.andWhere(
+        '(LOWER(user.email) LIKE :q OR LOWER(user.phone) LIKE :q OR LOWER(profile.display_name) LIKE :q)',
+        { q },
+      );
+    }
+
+    return qb.getManyAndCount();
+  }
+
+  async countByRole(role: UserRole): Promise<number> {
+    return this.repo.count({ where: { role } });
+  }
+
+  async countTotal(): Promise<number> {
+    return this.repo.count();
   }
 }
