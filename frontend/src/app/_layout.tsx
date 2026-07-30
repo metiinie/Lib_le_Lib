@@ -50,7 +50,7 @@ export default function RootLayout() {
 
           // Active members and staff roles skip onboarding
           if (isStaffRole || user.status === 'active') {
-            router.replace('/(main)/discovery');
+            router.replace('/(tabs)/discover');
             return;
           }
 
@@ -76,7 +76,7 @@ export default function RootLayout() {
           if (isCancelled) return;
 
           if (status === 'approved') {
-            router.replace('/(main)/discovery');
+            router.replace('/(tabs)/discover');
           } else if (status === 'submitted' || status === 'in_review') {
             router.replace('/(onboarding)/pending');
           } else if (status === 'rejected') {

@@ -24,7 +24,7 @@ export default function PendingScreen() {
         
         if (status === 'approved') {
           clearInterval(interval);
-          router.replace('/(main)/discovery');
+          router.replace('/(tabs)/discover');
         } else if (status === 'rejected') {
           clearInterval(interval);
           router.replace('/(onboarding)/rejected');
