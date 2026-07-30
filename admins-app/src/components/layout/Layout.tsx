@@ -1,34 +1,22 @@
 import React from 'react';
+import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
-import { User } from '../../types';
+import { useAuth } from '../../context/AuthContext';
 
 interface LayoutProps {
-  currentTab: string;
-  onSelectTab: (tab: string) => void;
-  user: User | null;
-  onLogout: () => void;
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
-export const Layout: React.FC<LayoutProps> = ({
-  currentTab,
-  onSelectTab,
-  user,
-  onLogout,
-  children,
-}) => {
+export const Layout: React.FC<LayoutProps> = ({ children }) => {
+  const { user } = useAuth();
+
   return (
     <div className="flex min-h-screen bg-slate-950 text-slate-100">
-      <Sidebar
-        currentTab={currentTab}
-        onSelectTab={onSelectTab}
-        role={user?.role}
-        onLogout={onLogout}
-      />
+      <Sidebar />
       <div className="flex-1 flex flex-col min-w-0">
         <Header user={user} />
-        <main className="flex-1 p-8 overflow-y-auto">{children}</main>
+        <main className="flex-1 p-8 overflow-y-auto">{children || <Outlet />}</main>
       </div>
     </div>
   );

@@ -12,12 +12,14 @@ import {
   UserX,
   Activity,
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { User, UserRole } from '../types';
 import { usersService, AdminStats } from '../services/users.service';
+import { useAuth } from '../context/AuthContext';
 
 interface DashboardProps {
-  user: User | null;
-  onNavigate: (tab: string) => void;
+  user?: User | null;
+  onNavigate?: (tab: string) => void;
 }
 
 interface TileConfig {
@@ -126,7 +128,10 @@ const TILE_ACCENT_CLASSES: Record<string, { border: string; icon: string; arrow:
   },
 };
 
-export const Dashboard: React.FC<DashboardProps> = ({ user, onNavigate }) => {
+export const Dashboard: React.FC<DashboardProps> = ({ user: propUser, onNavigate }) => {
+  const { user: authUser } = useAuth();
+  const user = propUser || authUser;
+  const navigate = useNavigate();
   const [stats, setStats] = useState<AdminStats | null>(null);
 
   useEffect(() => {
@@ -141,6 +146,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onNavigate }) => {
   const visibleTiles = WORKSPACE_TILES.filter(
     (tile) => user?.role && tile.roles.includes(user.role as UserRole)
   );
+
+  const handleTileClick = (tab: string) => {
+    if (onNavigate) {
+      onNavigate(tab);
+    } else {
+      navigate(`/${tab}`);
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -212,7 +225,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onNavigate }) => {
             return (
               <button
                 key={tile.tab}
-                onClick={() => onNavigate(tile.tab)}
+                onClick={() => handleTileClick(tile.tab)}
                 className={`p-6 bg-slate-900 border border-slate-800 rounded-xl text-left ${accent.border} transition-all group`}
               >
                 <div className="flex items-center justify-between mb-4">

@@ -1,4 +1,5 @@
 import React from 'react';
+import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard,
   ShieldCheck,
@@ -11,41 +12,31 @@ import {
   ShieldAlert,
   UserX,
 } from 'lucide-react';
-import { UserRole } from '../../types';
+import { useAuth } from '../../context/AuthContext';
 
-interface SidebarProps {
-  currentTab: string;
-  onSelectTab: (tab: string) => void;
-  role?: UserRole;
-  onLogout: () => void;
-}
+export const Sidebar: React.FC = () => {
+  const { role = 'member', logout } = useAuth();
 
-export const Sidebar: React.FC<SidebarProps> = ({
-  currentTab,
-  onSelectTab,
-  role = 'member',
-  onLogout,
-}) => {
   const isAdmin = role === 'admin';
   const isVerification = role === 'verification_officer' || isAdmin;
   const isModerator = role === 'moderator' || isAdmin;
   const isHealth = role === 'health_professional' || isAdmin;
 
   const navItems = [
-    { id: 'dashboard', label: 'Overview', icon: LayoutDashboard, visible: true },
+    { path: '/dashboard', label: 'Overview', icon: LayoutDashboard, visible: true },
     {
-      id: 'verification',
+      path: '/verification',
       label: 'ID Verifications',
       icon: ShieldCheck,
       visible: isVerification,
     },
-    { id: 'moderation', label: 'Safety Reports', icon: Flag, visible: isModerator },
-    { id: 'user-safety', label: 'Account Enforcement', icon: UserX, visible: isModerator },
-    { id: 'health-qa', label: 'Medical Q&A Desk', icon: Stethoscope, visible: isHealth },
-    { id: 'users', label: 'User Directory & Roles', icon: Users, visible: isAdmin },
-    { id: 'resources', label: 'Curated Resources', icon: BookOpen, visible: isAdmin },
-    { id: 'stories', label: 'Success Stories', icon: Heart, visible: isAdmin },
-    { id: 'audit-logs', label: 'System Audit Trail', icon: ShieldAlert, visible: isAdmin },
+    { path: '/moderation', label: 'Safety Reports', icon: Flag, visible: isModerator },
+    { path: '/user-safety', label: 'Account Enforcement', icon: UserX, visible: isModerator },
+    { path: '/health-qa', label: 'Medical Q&A Desk', icon: Stethoscope, visible: isHealth },
+    { path: '/users', label: 'User Directory & Roles', icon: Users, visible: isAdmin },
+    { path: '/resources', label: 'Curated Resources', icon: BookOpen, visible: isAdmin },
+    { path: '/stories', label: 'Success Stories', icon: Heart, visible: isAdmin },
+    { path: '/audit-logs', label: 'System Audit Trail', icon: ShieldAlert, visible: isAdmin },
   ];
 
   return (
@@ -70,20 +61,25 @@ export const Sidebar: React.FC<SidebarProps> = ({
           .filter((item) => item.visible)
           .map((item) => {
             const Icon = item.icon;
-            const isActive = currentTab === item.id;
             return (
-              <button
-                key={item.id}
-                onClick={() => onSelectTab(item.id)}
-                className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                  isActive
-                    ? 'bg-indigo-600/10 text-indigo-400 border border-indigo-500/20 shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
-                }`}
+              <NavLink
+                key={item.path}
+                to={item.path}
+                className={({ isActive }) =>
+                  `w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                    isActive
+                      ? 'bg-indigo-600/10 text-indigo-400 border border-indigo-500/20 shadow-sm'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                  }`
+                }
               >
-                <Icon className={`w-5 h-5 ${isActive ? 'text-indigo-400' : 'text-slate-400'}`} />
-                <span>{item.label}</span>
-              </button>
+                {({ isActive }) => (
+                  <>
+                    <Icon className={`w-5 h-5 ${isActive ? 'text-indigo-400' : 'text-slate-400'}`} />
+                    <span>{item.label}</span>
+                  </>
+                )}
+              </NavLink>
             );
           })}
       </nav>
@@ -91,7 +87,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Footer / Logout */}
       <div className="p-4 border-t border-slate-800">
         <button
-          onClick={onLogout}
+          onClick={logout}
           className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium text-rose-400 hover:bg-rose-500/10 transition-colors"
         >
           <LogOut className="w-5 h-5" />
