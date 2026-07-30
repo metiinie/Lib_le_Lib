@@ -14,16 +14,20 @@ export class DiscoveryRepository {
     const qb = this.dataSource
       .createQueryBuilder()
       .select([
+        'p.user_id as "id"',
         'p.user_id as "userId"',
         'p.nickname as "nickname"',
         'p.date_of_birth as "dateOfBirth"',
         'p.gender as "gender"',
         'p.bio as "bio"',
+        'p.relationship_goals as "relationshipGoals"',
+        'r.name as "region"',
         'ph.storage_ref as "primaryPhotoRef"',
         'ph.blurred_default as "isBlurred"',
       ])
       .from('profiles', 'p')
       .innerJoin('users', 'u', 'u.id = p.user_id')
+      .leftJoin('regions', 'r', 'r.id = p.region_id')
       .leftJoin(
         'photos',
         'ph',

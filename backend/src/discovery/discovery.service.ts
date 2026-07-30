@@ -30,10 +30,44 @@ export class DiscoveryService {
     ];
 
     // 2. Fetch the paged and filtered results using the repository
-    return this.discoveryRepo.findDiscoverablePaged(
+    const rawProfiles = await this.discoveryRepo.findDiscoverablePaged(
       userId,
       excludedIds,
       filters,
     );
+
+    // 3. Map into complete DiscoveryProfile objects
+    return rawProfiles.map((p) => {
+      let age = 25;
+      if (p.dateOfBirth) {
+        const dob = new Date(p.dateOfBirth);
+        const diffMs = Date.now() - dob.getTime();
+        const ageDate = new Date(diffMs);
+        age = Math.abs(ageDate.getUTCFullYear() - 1970);
+      }
+
+      const profileId = p.id || p.userId;
+      return {
+        id: profileId,
+        userId: p.userId || profileId,
+        nickname: p.nickname || 'Member',
+        age,
+        gender: p.gender || 'Not specified',
+        region: p.region || 'Nearby',
+        bio: p.bio || '',
+        relationshipGoals: Array.isArray(p.relationshipGoals)
+          ? p.relationshipGoals
+          : [],
+        isBlocked: false,
+        photos: [
+          {
+            id: `ph_${profileId}`,
+            blurhash: 'LEHV6nWB2yk8pyo0adR*.7kCMdnj',
+            url: p.primaryPhotoRef ? p.primaryPhotoRef : undefined,
+            revealGranted: p.isBlurred === false,
+          },
+        ],
+      };
+    });
   }
 }

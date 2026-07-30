@@ -60,7 +60,7 @@ export const BlurredPhoto = ({
       {/* Top Layer: Blurhash Placeholder (Fades out when revealed) */}
       <Animated.View style={[StyleSheet.absoluteFill, animatedBlurStyle]}>
         <Image
-          source={blurhash} // expo-image natively supports blurhashes via the source prop
+          source={{ blurhash: blurhash || 'LEHV6nWB2yk8pyo0adR*.7kCMdnj' }}
           style={StyleSheet.absoluteFill}
           contentFit="cover"
         />

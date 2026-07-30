@@ -24,25 +24,29 @@ export default function DiscoverScreen() {
     }
   };
 
-  const renderItem = ({ item }: { item: DiscoveryProfile }) => (
-    <TouchableOpacity
-      className="flex-1 m-2 aspect-[3/4] bg-slate-100 rounded-2xl overflow-hidden shadow-sm min-h-[48px] min-w-[48px]"
-      onPress={() => router.push(`/profiles/${item.id}`)}
-      activeOpacity={0.9}
-      accessibilityRole="button"
-      accessibilityLabel={`View profile of ${item.nickname}, ${item.age} years old from ${item.region}`}
-    >
-      <BlurredPhoto
-        blurhash={item.photos[0]?.blurhash || 'LEHV6nWB2yk8pyo0adR*.7kCMdnj'}
-        revealGranted={item.photos[0]?.revealGranted || false}
-        photoUrl={item.photos[0]?.url}
-      />
-      <View className="absolute bottom-0 inset-x-0 p-4 bg-gradient-to-t from-black/80 to-transparent pt-12">
-        <Text className="text-white font-bold text-lg">{item.nickname}, {item.age}</Text>
-        <Text className="text-white/80 text-sm">{item.region}</Text>
-      </View>
-    </TouchableOpacity>
-  );
+  const renderItem = ({ item }: { item: DiscoveryProfile }) => {
+    const primaryPhoto = item.photos?.[0];
+
+    return (
+      <TouchableOpacity
+        className="flex-1 m-2 aspect-[3/4] bg-slate-100 rounded-2xl overflow-hidden shadow-sm min-h-[48px] min-w-[48px]"
+        onPress={() => router.push(`/profiles/${item.id}`)}
+        activeOpacity={0.9}
+        accessibilityRole="button"
+        accessibilityLabel={`View profile of ${item.nickname}, ${item.age} years old from ${item.region}`}
+      >
+        <BlurredPhoto
+          blurhash={primaryPhoto?.blurhash || 'LEHV6nWB2yk8pyo0adR*.7kCMdnj'}
+          revealGranted={primaryPhoto?.revealGranted || false}
+          photoUrl={primaryPhoto?.url}
+        />
+        <View className="absolute bottom-0 inset-x-0 p-4 bg-gradient-to-t from-black/80 to-transparent pt-12">
+          <Text className="text-white font-bold text-lg">{item.nickname}, {item.age}</Text>
+          <Text className="text-white/80 text-sm">{item.region}</Text>
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <View className="flex-1 bg-white">
