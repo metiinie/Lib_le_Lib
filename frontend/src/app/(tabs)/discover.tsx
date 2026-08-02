@@ -70,7 +70,7 @@ export default function DiscoverScreen() {
         <View className="flex-1">
           <Text className="text-white font-bold text-base mb-1">Discover</Text>
           <Text className="text-blue-100/90 text-sm leading-relaxed">
-            Browse verified members. Every photo is blurred by default. Like or pass — nothing more happens until a match forms.
+            Browse verified members. Photos are visible to verified members unless the owner chose to hide them. Like or pass — nothing more happens until a match forms.
           </Text>
         </View>
       </View>

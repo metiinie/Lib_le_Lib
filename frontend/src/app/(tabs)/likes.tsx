@@ -110,16 +110,16 @@ export default function LikesScreen() {
         {/* Segmented Control */}
         <View className="flex-row bg-slate-100 rounded-xl p-1">
           <TouchableOpacity 
-            className={`flex-1 py-2 rounded-lg items-center justify-center ${activeTab === 'received' ? 'bg-white shadow-sm' : ''}`}
+            className={activeTab === 'received' ? 'flex-1 py-2 rounded-lg items-center justify-center bg-white shadow-sm' : 'flex-1 py-2 rounded-lg items-center justify-center'}
             onPress={() => setActiveTab('received')}
           >
-            <Text className={`font-semibold ${activeTab === 'received' ? 'text-slate-900' : 'text-slate-500'}`}>Who Liked Me</Text>
+            <Text className={activeTab === 'received' ? 'font-semibold text-slate-900' : 'font-semibold text-slate-500'}>Who Liked Me</Text>
           </TouchableOpacity>
           <TouchableOpacity 
-            className={`flex-1 py-2 rounded-lg items-center justify-center ${activeTab === 'sent' ? 'bg-white shadow-sm' : ''}`}
+            className={activeTab === 'sent' ? 'flex-1 py-2 rounded-lg items-center justify-center bg-white shadow-sm' : 'flex-1 py-2 rounded-lg items-center justify-center'}
             onPress={() => setActiveTab('sent')}
           >
-            <Text className={`font-semibold ${activeTab === 'sent' ? 'text-slate-900' : 'text-slate-500'}`}>People I Liked</Text>
+            <Text className={activeTab === 'sent' ? 'font-semibold text-slate-900' : 'font-semibold text-slate-500'}>People I Liked</Text>
           </TouchableOpacity>
         </View>
       </View>

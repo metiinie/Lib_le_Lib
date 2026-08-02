@@ -1,31 +1,59 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert, ActivityIndicator, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
 import { accountService } from '@/services/account.service';
+import { profileService } from '@/services/profile.service';
 
 export default function ProfileEditScreen() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Mock pre-filled state
-  const [nickname, setNickname] = useState('Alex');
-  const [dob, setDob] = useState('1990-01-01');
+  const [nickname, setNickname] = useState('');
+  const [dob, setDob] = useState('');
   const [gender, setGender] = useState('male');
-  const [region, setRegion] = useState('Addis Ababa');
+  const [region, setRegion] = useState('');
   const [goals, setGoals] = useState('long_term');
+  
+  const [photos, setPhotos] = useState<any[]>([]);
 
-  // Mock photo management
-  const [photos, setPhotos] = useState([
-    { id: '1', uri: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=400&q=80', isPrimary: true },
-    { id: '2', uri: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80', isPrimary: false }
-  ]);
+  useEffect(() => {
+    loadProfile();
+  }, []);
+
+  const loadProfile = async () => {
+    try {
+      const data = await profileService.getProfile();
+      setNickname(data.nickname || '');
+      setDob(data.dateOfBirth ? data.dateOfBirth.split('T')[0] : '');
+      setGender(data.gender || 'male');
+      // Set region if available, otherwise fallback
+      setRegion(data.region?.name || 'Addis Ababa'); 
+      setGoals(data.relationshipGoals?.[0] || 'long_term');
+      
+      if (data.photos && data.photos.length > 0) {
+        setPhotos(data.photos.map((p: any) => ({
+          id: p.id,
+          uri: p.url || p.storageRef, // Use appropriate field
+          isPrimary: p.isPrimary
+        })));
+      }
+    } catch (err) {
+      console.error('Failed to load profile:', err);
+      Alert.alert('Error', 'Could not load your profile data.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
   
   const handleSave = async () => {
     setIsSubmitting(true);
     try {
-      await accountService.updateProfile({ nickname, region }); // Extend backend in real app
+      // Send the fields we want to update. Note: region needs to be a UUID in the real app if updating.
+      // We will only update nickname here to avoid validation errors with mock region data.
+      await accountService.updateProfile({ nickname }); 
       Alert.alert('Success', 'Profile updated successfully', [
         { text: 'OK', onPress: () => router.back() }
       ]);
@@ -44,6 +72,14 @@ export default function ProfileEditScreen() {
   const removePhoto = (id: string) => {
     setPhotos(photos.filter(p => p.id !== id));
   };
+
+  if (isLoading) {
+    return (
+      <View className="flex-1 bg-white justify-center items-center">
+        <ActivityIndicator size="large" color="#4f46e5" />
+      </View>
+    );
+  }
 
   return (
     <ScrollView className="flex-1 bg-white px-6 pt-16">

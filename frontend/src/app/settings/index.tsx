@@ -66,6 +66,28 @@ export default function SettingsIndexScreen() {
           />
         </View>
 
+        {/* Photos Visibility */}
+        <View className="p-4 border-b border-slate-100 flex-row items-center justify-between">
+          <View className="flex-1 mr-4">
+            <Text className="text-base font-bold text-slate-900 mb-1">Show Photos to Verified</Text>
+            <Text className="text-slate-500 text-xs">Allow verified members to see your photos unblurred.</Text>
+          </View>
+          <Switch
+            value={prefs.photosVisibleToVerified}
+            onValueChange={async (val) => {
+              prefs.setPreference('photosVisibleToVerified', val);
+              try {
+                // Import would ideally be at top level but doing this to keep file edits self-contained for now, or assume it doesn't matter too much in this demo if we don't await the import here.
+                const { profileService } = await import('@/services/profile.service');
+                await profileService.updateProfile({ photosVisibleToVerified: val });
+              } catch (err) {
+                console.error('Failed to save photos visibility preference', err);
+              }
+            }}
+            trackColor={{ false: '#cbd5e1', true: '#4f46e5' }}
+          />
+        </View>
+
         {/* Language */}
         <View className="p-4 flex-row items-center justify-between">
           <View className="flex-1 mr-4">

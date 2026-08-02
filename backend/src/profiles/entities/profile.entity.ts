@@ -65,6 +65,18 @@ export class Profile {
   })
   preferredLanguage: string;
 
+  /**
+   * When true, verified (active) members can see this user's photos
+   * unblurred in discovery. When the owner toggles this to false,
+   * their photos remain blurred for everyone.
+   */
+  @Column({
+    name: 'photos_visible_to_verified',
+    type: 'boolean',
+    default: true,
+  })
+  photosVisibleToVerified: boolean;
+
   @ManyToMany(() => InterestTag)
   @JoinTable({
     name: 'profile_interest_tags',

@@ -24,6 +24,7 @@ export class DiscoveryRepository {
         'r.name as "region"',
         'ph.storage_ref as "primaryPhotoRef"',
         'ph.blurred_default as "isBlurred"',
+        'p.photos_visible_to_verified as "photosVisibleToVerified"',
       ])
       .from('profiles', 'p')
       .innerJoin('users', 'u', 'u.id = p.user_id')

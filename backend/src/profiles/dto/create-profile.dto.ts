@@ -58,6 +58,15 @@ export class CreateProfileDto {
   preferredLanguage?: string;
 
   @ApiProperty({
+    required: false,
+    description: 'Allow verified members to see photos unblurred',
+    default: true,
+  })
+  @IsBoolean()
+  @IsOptional()
+  photosVisibleToVerified?: boolean;
+
+  @ApiProperty({
     type: [String],
     description: 'Array of InterestTag UUIDs',
     required: false,

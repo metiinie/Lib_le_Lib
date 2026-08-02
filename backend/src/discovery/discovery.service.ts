@@ -17,7 +17,11 @@ export class DiscoveryService {
     private readonly discoveryRepo: DiscoveryRepository,
   ) {}
 
-  async getDiscoveryFeed(userId: string, filters: DiscoveryFiltersDto) {
+  async getDiscoveryFeed(
+    userId: string,
+    viewerStatus: string,
+    filters: DiscoveryFiltersDto,
+  ) {
     // 1. Gather all IDs we MUST exclude (self, blocked, swiped, matched)
     const [blockedIds, swipedIds, matchedIds] = await Promise.all([
       this.blocksRepo.getExcludedUserIds(userId),
@@ -64,7 +68,10 @@ export class DiscoveryService {
             id: `ph_${profileId}`,
             blurhash: 'LEHV6nWB2yk8pyo0adR*.7kCMdnj',
             url: p.primaryPhotoRef ? p.primaryPhotoRef : undefined,
-            revealGranted: p.isBlurred === false,
+            revealGranted:
+              p.isBlurred === false ||
+              (viewerStatus === 'active' &&
+                p.photosVisibleToVerified !== false),
           },
         ],
       };

@@ -6,28 +6,28 @@ export class AddDiscoveryIndexes1719550000000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     // Core discovery feed performance indexes
     await queryRunner.query(
-      `CREATE INDEX "idx_users_status_created_at" ON "users" ("status", "created_at" DESC)`,
+      `CREATE INDEX IF NOT EXISTS "idx_users_status_created_at" ON "users" ("status", "created_at" DESC)`,
     );
     await queryRunner.query(
-      `CREATE INDEX "idx_profiles_region_id" ON "profiles" ("region_id")`,
+      `CREATE INDEX IF NOT EXISTS "idx_profiles_region_id" ON "profiles" ("region_id")`,
     );
 
     // Fast primary photo join
     await queryRunner.query(
-      `CREATE INDEX "idx_photos_profile_id_primary" ON "photos" ("profile_id") WHERE is_primary = true`,
+      `CREATE INDEX IF NOT EXISTS "idx_photos_profile_id_primary" ON "photos" ("profile_id") WHERE is_primary = true`,
     );
 
     // Safety / Blocks exclusion lookup performance
     await queryRunner.query(
-      `CREATE INDEX "idx_blocks_blocked_id" ON "blocks" ("blocked_id")`,
+      `CREATE INDEX IF NOT EXISTS "idx_blocks_blocked_id" ON "blocks" ("blocked_id")`,
     );
 
     // Matches exclusion lookup performance
     await queryRunner.query(
-      `CREATE INDEX "idx_matches_user_a_id" ON "matches" ("user_a_id")`,
+      `CREATE INDEX IF NOT EXISTS "idx_matches_user_a_id" ON "matches" ("user_a_id")`,
     );
     await queryRunner.query(
-      `CREATE INDEX "idx_matches_user_b_id" ON "matches" ("user_b_id")`,
+      `CREATE INDEX IF NOT EXISTS "idx_matches_user_b_id" ON "matches" ("user_b_id")`,
     );
   }
 

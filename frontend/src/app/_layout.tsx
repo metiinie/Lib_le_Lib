@@ -1,5 +1,5 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack, useRouter, useSegments, useRootNavigationState } from 'expo-router';
+import { Stack, router, useSegments, useRootNavigationState } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { useColorScheme } from 'react-native';
@@ -16,7 +16,6 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
   const { isAuthenticated } = useAuth();
   const segments = useSegments();
-  const router = useRouter();
   const navigationState = useRootNavigationState();
 
   useEffect(() => {
@@ -89,9 +88,9 @@ export default function RootLayout() {
           console.warn('Route resolution error:', err?.message);
           const errStatus = err?.response?.status;
           if (errStatus === 401 || errStatus === 403) {
-            // Invalid or expired token — clear auth state and redirect to welcome
+            // Invalid or expired token — clear auth state
+            // The outer useEffect will react to isAuthenticated changing to false and handle the redirect safely.
             useAuthStore.getState().signOut();
-            router.replace('/(auth)/welcome');
           }
         }
       };
@@ -101,13 +100,11 @@ export default function RootLayout() {
         isCancelled = true;
       };
     }
-  }, [isAuthenticated, segments, router, navigationState?.key]);
+  }, [isAuthenticated, segments, navigationState?.key]);
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-      </Stack>
+      <Stack screenOptions={{ headerShown: false }} />
     </ThemeProvider>
   );
 }

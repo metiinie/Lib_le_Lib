@@ -65,13 +65,14 @@ export class SwipesRepository {
         's.actor_id as "id"',
         'p.nickname as "nickname"',
         `EXTRACT(YEAR FROM AGE(NOW(), p.date_of_birth))::int as "age"`,
-        'p.region as "region"',
+        'r.name as "region"',
         'ph.storage_ref as "primaryPhotoRef"',
         'ph.blurred_default as "isBlurred"',
         's.created_at as "likedAt"',
       ])
       .from('swipes', 's')
       .innerJoin('profiles', 'p', 'p.user_id = s.actor_id')
+      .leftJoin('regions', 'r', 'r.id = p.region_id')
       .leftJoin(
         'photos',
         'ph',
@@ -103,13 +104,14 @@ export class SwipesRepository {
         's.target_id as "id"',
         'p.nickname as "nickname"',
         `EXTRACT(YEAR FROM AGE(NOW(), p.date_of_birth))::int as "age"`,
-        'p.region as "region"',
+        'r.name as "region"',
         'ph.storage_ref as "primaryPhotoRef"',
         'ph.blurred_default as "isBlurred"',
         's.created_at as "likedAt"',
       ])
       .from('swipes', 's')
       .innerJoin('profiles', 'p', 'p.user_id = s.target_id')
+      .leftJoin('regions', 'r', 'r.id = p.region_id')
       .leftJoin(
         'photos',
         'ph',

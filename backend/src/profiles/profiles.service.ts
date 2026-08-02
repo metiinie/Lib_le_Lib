@@ -58,6 +58,7 @@ export class ProfilesService {
       discreetMode: dto.discreetMode,
       lowBandwidthMode: dto.lowBandwidthMode,
       preferredLanguage: dto.preferredLanguage,
+      photosVisibleToVerified: dto.photosVisibleToVerified ?? true,
       interestTags,
     };
 
@@ -98,6 +99,8 @@ export class ProfilesService {
       profile.lowBandwidthMode = dto.lowBandwidthMode;
     if (dto.preferredLanguage !== undefined)
       profile.preferredLanguage = dto.preferredLanguage;
+    if (dto.photosVisibleToVerified !== undefined)
+      profile.photosVisibleToVerified = dto.photosVisibleToVerified;
 
     if (dto.interestTagIds !== undefined) {
       profile.interestTags = await this.profilesRepository.findTagsByIds(

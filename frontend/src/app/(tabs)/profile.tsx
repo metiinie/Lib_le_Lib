@@ -1,21 +1,58 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Image } from 'react-native';
-import { useRouter } from 'expo-router';
+import React, { useEffect, useState, useCallback } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, Image, ActivityIndicator } from 'react-native';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/hooks/useAuth';
+import { profileService } from '@/services/profile.service';
 
 export default function ProfileHubScreen() {
   const router = useRouter();
   const { signOut } = useAuth();
   
-  // Mock data for the current user
-  const mockUser = {
-    nickname: 'Alex',
-    primaryPhoto: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=400&q=80',
-    verificationExpiry: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000) // 5 days from now
-  };
+  const [userProfile, setUserProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  const daysToExpiry = Math.ceil((mockUser.verificationExpiry.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+  // Reload profile when the screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+      profileService.getProfile().then(data => {
+        if (isActive) {
+          setUserProfile(data);
+          setLoading(false);
+        }
+      }).catch(err => {
+        console.error('Error fetching profile:', err);
+        if (isActive) setLoading(false);
+      });
+      return () => { isActive = false; };
+    }, [])
+  );
+
+  if (loading) {
+    return (
+      <View className="flex-1 bg-slate-50 justify-center items-center">
+        <ActivityIndicator size="large" color="#4f46e5" />
+      </View>
+    );
+  }
+
+  // Fallback for null profile
+  if (!userProfile) {
+    return (
+      <View className="flex-1 bg-slate-50 justify-center items-center">
+        <Text>Error loading profile.</Text>
+      </View>
+    );
+  }
+
+  const primaryPhotoUrl = userProfile.photos?.find((p: any) => p.isPrimary)?.url 
+    || userProfile.photos?.[0]?.url 
+    || 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=400&q=80';
+
+  // Mock expiry for now
+  const verificationExpiry = new Date(Date.now() + 5 * 24 * 60 * 60 * 1000);
+  const daysToExpiry = Math.ceil((verificationExpiry.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
   const showExpiryWarning = daysToExpiry <= 7;
 
   return (
@@ -25,10 +62,10 @@ export default function ProfileHubScreen() {
       {/* User Card */}
       <View className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 items-center mb-6">
         <Image 
-          source={{ uri: mockUser.primaryPhoto }} 
+          source={{ uri: primaryPhotoUrl }} 
           style={{ width: 128, height: 128, borderRadius: 64, marginBottom: 16, backgroundColor: '#e2e8f0' }}
         />
-        <Text className="text-2xl font-bold text-slate-900 mb-1">{mockUser.nickname}</Text>
+        <Text className="text-2xl font-bold text-slate-900 mb-1">{userProfile.nickname || 'Member'}</Text>
         <View className="flex-row items-center bg-blue-50 px-3 py-1 rounded-full mt-2">
           <Ionicons name="checkmark-circle" size={16} color="#2563eb" />
           <Text className="text-blue-700 font-bold ml-1 text-xs">Verified</Text>

@@ -14,9 +14,13 @@ export class DiscoveryController {
 
   @Get()
   async getDiscoveryFeed(
-    @CurrentUser() user: any,
+    @CurrentUser() user: { id: string; status: string },
     @Query() filters: DiscoveryFiltersDto,
   ) {
-    return this.discoveryService.getDiscoveryFeed(user.id, filters);
+    return this.discoveryService.getDiscoveryFeed(
+      user.id,
+      user.status,
+      filters,
+    );
   }
 }
