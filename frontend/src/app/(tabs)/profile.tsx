@@ -77,12 +77,23 @@ export default function ProfileHubScreen() {
         </TouchableOpacity>
 
         <TouchableOpacity 
-          className="p-4 flex-row items-center justify-between"
+          className="p-4 border-b border-slate-100 flex-row items-center justify-between"
           onPress={() => router.push('/settings/subscription')}
         >
           <View className="flex-row items-center">
             <Ionicons name="star-outline" size={20} color="#0f172a" />
             <Text className="text-base font-semibold text-slate-900 ml-3">Subscription</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color="#cbd5e1" />
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          className="p-4 flex-row items-center justify-between"
+          onPress={() => router.push('/support')}
+        >
+          <View className="flex-row items-center">
+            <Ionicons name="heart-outline" size={20} color="#0f172a" />
+            <Text className="text-base font-semibold text-slate-900 ml-3">Support & Resources</Text>
           </View>
           <Ionicons name="chevron-forward" size={20} color="#cbd5e1" />
         </TouchableOpacity>

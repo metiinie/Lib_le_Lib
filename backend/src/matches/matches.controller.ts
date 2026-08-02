@@ -33,4 +33,14 @@ export class MatchesController {
   async getMatches(@CurrentUser() user: any) {
     return this.matchesService.getMatches(user.id);
   }
+
+  @Get('swipes/received-likes')
+  async getReceivedLikes(@CurrentUser() user: any) {
+    return this.matchesService.getReceivedLikes(user.id);
+  }
+
+  @Get('swipes/sent-likes')
+  async getSentLikes(@CurrentUser() user: any) {
+    return this.matchesService.getSentLikes(user.id);
+  }
 }

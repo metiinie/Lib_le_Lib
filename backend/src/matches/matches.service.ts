@@ -71,4 +71,77 @@ export class MatchesService {
       excludedIds,
     );
   }
+
+  /**
+   * Returns profiles of users who liked the current user.
+   * Excludes blocked users and already-matched users to avoid showing
+   * profiles the user has already interacted with.
+   * Photos are returned blurred for privacy.
+   */
+  async getReceivedLikes(userId: string) {
+    const [blockedIds, matchedIds, swipedIds] = await Promise.all([
+      this.blocksRepo.getExcludedUserIds(userId),
+      this.matchesRepo.getMatchedUserIds(userId),
+      this.swipesRepo.getSwipedUserIds(userId),
+    ]);
+
+    const excludedIds = [
+      ...new Set([...blockedIds, ...matchedIds, ...swipedIds]),
+    ];
+
+    const rawLikes = await this.swipesRepo.getReceivedLikes(
+      userId,
+      excludedIds,
+    );
+
+    // Shape the response to match frontend expectations
+    return rawLikes.map((row) => ({
+      id: row.id,
+      nickname: row.nickname || 'Member',
+      age: row.age ?? 25,
+      region: row.region || 'Nearby',
+      photos: [
+        {
+          id: `ph_${row.id}`,
+          blurhash: 'LEHV6nWB2yk8pyo0adR*.7kCMdnj',
+          url: row.primaryPhotoRef || undefined,
+          revealGranted: false, // Force blurred for received likes
+        },
+      ],
+    }));
+  }
+
+  /**
+   * Returns profiles of users the current user has liked.
+   * Excludes blocked users and already-matched users.
+   */
+  async getSentLikes(userId: string) {
+    const [blockedIds, matchedIds] = await Promise.all([
+      this.blocksRepo.getExcludedUserIds(userId),
+      this.matchesRepo.getMatchedUserIds(userId),
+    ]);
+
+    const excludedIds = [...new Set([...blockedIds, ...matchedIds])];
+
+    const rawLikes = await this.swipesRepo.getSentLikes(
+      userId,
+      excludedIds,
+    );
+
+    // Shape the response to match frontend expectations
+    return rawLikes.map((row) => ({
+      id: row.id,
+      nickname: row.nickname || 'Member',
+      age: row.age ?? 25,
+      region: row.region || 'Nearby',
+      photos: [
+        {
+          id: `ph_${row.id}`,
+          blurhash: 'LEHV6nWB2yk8pyo0adR*.7kCMdnj',
+          url: row.primaryPhotoRef || undefined,
+          revealGranted: row.isBlurred === false,
+        },
+      ],
+    }));
+  }
 }

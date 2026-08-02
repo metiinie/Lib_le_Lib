@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { discoveryService, DiscoveryProfile } from '@/services/discovery.service';
 import { BlurredPhoto } from '@/components/photos/BlurredPhoto';
@@ -59,6 +60,19 @@ export default function DiscoverScreen() {
         >
           <Text className="text-slate-700 font-semibold text-sm">Filters</Text>
         </TouchableOpacity>
+      </View>
+
+      {/* Educational Banner from Design Spec */}
+      <View className="mx-4 mt-4 mb-2 bg-[#002B5B] rounded-2xl p-4 shadow-sm flex-row">
+        <View className="w-10 h-10 bg-blue-500/20 rounded-xl items-center justify-center mr-3 mt-1">
+          <Ionicons name="compass-outline" size={24} color="#60A5FA" />
+        </View>
+        <View className="flex-1">
+          <Text className="text-white font-bold text-base mb-1">Discover</Text>
+          <Text className="text-blue-100/90 text-sm leading-relaxed">
+            Browse verified members. Every photo is blurred by default. Like or pass — nothing more happens until a match forms.
+          </Text>
+        </View>
       </View>
 
       {loading ? (

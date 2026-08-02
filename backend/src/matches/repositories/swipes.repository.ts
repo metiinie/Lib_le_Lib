@@ -50,4 +50,80 @@ export class SwipesRepository {
     });
     return count > 0;
   }
+
+  /**
+   * Returns profiles of users who liked the given user.
+   * Excludes blocked users and already-matched users.
+   */
+  async getReceivedLikes(
+    userId: string,
+    excludedIds: string[],
+  ): Promise<any[]> {
+    const qb = this.dataSource
+      .createQueryBuilder()
+      .select([
+        's.actor_id as "id"',
+        'p.nickname as "nickname"',
+        `EXTRACT(YEAR FROM AGE(NOW(), p.date_of_birth))::int as "age"`,
+        'p.region as "region"',
+        'ph.storage_ref as "primaryPhotoRef"',
+        'ph.blurred_default as "isBlurred"',
+        's.created_at as "likedAt"',
+      ])
+      .from('swipes', 's')
+      .innerJoin('profiles', 'p', 'p.user_id = s.actor_id')
+      .leftJoin(
+        'photos',
+        'ph',
+        'ph.profile_id = s.actor_id AND ph.is_primary = true',
+      )
+      .where('s.target_id = :userId', { userId })
+      .andWhere('s.action = :action', { action: 'like' });
+
+    if (excludedIds.length > 0) {
+      qb.andWhere('s.actor_id NOT IN (:...excludedIds)', { excludedIds });
+    }
+
+    qb.orderBy('s.created_at', 'DESC');
+
+    return qb.getRawMany();
+  }
+
+  /**
+   * Returns profiles of users that the given user has liked.
+   * Excludes blocked users and already-matched users.
+   */
+  async getSentLikes(
+    userId: string,
+    excludedIds: string[],
+  ): Promise<any[]> {
+    const qb = this.dataSource
+      .createQueryBuilder()
+      .select([
+        's.target_id as "id"',
+        'p.nickname as "nickname"',
+        `EXTRACT(YEAR FROM AGE(NOW(), p.date_of_birth))::int as "age"`,
+        'p.region as "region"',
+        'ph.storage_ref as "primaryPhotoRef"',
+        'ph.blurred_default as "isBlurred"',
+        's.created_at as "likedAt"',
+      ])
+      .from('swipes', 's')
+      .innerJoin('profiles', 'p', 'p.user_id = s.target_id')
+      .leftJoin(
+        'photos',
+        'ph',
+        'ph.profile_id = s.target_id AND ph.is_primary = true',
+      )
+      .where('s.actor_id = :userId', { userId })
+      .andWhere('s.action = :action', { action: 'like' });
+
+    if (excludedIds.length > 0) {
+      qb.andWhere('s.target_id NOT IN (:...excludedIds)', { excludedIds });
+    }
+
+    qb.orderBy('s.created_at', 'DESC');
+
+    return qb.getRawMany();
+  }
 }
