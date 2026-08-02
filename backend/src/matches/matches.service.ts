@@ -66,10 +66,25 @@ export class MatchesService {
 
   async getMatches(userId: string) {
     const excludedIds = await this.blocksRepo.getExcludedUserIds(userId);
-    return this.matchesRepo.getActiveMatchesWithProfileData(
-      userId,
-      excludedIds,
-    );
+    const rawMatches =
+      await this.matchesRepo.getActiveMatchesWithProfileData(
+        userId,
+        excludedIds,
+      );
+
+    // Shape the response to match the frontend Match interface
+    return rawMatches.map((row: any) => ({
+      id: row.matchId,
+      matchedUserId: row.userId,
+      matchedUserNickname: row.nickname || 'Member',
+      avatarBlurhash: 'LEHV6nWB2yk8pyo0adR*.7kCMdnj',
+      avatarUrl: row.primaryPhotoRef || undefined,
+      // Photos are visible to verified users by default (photosVisibleToVerified
+      // defaults to true). The photo owner can opt OUT by setting it to false.
+      // If the owner hasn't opted out, verified viewers see the unblurred photo.
+      revealGranted: row.photosVisibleToVerified !== false,
+      lastMessageEncryptedPreview: undefined,
+    }));
   }
 
   /**

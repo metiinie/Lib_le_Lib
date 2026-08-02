@@ -63,6 +63,7 @@ export class MatchesRepository {
         'p.date_of_birth as "dateOfBirth"',
         'ph.storage_ref as "primaryPhotoRef"',
         'ph.blurred_default as "isBlurred"',
+        'p.photos_visible_to_verified as "photosVisibleToVerified"',
       ])
       .from('matches', 'm')
       // Join profiles on the OTHER user

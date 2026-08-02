@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsInt, Min, IsBoolean } from 'class-validator';
+import { IsString, IsOptional, IsInt, Min, IsBoolean, IsIn } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class RequestUploadUrlDto {
@@ -6,6 +6,12 @@ export class RequestUploadUrlDto {
   @IsString()
   @IsOptional()
   contentType?: string;
+
+  @ApiProperty({ enum: ['document', 'selfie', 'profile'], required: false })
+  @IsString()
+  @IsOptional()
+  @IsIn(['document', 'selfie', 'profile'])
+  type?: string;
 }
 
 export class RegisterPhotoDto {

@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import { View, Text, FlatList, TouchableOpacity, RefreshControl, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurredPhoto } from '@/components/photos/BlurredPhoto';
@@ -102,6 +102,27 @@ export default function LikesScreen() {
 
   const activeProfiles = activeTab === 'received' ? receivedLikes : sentLikes;
 
+  const renderEmptyState = () => {
+    if (loading) return null; // Let the RefreshControl handle the loading UI
+    return (
+      <View className="flex-1 justify-center items-center px-8 mt-20">
+        <View className="w-20 h-20 bg-slate-100 rounded-full items-center justify-center mb-6">
+          <Ionicons name={activeTab === 'received' ? "star-outline" : "heart-outline"} size={40} color="#94a3b8" />
+        </View>
+        <Text className="text-slate-900 text-xl font-bold text-center mb-2">
+          {activeTab === 'received' ? 'No likes yet' : 'You haven\'t liked anyone'}
+        </Text>
+        <Text className="text-slate-500 text-center text-base leading-relaxed">
+          {error
+            ? 'Failed to load profiles. Please try again later.'
+            : activeTab === 'received' 
+              ? 'When someone likes your profile, they\'ll appear here.'
+              : 'Start exploring and like profiles to see them here.'}
+        </Text>
+      </View>
+    );
+  };
+
   return (
     <View className="flex-1 bg-white">
       <View className="px-4 pt-4 pb-4 border-b border-slate-100">
@@ -110,13 +131,15 @@ export default function LikesScreen() {
         {/* Segmented Control */}
         <View className="flex-row bg-slate-100 rounded-xl p-1">
           <TouchableOpacity 
-            className={activeTab === 'received' ? 'flex-1 py-2 rounded-lg items-center justify-center bg-white shadow-sm' : 'flex-1 py-2 rounded-lg items-center justify-center'}
+            className="flex-1 py-2 rounded-lg items-center justify-center"
+            style={activeTab === 'received' ? { backgroundColor: 'white', shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 2, elevation: 1 } : undefined}
             onPress={() => setActiveTab('received')}
           >
             <Text className={activeTab === 'received' ? 'font-semibold text-slate-900' : 'font-semibold text-slate-500'}>Who Liked Me</Text>
           </TouchableOpacity>
           <TouchableOpacity 
-            className={activeTab === 'sent' ? 'flex-1 py-2 rounded-lg items-center justify-center bg-white shadow-sm' : 'flex-1 py-2 rounded-lg items-center justify-center'}
+            className="flex-1 py-2 rounded-lg items-center justify-center"
+            style={activeTab === 'sent' ? { backgroundColor: 'white', shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 2, elevation: 1 } : undefined}
             onPress={() => setActiveTab('sent')}
           >
             <Text className={activeTab === 'sent' ? 'font-semibold text-slate-900' : 'font-semibold text-slate-500'}>People I Liked</Text>
@@ -124,39 +147,25 @@ export default function LikesScreen() {
         </View>
       </View>
 
-      {loading ? (
-        <View className="flex-1 justify-center items-center">
-          <ActivityIndicator size="large" color="#208AEF" />
-        </View>
-      ) : activeProfiles.length === 0 ? (
-        <View className="flex-1 justify-center items-center px-8">
-          <View className="w-20 h-20 bg-slate-100 rounded-full items-center justify-center mb-6">
-            <Ionicons name={activeTab === 'received' ? "star-outline" : "heart-outline"} size={40} color="#94a3b8" />
-          </View>
-          <Text className="text-slate-900 text-xl font-bold text-center mb-2">
-            {activeTab === 'received' ? 'No likes yet' : 'You haven\'t liked anyone'}
-          </Text>
-          <Text className="text-slate-500 text-center text-base leading-relaxed">
-            {error
-              ? 'Failed to load profiles. Please try again later.'
-              : activeTab === 'received' 
-                ? 'When someone likes your profile, they\'ll appear here.'
-                : 'Start exploring and like profiles to see them here.'}
-          </Text>
-        </View>
-      ) : (
-        <FlatList
-          data={activeProfiles}
-          keyExtractor={(item) => item.id}
-          renderItem={renderItem}
-          numColumns={2}
-          contentContainerStyle={{ padding: 8 }}
-          showsVerticalScrollIndicator={false}
-          removeClippedSubviews={true}
-          initialNumToRender={6}
-          maxToRenderPerBatch={10}
-        />
-      )}
+      <FlatList
+        data={activeProfiles}
+        keyExtractor={(item) => item.id}
+        renderItem={renderItem}
+        numColumns={2}
+        contentContainerStyle={{ padding: 8, flexGrow: 1 }}
+        showsVerticalScrollIndicator={false}
+        initialNumToRender={6}
+        maxToRenderPerBatch={10}
+        ListEmptyComponent={renderEmptyState}
+        refreshControl={
+          <RefreshControl
+            refreshing={loading}
+            onRefresh={loadData}
+            colors={['#208AEF']}
+            tintColor="#208AEF"
+          />
+        }
+      />
     </View>
   );
 }

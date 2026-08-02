@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { useRouter } from 'expo-router';
 import { matchService, Match } from '@/services/match.service';
 import { BlurredPhoto } from '@/components/photos/BlurredPhoto';
 
 export default function MatchesScreen() {
+  const router = useRouter();
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -22,7 +24,13 @@ export default function MatchesScreen() {
   }, []);
 
   const renderMatch = ({ item }: { item: Match }) => (
-    <TouchableOpacity className="flex-row items-center p-4 border-b border-slate-100 active:bg-slate-50">
+    <TouchableOpacity
+      className="flex-row items-center p-4 border-b border-slate-100 active:bg-slate-50"
+      onPress={() => router.push(`/chat/${item.id}`)}
+      activeOpacity={0.7}
+      accessibilityRole="button"
+      accessibilityLabel={`Chat with ${item.matchedUserNickname}`}
+    >
       <View className="w-16 h-16 rounded-full overflow-hidden bg-slate-200 mr-4">
         <BlurredPhoto
           blurhash={item.avatarBlurhash}

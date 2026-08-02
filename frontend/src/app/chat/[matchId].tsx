@@ -5,6 +5,7 @@ import { MessageBubble, MessageProps } from '@/components/chat/MessageBubble';
 import { cryptoService } from '@/services/crypto.service';
 import { Ionicons } from '@expo/vector-icons';
 import { api } from '@/lib/api';
+import { useAuthStore } from '@/state/auth.store';
 import { ChatHeaderMenu } from '@/components/chat/ChatHeaderMenu';
 import { usePreferencesStore } from '@/stores/preferences.store';
 
@@ -20,17 +21,61 @@ export default function ChatScreen() {
   // Mock recipient key for the current match
   const RECIPIENT_KEY = 'mock_recipient_pub_key';
 
-  useEffect(() => {
-    // Mock fetching chat history (which are encrypted ciphertexts)
-    setTimeout(() => {
-      setMessages([]);
-      setLoading(false);
+  const getMyId = () => {
+    const token = useAuthStore.getState().token;
+    if (!token) return '';
+    try {
+      const payload = token.split('.')[1];
+      // RN doesn't always have atob globally depending on Hermes config, but
+      // crypto.service uses it. Just to be safe, use basic parsing.
+      const decoded = JSON.parse(atob(payload));
+      return decoded.sub || decoded.id;
+    } catch (e) {
+      return '';
+    }
+  };
+
+  const fetchMessages = async (isPoll = false) => {
+    try {
+      if (!isPoll) setLoading(true);
+      const res = await api.get(`/matches/${matchId}/messages?limit=100&offset=0`);
+      const myId = getMyId();
       
-      // If NOT in discreet mode, we would trigger read receipts here
+      const formattedMessages: MessageProps[] = res.data.data.map((msg: any) => ({
+        id: msg.id,
+        senderId: msg.senderId,
+        isMe: msg.senderId === myId,
+        ciphertext: atob(msg.ciphertext),
+        type: msg.messageType,
+        sentAt: msg.sentAt,
+        deliveredAt: msg.deliveredAt,
+        readAt: msg.readAt,
+      }));
+
+      setMessages(formattedMessages);
+      setLoading(false);
+
+      // If NOT in discreet mode, mark unread received messages as read
       if (!isDiscreetMode) {
-        // api.post(`/messages/${matchId}/read`);
+        const unreadReceived = formattedMessages.filter(m => !m.isMe && !m.readAt);
+        unreadReceived.forEach(async (m) => {
+          try {
+            await api.patch(`/matches/${matchId}/messages/${m.id}/read`);
+          } catch (e) {
+            console.error('Failed to mark read', e);
+          }
+        });
       }
-    }, 500);
+    } catch (err) {
+      console.error('Failed to fetch messages', err);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMessages();
+    const interval = setInterval(() => fetchMessages(true), 3000);
+    return () => clearInterval(interval);
   }, [matchId, isDiscreetMode]);
 
   const sendMessage = async () => {
@@ -43,17 +88,23 @@ export default function ChatScreen() {
       // ENCRYPT BEFORE NETWORK
       const ciphertext = await cryptoService.encryptMessage(plaintext, RECIPIENT_KEY);
       
+      // Post to real backend
+      // Backend expects ciphertext and nonce to be base64 strings
+      const res = await api.post(`/matches/${matchId}/messages`, {
+        messageType: 'text',
+        ciphertext: btoa(ciphertext),
+        nonce: btoa('dummy_nonce'),
+      });
+      
       const newMessage: MessageProps = {
-        id: Date.now().toString(),
-        senderId: 'me',
-        isMe: true, // boolean, fixing the type below
+        id: res.data.id,
+        senderId: getMyId(),
+        isMe: true,
         ciphertext,
-        type: 'text'
+        type: 'text',
+        sentAt: res.data.sentAt,
       };
 
-      // In real life, POST to /messages or send over WebSocket
-      // await api.post(`/messages/${matchId}`, { ciphertext });
-      
       // Optimistic UI update
       setMessages(prev => [newMessage, ...prev]);
     } catch (err) {

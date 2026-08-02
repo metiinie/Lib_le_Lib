@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, ActivityIndicator } from 'react-native';
 import { cryptoService } from '@/services/crypto.service';
 import { BlurredPhoto } from '@/components/photos/BlurredPhoto';
+import { Ionicons } from '@expo/vector-icons';
 
 export interface MessageProps {
   id: string;
@@ -14,6 +15,9 @@ export interface MessageProps {
     url?: string;
     revealGranted: boolean;
   };
+  sentAt?: string;
+  deliveredAt?: string;
+  readAt?: string;
 }
 
 export function MessageBubble({ message }: { message: MessageProps }) {
@@ -57,6 +61,17 @@ export function MessageBubble({ message }: { message: MessageProps }) {
           </View>
         )}
       </View>
+      {isMe && (
+        <View className="flex-row justify-end mt-1 px-1">
+          {message.readAt ? (
+            <Ionicons name="checkmark-done" size={16} color="#3b82f6" />
+          ) : message.deliveredAt ? (
+            <Ionicons name="checkmark-done" size={16} color="#94a3b8" />
+          ) : (
+            <Ionicons name="checkmark" size={16} color="#94a3b8" />
+          )}
+        </View>
+      )}
     </View>
   );
 }

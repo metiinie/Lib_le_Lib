@@ -49,7 +49,7 @@ export class PhotosService {
       storageRef: dto.storageRef,
       position: dto.position ?? 0,
       isPrimary: dto.isPrimary ?? false,
-      blurredDefault: true, // always blurred by default (constraints.md)
+      blurredDefault: false, // Photos are visible by default; owner can opt out via profile.photosVisibleToVerified
     });
   }
 

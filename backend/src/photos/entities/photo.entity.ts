@@ -29,7 +29,7 @@ export class Photo {
   @Column({ name: 'is_primary', type: 'boolean', default: false })
   isPrimary: boolean;
 
-  @Column({ name: 'blurred_default', type: 'boolean', default: true })
+  @Column({ name: 'blurred_default', type: 'boolean', default: false })
   blurredDefault: boolean;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
