@@ -11,6 +11,8 @@ import {
   UserCheck,
   UserX,
   Activity,
+  CreditCard,
+  Heart,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { User, UserRole } from '../types';
@@ -73,11 +75,35 @@ const WORKSPACE_TILES: TileConfig[] = [
     roles: ['admin'],
   },
   {
+    tab: 'subscriptions',
+    title: 'Subscription & Billing',
+    description: 'View, filter, and manage active user subscriptions.',
+    icon: CreditCard,
+    color: 'indigo',
+    roles: ['admin'],
+  },
+  {
+    tab: 'telemetry',
+    title: 'Performance Telemetry',
+    description: 'Monitor p95 latency budgets for critical API endpoints.',
+    icon: Activity,
+    color: 'cyan',
+    roles: ['admin'],
+  },
+  {
     tab: 'resources',
     title: 'Curated Resources',
     description: 'Publish and manage HIV wellness articles.',
     icon: BookOpen,
     color: 'purple',
+    roles: ['admin'],
+  },
+  {
+    tab: 'stories',
+    title: 'Success Stories',
+    description: 'Review and approve member-submitted testimonials.',
+    icon: Heart,
+    color: 'pink',
     roles: ['admin'],
   },
   {
@@ -125,6 +151,21 @@ const TILE_ACCENT_CLASSES: Record<string, { border: string; icon: string; arrow:
     border: 'hover:border-slate-600',
     icon: 'bg-slate-800 text-slate-400 border-slate-700',
     arrow: 'group-hover:text-slate-300',
+  },
+  indigo: {
+    border: 'hover:border-indigo-500/40',
+    icon: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
+    arrow: 'group-hover:text-indigo-400',
+  },
+  cyan: {
+    border: 'hover:border-cyan-500/40',
+    icon: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
+    arrow: 'group-hover:text-cyan-400',
+  },
+  pink: {
+    border: 'hover:border-pink-500/40',
+    icon: 'bg-pink-500/10 text-pink-400 border-pink-500/20',
+    arrow: 'group-hover:text-pink-400',
   },
 };
 
