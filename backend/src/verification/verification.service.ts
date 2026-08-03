@@ -12,6 +12,7 @@ import { AuditLogsRepository } from './repositories/audit-logs.repository';
 import { VerificationStorageService } from './verification-storage.service';
 import { SubmitVerificationDto } from './dto/submit-verification.dto';
 import { DecideVerificationDto } from './dto/decide-verification.dto';
+import { RevokeVerificationDto } from './dto/revoke-verification.dto';
 import { VerificationRecord } from './entities/verification-record.entity';
 import { User } from '../users/entities/user.entity';
 
@@ -112,15 +113,11 @@ export class VerificationService {
         const docs = await this.documentsRepo.findByRecordId(record.id);
         const mappedDocs = await Promise.all(
           docs.map(async (doc) => {
-            if (!doc.storageRef) return { ...doc, url: null };
-            const url = await this.storageService.getDocumentReadUrl(
-              doc.storageRef,
-            );
             return {
               id: doc.id,
               documentType: doc.documentType,
               uploadedAt: doc.uploadedAt,
-              url,
+              url: null, // URLs are no longer loaded in bulk to preserve privacy audit trails
             };
           }),
         );
@@ -154,6 +151,51 @@ export class VerificationService {
       }),
     );
     return result;
+  }
+
+  /**
+   * Fetches signed URLs for a specific record's documents and logs the read event.
+   */
+  async getRecordDocuments(officerId: string, recordId: string) {
+    const record = await this.recordsRepo.findById(recordId);
+    if (!record) {
+      throw new NotFoundException({
+        error: {
+          code: 'RECORD_NOT_FOUND',
+          message: 'Verification record not found.',
+        },
+      });
+    }
+
+    const docs = await this.documentsRepo.findByRecordId(recordId);
+    const mappedDocs = await Promise.all(
+      docs.map(async (doc) => {
+        if (!doc.storageRef) return { ...doc, url: null };
+        const url = await this.storageService.getDocumentReadUrl(
+          doc.storageRef,
+        );
+        return {
+          id: doc.id,
+          documentType: doc.documentType,
+          uploadedAt: doc.uploadedAt,
+          url,
+        };
+      }),
+    );
+
+    // Write audit log for the read
+    await this.auditLogsRepo.insertWithManager({
+      actorId: officerId,
+      actorRole: 'verification_officer',
+      action: 'verification_documents_read',
+      targetType: 'verification_record',
+      targetId: recordId,
+      metadata: {
+        documentCount: mappedDocs.length,
+      },
+    });
+
+    return mappedDocs;
   }
 
   /**
@@ -239,8 +281,97 @@ export class VerificationService {
         },
         manager,
       );
+      
+      // 4. Hard Delete Verification Documents for Privacy Constraint
+      // Identify all documents attached to this record
+      const docs = await this.documentsRepo.findByRecordId(recordId);
+      
+      for (const doc of docs) {
+        if (doc.storageRef) {
+          try {
+            await this.storageService.deleteDocument(doc.storageRef);
+          } catch (err) {
+            // Log but do not fail the transaction; the file is orphaned in S3
+            // but the DB record will be destroyed. In production, we might want a DLQ.
+            console.error(`Failed to delete document from S3: ${doc.storageRef}`, err);
+          }
+        }
+      }
+
+      // Hard delete from DB
+      await this.documentsRepo.deleteByRecordId(recordId, manager);
     });
 
     return { message: `Verification request ${dto.decision}.` };
+  }
+
+  /**
+   * Manually revokes an active verification request (e.g. for fraud).
+   */
+  async revoke(
+    officerId: string,
+    recordId: string,
+    dto: RevokeVerificationDto,
+  ) {
+    const record = await this.recordsRepo.findById(recordId);
+    if (!record) {
+      throw new NotFoundException({
+        error: {
+          code: 'RECORD_NOT_FOUND',
+          message: 'Verification record not found.',
+        },
+      });
+    }
+
+    if (record.status !== 'approved') {
+      throw new ConflictException({
+        error: {
+          code: 'INVALID_STATUS',
+          message: 'Only approved records can be revoked.',
+        },
+      });
+    }
+
+    await this.dataSource.transaction(async (manager) => {
+      // 1. Update record status to expired/revoked
+      await manager.update(
+        VerificationRecord,
+        { id: recordId },
+        {
+          status: 'expired',
+          decisionAt: new Date(),
+          reviewerId: officerId,
+          rejectionReason: `REVOKED BY STAFF: ${dto.reason}`,
+          updatedAt: new Date(),
+        },
+      );
+
+      // 2. Suspend user (per business logic plan)
+      await manager.update(
+        User,
+        { id: record.userId },
+        {
+          status: 'pending_verification',
+          updatedAt: new Date(),
+        },
+      );
+
+      // 3. Write audit log
+      await this.auditLogsRepo.insertWithManager(
+        {
+          actorId: officerId,
+          actorRole: 'verification_officer',
+          action: 'verification_revoked',
+          targetType: 'verification_record',
+          targetId: recordId,
+          metadata: {
+            reason: dto.reason,
+          },
+        },
+        manager,
+      );
+    });
+
+    return { message: `Verification request successfully revoked.` };
   }
 }

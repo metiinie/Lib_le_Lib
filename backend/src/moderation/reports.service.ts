@@ -14,7 +14,10 @@ import { AuditLogsService } from './audit-logs.service';
 import { CreateReportDto } from './dto/create-report.dto';
 import { ModerationActionDto } from './dto/moderation-action.dto';
 import { User, UserStatus } from '../users/entities/user.entity';
+import { Profile } from '../profiles/entities/profile.entity';
+import { Photo } from '../photos/entities/photo.entity';
 import { ReportsRepository } from './repositories/reports.repository';
+import { StorageService } from '../photos/storage.service';
 
 @Injectable()
 export class ReportsService {
@@ -22,6 +25,7 @@ export class ReportsService {
     private readonly reportsRepository: ReportsRepository,
     private readonly auditLogsService: AuditLogsService,
     private readonly dataSource: DataSource,
+    private readonly storageService: StorageService,
   ) {}
 
   async createReport(
@@ -204,6 +208,114 @@ export class ReportsService {
       });
 
       return savedAction;
+    });
+  }
+
+  async getUserContent(
+    actorId: string,
+    actorRole: string,
+    targetUserId: string,
+  ) {
+    const profile = await this.dataSource.manager.findOne(Profile, {
+      where: { userId: targetUserId },
+    });
+    
+    if (!profile) {
+      throw new NotFoundException('Profile not found');
+    }
+
+    const photos = await this.dataSource.manager.find(Photo, {
+      where: { profileId: targetUserId },
+      order: { position: 'ASC' },
+    });
+
+    const mappedPhotos = await Promise.all(
+      photos.map(async (p) => {
+        const url = await this.storageService.getPhotoReadUrl(p.storageRef);
+        return {
+          id: p.id,
+          url,
+          isPrimary: p.isPrimary,
+          position: p.position,
+        };
+      })
+    );
+
+    await this.auditLogsService.logAction(this.dataSource.manager, {
+      actorId,
+      actorRole,
+      action: 'user_content_read',
+      targetType: 'user',
+      targetId: targetUserId,
+      metadata: { reason: 'Moderation review' },
+    });
+
+    return {
+      bio: profile.bio,
+      nickname: profile.nickname,
+      photos: mappedPhotos,
+    };
+  }
+
+  async resetUserBio(
+    actorId: string,
+    actorRole: string,
+    targetUserId: string,
+    reason: string,
+  ) {
+    return this.dataSource.transaction(async (manager) => {
+      const profile = await manager.findOne(Profile, {
+        where: { userId: targetUserId },
+      });
+
+      if (!profile) {
+        throw new NotFoundException('Profile not found');
+      }
+
+      profile.bio = '[Removed by Moderator]';
+      await manager.save(profile);
+
+      await this.auditLogsService.logAction(manager, {
+        actorId,
+        actorRole,
+        action: 'bio_reset',
+        targetType: 'user',
+        targetId: targetUserId,
+        metadata: { reason },
+      });
+
+      return { success: true };
+    });
+  }
+
+  async deleteUserPhoto(
+    actorId: string,
+    actorRole: string,
+    targetUserId: string,
+    photoId: string,
+    reason: string,
+  ) {
+    return this.dataSource.transaction(async (manager) => {
+      const photo = await manager.findOne(Photo, {
+        where: { id: photoId, profileId: targetUserId },
+      });
+
+      if (!photo) {
+        throw new NotFoundException('Photo not found for this user');
+      }
+
+      await manager.remove(photo);
+
+      await this.auditLogsService.logAction(manager, {
+        actorId,
+        actorRole,
+        action: 'photo_deleted',
+        targetType: 'user',
+        targetId: targetUserId,
+        metadata: { reason, deletedPhotoId: photoId },
+      });
+
+      return { success: true };
     });
   }
 }

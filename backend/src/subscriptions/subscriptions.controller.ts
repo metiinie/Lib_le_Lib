@@ -1,12 +1,19 @@
 import {
   Controller,
   Post,
+  Get,
   Body,
   Headers,
   Param,
+  Query,
+  Req,
   UnauthorizedException,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { SubscriptionsService } from './subscriptions.service';
 import { WebhookPayloadDto } from './dto/webhook-payload.dto';
 import { SkipThrottle, Throttle } from '@nestjs/throttler';
@@ -43,6 +50,42 @@ export class SubscriptionsController {
     }
 
     await this.subscriptionsService.handleWebhook(provider, payload);
+    return { success: true };
+  }
+
+  @Get('admin/queue')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  async getAdminQueue(
+    @Query('limit') limitStr: string,
+    @Query('offset') offsetStr: string,
+    @Query('status') status?: string,
+    @Query('plan') plan?: string,
+  ) {
+    const limit = parseInt(limitStr, 10) || 50;
+    const offset = parseInt(offsetStr, 10) || 0;
+    const [data, total] = await this.subscriptionsService.getAdminQueue(
+      limit,
+      offset,
+      status,
+      plan,
+    );
+    return { data, total, limit, offset };
+  }
+
+  @Post('admin/:id/cancel')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  async cancelSubscription(
+    @Req() req: any,
+    @Param('id') subscriptionId: string,
+    @Body() body: { reason: string },
+  ) {
+    await this.subscriptionsService.cancelSubscription(
+      req.user.id,
+      subscriptionId,
+      body.reason,
+    );
     return { success: true };
   }
 }

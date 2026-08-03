@@ -13,6 +13,8 @@ import { HealthQA } from './pages/HealthQA';
 import { SuccessStories } from './pages/SuccessStories';
 import { AuditLogs } from './pages/AuditLogs';
 import { UserSafetyDesk } from './pages/UserSafetyDesk';
+import { SubscriptionDesk } from './pages/SubscriptionDesk';
+import { TelemetryDesk } from './pages/TelemetryDesk';
 import { ShieldAlert } from 'lucide-react';
 
 export function App() {
@@ -73,6 +75,22 @@ export function App() {
           element={
             <ProtectedRoute allowedRoles={['admin']} userRole={user?.role}>
               <UserManagement />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/subscriptions"
+          element={
+            <ProtectedRoute allowedRoles={['admin']} userRole={user?.role}>
+              <SubscriptionDesk />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/telemetry"
+          element={
+            <ProtectedRoute allowedRoles={['admin']} userRole={user?.role}>
+              <TelemetryDesk />
             </ProtectedRoute>
           }
         />

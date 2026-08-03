@@ -4,7 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { LoggerModule } from 'nestjs-pino';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { ScheduleModule } from '@nestjs/schedule';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ThrottlerGuard } from '@nestjs/throttler';
 import { AppDataSource } from './config/typeorm.config';
 import { AppController } from './app.controller';
@@ -27,6 +27,8 @@ import { CompatibilityQuizModule } from './compatibility-quiz/compatibility-quiz
 import { VideoCallsModule } from './video-calls/video-calls.module';
 import { ModerationModule } from './moderation/moderation.module';
 import { SuccessStoriesModule } from './success-stories/success-stories.module';
+import { TelemetryModule } from './telemetry/telemetry.module';
+import { TelemetryInterceptor } from './telemetry/telemetry.interceptor';
 
 @Module({
   imports: [
@@ -100,6 +102,7 @@ import { SuccessStoriesModule } from './success-stories/success-stories.module';
     VideoCallsModule,
     ModerationModule,
     SuccessStoriesModule,
+    TelemetryModule,
   ],
   controllers: [AppController],
   providers: [
@@ -107,6 +110,10 @@ import { SuccessStoriesModule } from './success-stories/success-stories.module';
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: TelemetryInterceptor,
     },
   ],
 })

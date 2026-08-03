@@ -49,4 +49,14 @@ export class VerificationDocumentsRepository {
       relations: ['verificationRecord'], // Required for the relation condition above
     });
   }
+
+  async deleteByRecordId(
+    verificationRecordId: string,
+    manager?: import('typeorm').EntityManager,
+  ): Promise<void> {
+    const targetRepo = manager
+      ? manager.getRepository(VerificationDocument)
+      : this.repo;
+    await targetRepo.delete({ verificationRecordId });
+  }
 }

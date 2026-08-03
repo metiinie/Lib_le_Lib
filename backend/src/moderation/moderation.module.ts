@@ -8,9 +8,13 @@ import { Report } from './entities/report.entity';
 import { ModerationAction } from './entities/moderation-action.entity';
 import { AuditLog } from './entities/audit-log.entity';
 import { ReportsRepository } from './repositories/reports.repository';
+import { PhotosModule } from '../photos/photos.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Report, ModerationAction, AuditLog])],
+  imports: [
+    TypeOrmModule.forFeature([Report, ModerationAction, AuditLog]),
+    PhotosModule,
+  ],
   controllers: [ReportsController, AdminAuditController],
   providers: [ReportsRepository, ReportsService, AuditLogsService],
   exports: [AuditLogsService, ReportsService, ReportsRepository],

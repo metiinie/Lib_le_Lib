@@ -37,4 +37,29 @@ export class SubscriptionsRepository {
     });
     return !!subscription;
   }
+
+  async findAdminQueue(
+    limit: number,
+    offset: number,
+    status?: string,
+    plan?: string,
+  ): Promise<[Subscription[], number]> {
+    const query = this.repo
+      .createQueryBuilder('subscription')
+      .leftJoinAndSelect('subscription.user', 'user')
+      .leftJoinAndSelect('user.profile', 'profile')
+      .orderBy('subscription.startedAt', 'DESC')
+      .skip(offset)
+      .take(limit);
+
+    if (status && status !== 'all') {
+      query.andWhere('subscription.status = :status', { status });
+    }
+
+    if (plan && plan !== 'all') {
+      query.andWhere('subscription.plan = :plan', { plan });
+    }
+
+    return query.getManyAndCount();
+  }
 }

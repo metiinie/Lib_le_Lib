@@ -38,4 +38,21 @@ export const reportsService = {
     const res = await api.post(`/reports/${reportId}/actions`, { action, reason });
     return res.data;
   },
+
+  getUserContent: async (userId: string) => {
+    const res = await api.get(`/reports/users/${userId}/content`);
+    return res.data;
+  },
+
+  resetBio: async (userId: string, reason: string) => {
+    const res = await api.patch(`/reports/users/${userId}/bio`, { reason });
+    return res.data;
+  },
+
+  deletePhoto: async (userId: string, photoId: string, reason: string) => {
+    const res = await api.delete(`/reports/users/${userId}/photos/${photoId}`, {
+      data: { reason },
+    });
+    return res.data;
+  },
 };

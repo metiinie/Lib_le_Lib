@@ -13,6 +13,7 @@ import { ApiTags, ApiBearerAuth, ApiExcludeController } from '@nestjs/swagger';
 import { VerificationService } from './verification.service';
 import { SubmitVerificationDto } from './dto/submit-verification.dto';
 import { DecideVerificationDto } from './dto/decide-verification.dto';
+import { RevokeVerificationDto } from './dto/revoke-verification.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -47,6 +48,16 @@ export class VerificationController {
     return this.verificationService.getQueue(status);
   }
 
+  @Get(':id/documents')
+  @UseGuards(RolesGuard)
+  @Roles('verification_officer', 'admin')
+  async getDocuments(
+    @Param('id') recordId: string,
+    @CurrentUser() user: any,
+  ) {
+    return this.verificationService.getRecordDocuments(user.id, recordId);
+  }
+
   @Post(':id/decision')
   @UseGuards(RolesGuard)
   @Roles('verification_officer', 'admin')
@@ -57,5 +68,17 @@ export class VerificationController {
     @Body() dto: DecideVerificationDto,
   ) {
     return this.verificationService.decide(user.id, recordId, dto);
+  }
+
+  @Post(':id/revoke')
+  @UseGuards(RolesGuard)
+  @Roles('verification_officer', 'admin')
+  @HttpCode(HttpStatus.OK)
+  async revoke(
+    @Param('id') recordId: string,
+    @CurrentUser() user: any,
+    @Body() dto: RevokeVerificationDto,
+  ) {
+    return this.verificationService.revoke(user.id, recordId, dto);
   }
 }

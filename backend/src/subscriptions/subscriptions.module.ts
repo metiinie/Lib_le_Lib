@@ -7,8 +7,13 @@ import { PlanGuard } from './guards/plan.guard';
 
 import { SubscriptionsRepository } from './repositories/subscriptions.repository';
 
+import { ModerationModule } from '../moderation/moderation.module';
+
 @Module({
-  imports: [TypeOrmModule.forFeature([Subscription])],
+  imports: [
+    TypeOrmModule.forFeature([Subscription]),
+    ModerationModule,
+  ],
   controllers: [SubscriptionsController],
   providers: [SubscriptionsService, PlanGuard, SubscriptionsRepository],
   exports: [TypeOrmModule, PlanGuard, SubscriptionsRepository],

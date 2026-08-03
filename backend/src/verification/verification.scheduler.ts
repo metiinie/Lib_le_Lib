@@ -48,58 +48,57 @@ export class VerificationScheduler {
     }
   }
 
+  }
+
   /**
-   * Daily at 02:00 - Document Retention Purge Cron
-   * Deletes raw documents from S3 and nulls the storage_ref in DB
-   * if the decision was made more than N days ago.
+   * Daily at 00:00 - Expiration Cron
+   * Transitions records past their expiry date to 'expired' and suspends user.
    */
-  @Cron('0 2 * * *')
-  async handleDocumentRetentionPurge() {
-    this.logger.log('Running Document Retention Purge Cron...');
-    const retentionDays = this.configService.get<number>(
-      'VERIFICATION_RETENTION_DAYS',
-      30,
-    );
+  @Cron('0 0 * * *')
+  async handleExpirations() {
+    this.logger.log('Running Expiration Cron...');
+    const today = new Date().toISOString().split('T')[0];
 
-    const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
+    // Find all 'approved' records where expiryDate <= today
+    const expiredRecords = await this.recordsRepo.findExpiringBefore(today); // We can reuse this method if it finds strictly before or on. Actually findExpiringBefore finds where expiryDate <= targetDate.
 
-    const purgeableDocs = await this.documentsRepo.findPurgeable(cutoffDate);
+    if (expiredRecords.length === 0) {
+      this.logger.log('No records to expire today.');
+      return;
+    }
 
-    for (const doc of purgeableDocs) {
-      if (!doc.storageRef) continue;
+    // In a real application, we would chunk this
+    for (const record of expiredRecords) {
+      await this.dataSource.transaction(async (manager) => {
+        // 1. Mark verification record as expired
+        await manager.query(
+          `UPDATE verification.verification_records SET status = 'expired', updated_at = NOW() WHERE id = $1`,
+          [record.id],
+        );
 
-      try {
-        // 1. Delete from S3 (cannot be rolled back if DB fails, so we do it first or handle separately.
-        // If DB fails, file is lost but DB says it exists. If we do DB first, file might not be deleted.
-        // Let's do S3 first, then DB transaction. If S3 fails, we abort.
-        await this.storageService.deleteDocument(doc.storageRef);
+        // 2. Revert user to pending_verification (locking their account)
+        await manager.query(
+          `UPDATE users SET status = 'pending_verification', updated_at = NOW() WHERE id = $1`,
+          [record.userId],
+        );
 
-        // 2. DB Transaction
-        await this.dataSource.transaction(async (manager) => {
-          // Null out storage_ref in DB
-          await this.documentsRepo.nullStorageRef(doc.id, manager);
-
-          // Write audit log (system action -> actorId = null)
-          await this.auditLogsRepo.insertWithManager(
-            {
-              actorId: undefined,
-              action: 'document_retention_purge',
-              targetType: 'verification_document',
-              targetId: doc.id,
-              metadata: {
-                storageRef: doc.storageRef, // Store what we deleted just in case
-                deletedAt: new Date(),
-              },
+        // 3. Write audit log
+        await this.auditLogsRepo.insertWithManager(
+          {
+            actorId: null, // system
+            actorRole: null,
+            action: 'verification_expired',
+            targetType: 'verification_record',
+            targetId: record.id,
+            metadata: {
+              expiredAt: today,
             },
-            manager,
-          );
-        });
-
-        this.logger.log(`Successfully purged document ${doc.id}`);
-      } catch (error) {
-        this.logger.error(`Failed to purge document ${doc.id}`, error);
-      }
+          },
+          manager,
+        );
+      });
+      
+      this.logger.log(`Expired verification record for user ${record.userId}`);
     }
   }
 }

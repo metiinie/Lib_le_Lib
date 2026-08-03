@@ -37,7 +37,7 @@ export interface VerificationDocument {
 export interface VerificationSubmission {
   id: string;
   userId: string;
-  status: 'submitted' | 'in_review' | 'approved' | 'rejected';
+  status: 'submitted' | 'in_review' | 'approved' | 'rejected' | 'expired';
   rejectionReason?: string;
   submittedAt?: string;
   createdAt?: string;
@@ -129,6 +129,21 @@ export interface AuditLog {
   targetId?: string;
   metadata?: Record<string, any>;
   createdAt: string;
+}
+
+export type SubscriptionPlan = 'free' | 'premium';
+export type SubscriptionStatus = 'active' | 'canceled' | 'expired' | 'past_due';
+
+export interface Subscription {
+  id: string;
+  userId: string;
+  user?: User;
+  plan: SubscriptionPlan;
+  status: SubscriptionStatus;
+  paymentProvider?: string;
+  externalSubscriptionId?: string;
+  startedAt: string;
+  currentPeriodEnd?: string;
 }
 
 export interface AuthResponse {

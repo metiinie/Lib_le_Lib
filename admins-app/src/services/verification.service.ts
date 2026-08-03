@@ -15,4 +15,14 @@ export const verificationService = {
     });
     return res.data;
   },
+
+  revoke: async (id: string, reason: string) => {
+    const res = await api.post(`/verification/${id}/revoke`, { reason });
+    return res.data;
+  },
+
+  getDocuments: async (id: string) => {
+    const res = await api.get(`/verification/${id}/documents`);
+    return res.data;
+  },
 };

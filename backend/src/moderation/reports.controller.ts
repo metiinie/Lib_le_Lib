@@ -8,6 +8,7 @@ import {
   UseGuards,
   Req,
   Query,
+  Delete,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -86,6 +87,53 @@ export class ReportsController {
       req.user.role,
       userId,
       body.status,
+      body.reason,
+    );
+  }
+
+  @Get('users/:id/content')
+  @UseGuards(RolesGuard)
+  @Roles('moderator', 'admin')
+  @ApiOperation({ summary: 'Get user content (bio and photos) for moderation' })
+  async getUserContent(
+    @Param('id') userId: string,
+    @Req() req: any,
+  ) {
+    return this.reportsService.getUserContent(req.user.id, req.user.role, userId);
+  }
+
+  @Patch('users/:id/bio')
+  @UseGuards(RolesGuard)
+  @Roles('moderator', 'admin')
+  @ApiOperation({ summary: 'Reset user bio' })
+  async resetUserBio(
+    @Param('id') userId: string,
+    @Body() body: { reason: string },
+    @Req() req: any,
+  ) {
+    return this.reportsService.resetUserBio(
+      req.user.id,
+      req.user.role,
+      userId,
+      body.reason,
+    );
+  }
+
+  @Delete('users/:id/photos/:photoId')
+  @UseGuards(RolesGuard)
+  @Roles('moderator', 'admin')
+  @ApiOperation({ summary: 'Delete user photo' })
+  async deleteUserPhoto(
+    @Param('id') userId: string,
+    @Param('photoId') photoId: string,
+    @Body() body: { reason: string },
+    @Req() req: any,
+  ) {
+    return this.reportsService.deleteUserPhoto(
+      req.user.id,
+      req.user.role,
+      userId,
+      photoId,
       body.reason,
     );
   }

@@ -8,6 +8,7 @@ import { ShieldAlert, RefreshCw, Calendar, Code, X } from 'lucide-react';
 export const AuditLogs: React.FC = () => {
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
+  const [total, setTotal] = useState(0);
   const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
 
   // Pagination state
@@ -17,8 +18,9 @@ export const AuditLogs: React.FC = () => {
   const loadLogs = async () => {
     setLoading(true);
     try {
-      const res = await usersService.getAuditLogs(50, 0);
+      const res = await usersService.getAuditLogs(limit, offset);
       setLogs(res.data || []);
+      setTotal(res.total || 0);
     } catch (err) {
       console.error('Failed to fetch audit logs:', err);
     } finally {
@@ -28,7 +30,8 @@ export const AuditLogs: React.FC = () => {
 
   useEffect(() => {
     loadLogs();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [limit, offset]);
 
   const getActionBadgeStyle = (action: string) => {
     if (action.includes('approved') || action.includes('updated')) {
@@ -84,7 +87,7 @@ export const AuditLogs: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60 text-sm">
-                {logs.slice(offset, offset + limit).map((log) => (
+                {logs.map((log) => (
                   <tr key={log.id} className="hover:bg-slate-800/40 transition-colors">
                     <td className="p-4 pl-6">
                       <span
@@ -132,11 +135,14 @@ export const AuditLogs: React.FC = () => {
             </table>
 
             <Pagination
-              total={logs.length}
+              total={total}
               limit={limit}
               offset={offset}
               onPageChange={setOffset}
-              onLimitChange={setLimit}
+              onLimitChange={(newLimit) => {
+                setLimit(newLimit);
+                setOffset(0);
+              }}
             />
           </>
         )}

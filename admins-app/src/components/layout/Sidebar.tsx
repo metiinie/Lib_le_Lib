@@ -12,6 +12,8 @@ import {
   ShieldAlert,
   UserX,
   X,
+  CreditCard,
+  Activity,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -40,6 +42,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => 
     { path: '/user-safety', label: 'Account Enforcement', icon: UserX, visible: isModerator },
     { path: '/health-qa', label: 'Medical Q&A Desk', icon: Stethoscope, visible: isHealth },
     { path: '/users', label: 'User Directory & Roles', icon: Users, visible: isAdmin },
+    { path: '/subscriptions', label: 'Subscription & Billing', icon: CreditCard, visible: isAdmin },
+    { path: '/telemetry', label: 'Performance Telemetry', icon: Activity, visible: isAdmin },
     { path: '/resources', label: 'Curated Resources', icon: BookOpen, visible: isAdmin },
     { path: '/stories', label: 'Success Stories', icon: Heart, visible: isAdmin },
     { path: '/audit-logs', label: 'System Audit Trail', icon: ShieldAlert, visible: isAdmin },
