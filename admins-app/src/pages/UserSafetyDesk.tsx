@@ -117,7 +117,7 @@ export const UserSafetyDesk: React.FC = () => {
                 <tr key={u.id} className="hover:bg-slate-800/40 transition-colors">
                   <td className="p-4 pl-6">
                     <p className="font-semibold text-slate-200">
-                      {u.profile?.displayName || 'Unnamed User'}
+                      {u.profile?.nickname || 'Unnamed User'}
                     </p>
                     <p className="font-mono text-xs text-slate-500">{u.id}</p>
                   </td>
@@ -169,7 +169,7 @@ export const UserSafetyDesk: React.FC = () => {
             <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 text-sm space-y-1">
               <p className="text-slate-400">Target User:</p>
               <p className="font-semibold text-slate-200">
-                {selectedUser.profile?.displayName || selectedUser.email || selectedUser.id}
+                {selectedUser.profile?.nickname || selectedUser.email || selectedUser.id}
               </p>
               <p className="font-mono text-xs text-slate-500">{selectedUser.id}</p>
             </div>

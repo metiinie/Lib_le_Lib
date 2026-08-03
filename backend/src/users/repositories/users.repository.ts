@@ -68,18 +68,18 @@ export class UsersRepository {
   ): Promise<[User[], number]> {
     const qb = this.repo.createQueryBuilder('user')
       .leftJoinAndSelect('user.profile', 'profile')
-      .orderBy('user.created_at', 'DESC')
+      .orderBy('user.createdAt', 'DESC')
       .take(limit)
       .skip(offset);
 
     if (role) {
-      qb.andWhere('user.role = :role', { role });
+      qb.andWhere('"user"."role" = :role', { role });
     }
 
     if (search && search.trim().length > 0) {
       const q = `%${search.trim().toLowerCase()}%`;
       qb.andWhere(
-        '(LOWER(user.email) LIKE :q OR LOWER(user.phone) LIKE :q OR LOWER(profile.display_name) LIKE :q)',
+        '(LOWER("user"."email") LIKE :q OR LOWER("user"."phone") LIKE :q OR LOWER("profile"."nickname") LIKE :q OR CAST("user"."id" AS TEXT) LIKE :q)',
         { q },
       );
     }

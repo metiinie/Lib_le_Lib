@@ -1,29 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { discoveryService, DiscoveryProfile } from '@/services/discovery.service';
+import { DiscoveryProfile } from '@/services/discovery.service';
 import { BlurredPhoto } from '@/components/photos/BlurredPhoto';
+import { useDiscovery } from '@/hooks/useDiscovery';
+import { FilterSheet } from '@/components/discovery/FilterSheet';
 
 export default function DiscoverScreen() {
   const router = useRouter();
-  const [profiles, setProfiles] = useState<DiscoveryProfile[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    loadProfiles();
-  }, []);
-
-  const loadProfiles = async () => {
-    try {
-      const data = await discoveryService.getProfiles();
-      setProfiles(data);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [filters, setFilters] = useState({});
+  const [isFilterVisible, setFilterVisible] = useState(false);
+  
+  const { data: profiles, isLoading, isError, refetch } = useDiscovery(filters);
 
   const renderItem = ({ item }: { item: DiscoveryProfile }) => {
     const primaryPhoto = item.photos?.[0];
@@ -38,7 +27,7 @@ export default function DiscoverScreen() {
       >
         <BlurredPhoto
           blurhash={primaryPhoto?.blurhash || 'LEHV6nWB2yk8pyo0adR*.7kCMdnj'}
-          revealGranted={primaryPhoto?.revealGranted || false}
+          revealGranted={true} // Photos are unblurred by default for verified users based on updated business rules
           photoUrl={primaryPhoto?.url}
         />
         <View className="absolute bottom-0 inset-x-0 p-4 bg-gradient-to-t from-black/80 to-transparent pt-12">
@@ -57,6 +46,7 @@ export default function DiscoverScreen() {
           className="bg-slate-100 px-4 py-2 rounded-full min-h-[48px] min-w-[48px] justify-center items-center"
           accessibilityRole="button"
           accessibilityLabel="Filter profiles"
+          onPress={() => setFilterVisible(true)}
         >
           <Text className="text-slate-700 font-semibold text-sm">Filters</Text>
         </TouchableOpacity>
@@ -75,9 +65,21 @@ export default function DiscoverScreen() {
         </View>
       </View>
 
-      {loading ? (
+      {isLoading ? (
         <View className="flex-1 justify-center items-center">
           <ActivityIndicator size="large" color="#208AEF" />
+        </View>
+      ) : isError ? (
+        <View className="flex-1 justify-center items-center p-4">
+          <Text className="text-slate-500 text-center mb-4">Something went wrong while loading profiles.</Text>
+          <TouchableOpacity onPress={() => refetch()} className="bg-blue-50 px-4 py-2 rounded-full">
+            <Text className="text-blue-600 font-semibold">Try Again</Text>
+          </TouchableOpacity>
+        </View>
+      ) : profiles?.length === 0 ? (
+        <View className="flex-1 justify-center items-center p-4">
+          <Text className="text-slate-500 text-center text-lg mb-2">No profiles found</Text>
+          <Text className="text-slate-400 text-center">Try adjusting your filters to see more people.</Text>
         </View>
       ) : (
         <FlatList
@@ -92,6 +94,13 @@ export default function DiscoverScreen() {
           maxToRenderPerBatch={10}
         />
       )}
+
+      <FilterSheet 
+        visible={isFilterVisible} 
+        onClose={() => setFilterVisible(false)} 
+        filters={filters} 
+        setFilters={setFilters} 
+      />
     </View>
   );
 }

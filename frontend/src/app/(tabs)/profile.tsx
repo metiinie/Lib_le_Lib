@@ -1,35 +1,17 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView, Image, ActivityIndicator } from 'react-native';
-import { useRouter, useFocusEffect } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/hooks/useAuth';
-import { profileService } from '@/services/profile.service';
+import { useProfile } from '@/hooks/useProfile';
 
 export default function ProfileHubScreen() {
   const router = useRouter();
   const { signOut } = useAuth();
   
-  const [userProfile, setUserProfile] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const { data: userProfile, isLoading, isError, refetch } = useProfile();
 
-  // Reload profile when the screen comes into focus
-  useFocusEffect(
-    useCallback(() => {
-      let isActive = true;
-      profileService.getProfile().then(data => {
-        if (isActive) {
-          setUserProfile(data);
-          setLoading(false);
-        }
-      }).catch(err => {
-        console.error('Error fetching profile:', err);
-        if (isActive) setLoading(false);
-      });
-      return () => { isActive = false; };
-    }, [])
-  );
-
-  if (loading) {
+  if (isLoading) {
     return (
       <View className="flex-1 bg-slate-50 justify-center items-center">
         <ActivityIndicator size="large" color="#4f46e5" />
@@ -37,11 +19,13 @@ export default function ProfileHubScreen() {
     );
   }
 
-  // Fallback for null profile
-  if (!userProfile) {
+  if (isError || !userProfile) {
     return (
       <View className="flex-1 bg-slate-50 justify-center items-center">
-        <Text>Error loading profile.</Text>
+        <Text className="mb-4">Error loading profile.</Text>
+        <TouchableOpacity onPress={() => refetch()} className="bg-blue-50 px-4 py-2 rounded-full">
+          <Text className="text-blue-600 font-semibold">Try Again</Text>
+        </TouchableOpacity>
       </View>
     );
   }

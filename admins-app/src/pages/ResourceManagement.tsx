@@ -9,9 +9,8 @@ export const ResourceManagement: React.FC = () => {
   const [showCreate, setShowCreate] = useState(false);
 
   const [title, setTitle] = useState('');
-  const [category, setCategory] = useState<'medical' | 'mental_health' | 'legal' | 'lifestyle'>('medical');
-  const [summary, setSummary] = useState('');
-  const [content, setContent] = useState('');
+  const [category, setCategory] = useState<'treatment_info' | 'u_equals_u' | 'hotline' | 'general'>('treatment_info');
+  const [body, setBody] = useState('');
 
   const loadResources = async () => {
     setLoading(true);
@@ -35,13 +34,11 @@ export const ResourceManagement: React.FC = () => {
       await resourcesService.createResource({
         title,
         category,
-        summary,
-        content,
+        body,
         published: true,
       });
       setTitle('');
-      setSummary('');
-      setContent('');
+      setBody('');
       setShowCreate(false);
       await loadResources();
     } catch (err) {
@@ -101,29 +98,19 @@ export const ResourceManagement: React.FC = () => {
                 onChange={(e) => setCategory(e.target.value as any)}
                 className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-slate-100 focus:outline-none focus:border-purple-500"
               >
-                <option value="medical">Medical Guidance</option>
-                <option value="mental_health">Mental Health & Counseling</option>
-                <option value="legal">Legal & Rights</option>
-                <option value="lifestyle">Wellness & Lifestyle</option>
+                <option value="treatment_info">Treatment Info</option>
+                <option value="u_equals_u">U=U (Undetectable = Untransmittable)</option>
+                <option value="hotline">Hotline</option>
+                <option value="general">General</option>
               </select>
             </div>
-          </div>
-          <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">Summary</label>
-            <input
-              type="text"
-              required
-              value={summary}
-              onChange={(e) => setSummary(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-slate-100 focus:outline-none focus:border-purple-500"
-            />
           </div>
           <div>
             <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">Full Article Body</label>
             <textarea
               required
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
               className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-slate-100 focus:outline-none focus:border-purple-500 h-32"
             />
           </div>
@@ -157,7 +144,7 @@ export const ResourceManagement: React.FC = () => {
                 </button>
               </div>
               <h3 className="text-lg font-bold text-white">{res.title}</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">{res.summary}</p>
+              <p className="text-xs text-slate-400 leading-relaxed line-clamp-3">{res.body}</p>
             </div>
           ))
         )}

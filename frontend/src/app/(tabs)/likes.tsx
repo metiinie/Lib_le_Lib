@@ -1,64 +1,23 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, FlatList, TouchableOpacity, RefreshControl, Alert } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, FlatList, TouchableOpacity, RefreshControl, Alert, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurredPhoto } from '@/components/photos/BlurredPhoto';
-import { api } from '@/lib/api';
-import { discoveryService } from '@/services/discovery.service';
-
-interface LikeProfile {
-  id: string;
-  nickname: string;
-  age: number;
-  region: string;
-  photos: { id: string; blurhash: string; url?: string; revealGranted: boolean }[];
-}
+import { useLikes, LikeProfile } from '@/hooks/useLikes';
 
 export default function LikesScreen() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'received' | 'sent'>('received');
   
-  const [receivedLikes, setReceivedLikes] = useState<LikeProfile[]>([]);
-  const [sentLikes, setSentLikes] = useState<LikeProfile[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-
-  useEffect(() => {
-    loadData();
-  }, [activeTab]);
-
-  const loadData = async () => {
-    setLoading(true);
-    setError(false);
-    try {
-      if (activeTab === 'received') {
-        const response = await api.get('/swipes/received-likes');
-        setReceivedLikes(Array.isArray(response.data) ? response.data : []);
-      } else {
-        const response = await api.get('/swipes/sent-likes');
-        setSentLikes(Array.isArray(response.data) ? response.data : []);
-      }
-    } catch (err: any) {
-      console.warn('Likes endpoint error:', err?.message);
-      if (activeTab === 'received') setReceivedLikes([]);
-      else setSentLikes([]);
-      setError(true);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { data: activeProfiles, isLoading, isError, refetch, passProfile } = useLikes(activeTab);
 
   const handlePass = async (targetId: string, nickname: string) => {
-    // Optimistic UI update
-    setReceivedLikes(prev => prev.filter(p => p.id !== targetId));
-    
     try {
-      await discoveryService.passProfile(targetId);
+      await passProfile(targetId);
     } catch (error) {
       console.error('Failed to pass:', error);
       Alert.alert('Error', `Failed to pass on ${nickname}. Please try again.`);
-      // Reload on failure to restore state
-      loadData();
+      refetch();
     }
   };
 
@@ -75,7 +34,7 @@ export default function LikesScreen() {
       >
         <BlurredPhoto
           blurhash={primaryPhoto?.blurhash || 'LEHV6nWB2yk8pyo0adR*.7kCMdnj'}
-          revealGranted={primaryPhoto?.revealGranted || false}
+          revealGranted={true} // Photos are unblurred by default for verified users
           photoUrl={primaryPhoto?.url}
         />
         <View className="absolute bottom-0 inset-x-0 p-4 bg-gradient-to-t from-black/80 to-transparent pt-12">
@@ -100,10 +59,8 @@ export default function LikesScreen() {
     );
   };
 
-  const activeProfiles = activeTab === 'received' ? receivedLikes : sentLikes;
-
   const renderEmptyState = () => {
-    if (loading) return null; // Let the RefreshControl handle the loading UI
+    if (isLoading) return null; // Let the RefreshControl or ActivityIndicator handle the loading UI
     return (
       <View className="flex-1 justify-center items-center px-8 mt-20">
         <View className="w-20 h-20 bg-slate-100 rounded-full items-center justify-center mb-6">
@@ -113,12 +70,17 @@ export default function LikesScreen() {
           {activeTab === 'received' ? 'No likes yet' : 'You haven\'t liked anyone'}
         </Text>
         <Text className="text-slate-500 text-center text-base leading-relaxed">
-          {error
+          {isError
             ? 'Failed to load profiles. Please try again later.'
             : activeTab === 'received' 
               ? 'When someone likes your profile, they\'ll appear here.'
               : 'Start exploring and like profiles to see them here.'}
         </Text>
+        {isError && (
+          <TouchableOpacity onPress={() => refetch()} className="mt-4 bg-blue-50 px-4 py-2 rounded-full">
+            <Text className="text-blue-600 font-semibold">Try Again</Text>
+          </TouchableOpacity>
+        )}
       </View>
     );
   };
@@ -147,25 +109,31 @@ export default function LikesScreen() {
         </View>
       </View>
 
-      <FlatList
-        data={activeProfiles}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        numColumns={2}
-        contentContainerStyle={{ padding: 8, flexGrow: 1 }}
-        showsVerticalScrollIndicator={false}
-        initialNumToRender={6}
-        maxToRenderPerBatch={10}
-        ListEmptyComponent={renderEmptyState}
-        refreshControl={
-          <RefreshControl
-            refreshing={loading}
-            onRefresh={loadData}
-            colors={['#208AEF']}
-            tintColor="#208AEF"
-          />
-        }
-      />
+      {isLoading && !activeProfiles?.length ? (
+        <View className="flex-1 justify-center items-center">
+          <ActivityIndicator size="large" color="#208AEF" />
+        </View>
+      ) : (
+        <FlatList
+          data={activeProfiles}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          numColumns={2}
+          contentContainerStyle={{ padding: 8, flexGrow: 1 }}
+          showsVerticalScrollIndicator={false}
+          initialNumToRender={6}
+          maxToRenderPerBatch={10}
+          ListEmptyComponent={renderEmptyState}
+          refreshControl={
+            <RefreshControl
+              refreshing={isLoading}
+              onRefresh={refetch}
+              colors={['#208AEF']}
+              tintColor="#208AEF"
+            />
+          }
+        />
+      )}
     </View>
   );
 }

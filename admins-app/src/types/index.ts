@@ -87,9 +87,8 @@ export interface ModerationReport {
 export interface ResourceItem {
   id: string;
   title: string;
-  category: 'medical' | 'mental_health' | 'legal' | 'lifestyle';
-  summary: string;
-  content: string;
+  category: 'treatment_info' | 'u_equals_u' | 'hotline' | 'general';
+  body: string;
   published: boolean;
   createdByUserId: string;
   createdAt: string;

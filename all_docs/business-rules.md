@@ -31,10 +31,7 @@ here, update this file in the same PR — don't let it drift out of sync.
 
 ## Photos
 
-- Blurred by default, always. Reveal is a deliberate, revocable act by the photo's
-  owner — never automatic on match, even though an earlier draft of the product
-  considered that. Treat "auto-reveal on match" as explicitly out of scope unless it
-  comes in as its own, separately-scoped task.
+- Unblurred by default for all verified users. Photos are visible to verified members unless the owner explicitly chooses to hide them. The previous "blur by default" mechanic has been replaced.
 
 ## Safety
 

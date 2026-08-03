@@ -1,27 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { View, Text, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
-import { matchService, Match } from '@/services/match.service';
+import { Match } from '@/services/match.service';
 import { BlurredPhoto } from '@/components/photos/BlurredPhoto';
+import { useMatches } from '@/hooks/useMatches';
 
 export default function MatchesScreen() {
   const router = useRouter();
-  const [matches, setMatches] = useState<Match[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchMatches = async () => {
-      try {
-        const data = await matchService.getMatches();
-        setMatches(data);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchMatches();
-  }, []);
+  const { data: matches, isLoading, isError, refetch } = useMatches();
 
   const renderMatch = ({ item }: { item: Match }) => (
     <TouchableOpacity
@@ -34,7 +20,7 @@ export default function MatchesScreen() {
       <View className="w-16 h-16 rounded-full overflow-hidden bg-slate-200 mr-4">
         <BlurredPhoto
           blurhash={item.avatarBlurhash}
-          revealGranted={item.revealGranted}
+          revealGranted={true} // Photos are unblurred by default for verified users
           photoUrl={item.avatarUrl}
         />
       </View>
@@ -54,11 +40,18 @@ export default function MatchesScreen() {
         <Text className="text-2xl font-bold text-slate-900">Your Matches</Text>
       </View>
 
-      {loading ? (
+      {isLoading ? (
         <View className="flex-1 justify-center items-center">
           <ActivityIndicator size="large" color="#208AEF" />
         </View>
-      ) : matches.length === 0 ? (
+      ) : isError ? (
+        <View className="flex-1 justify-center items-center p-4">
+          <Text className="text-slate-500 text-center mb-4">Something went wrong while loading matches.</Text>
+          <TouchableOpacity onPress={() => refetch()} className="bg-blue-50 px-4 py-2 rounded-full">
+            <Text className="text-blue-600 font-semibold">Try Again</Text>
+          </TouchableOpacity>
+        </View>
+      ) : matches?.length === 0 ? (
         <View className="flex-1 justify-center items-center px-6">
           <Text className="text-slate-500 text-center text-lg">No matches yet. Keep discovering!</Text>
         </View>

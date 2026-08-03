@@ -8,6 +8,8 @@ import { useAuthStore } from '@/state/auth.store';
 import { userService } from '@/services/user.service';
 import { profileService } from '@/services/profile.service';
 import { verificationService } from '@/services/verification.service';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from '@/lib/queryClient';
 import '../global.css';
 
 SplashScreen.preventAutoHideAsync();
@@ -103,8 +105,10 @@ export default function RootLayout() {
   }, [isAuthenticated, segments, navigationState?.key]);
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack screenOptions={{ headerShown: false }} />
-    </ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <Stack screenOptions={{ headerShown: false }} />
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 }

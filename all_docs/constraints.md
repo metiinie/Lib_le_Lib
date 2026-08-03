@@ -19,8 +19,7 @@ raise it explicitly — don't route around it quietly.
 
 ## Photos & chat
 
-- A photo is never sent unblurred to a client unless an active, non-revoked
-  `photo_reveal_grants` row exists for that exact viewer.
+- Photos are sent unblurred to verified clients by default, unless the photo owner has explicitly chosen to hide their photos. The strict `photo_reveal_grants` requirement is no longer the default.
 - Chat message plaintext is never available server-side. If a feature request implies
   the server needs to read message content (e.g. "auto-moderate chat text"), that's a
   constraint conflict — flag it rather than quietly building something that looks
