@@ -28,6 +28,8 @@ export default function TabsLayout() {
         name="likes"
         options={{
           title: 'Likes',
+          tabBarBadge: '', // Renders a red dot for new likes
+          tabBarBadgeStyle: { minWidth: 10, maxHeight: 10, borderRadius: 5, backgroundColor: '#ef4444' },
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="star-outline" size={size} color={color} />
           ),

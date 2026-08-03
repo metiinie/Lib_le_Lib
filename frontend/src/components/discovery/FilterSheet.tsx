@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Modal, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import Slider from '@react-native-community/slider';
 
 interface FilterSheetProps {
   visible: boolean;
@@ -10,15 +11,33 @@ interface FilterSheetProps {
 }
 
 export function FilterSheet({ visible, onClose, filters, setFilters }: FilterSheetProps) {
-  // Simple filter state for now. In a full implementation, you might use React Hook Form here.
+  const [localFilters, setLocalFilters] = useState({
+    minAge: 18,
+    maxAge: 55,
+    gender: 'All',
+    relationshipGoals: [] as string[],
+    ...filters,
+  });
+
   const applyFilters = () => {
-    // Apply filters logic goes here
+    setFilters(localFilters);
     onClose();
   };
 
   const clearFilters = () => {
-    setFilters({});
+    const defaultFilters = { minAge: 18, maxAge: 55, gender: 'All', relationshipGoals: [] };
+    setLocalFilters(defaultFilters);
+    setFilters(defaultFilters);
     onClose();
+  };
+
+  const toggleGoal = (goal: string) => {
+    setLocalFilters((prev: any) => {
+      const goals = prev.relationshipGoals.includes(goal)
+        ? prev.relationshipGoals.filter((g: string) => g !== goal)
+        : [...prev.relationshipGoals, goal];
+      return { ...prev, relationshipGoals: goals };
+    });
   };
 
   return (
@@ -29,7 +48,7 @@ export function FilterSheet({ visible, onClose, filters, setFilters }: FilterShe
       onRequestClose={onClose}
     >
       <View className="flex-1 justify-end bg-black/50">
-        <View className="bg-white rounded-t-3xl h-[70%]">
+        <View className="bg-white rounded-t-3xl h-[85%]">
           <View className="p-4 border-b border-slate-100 flex-row justify-between items-center">
             <TouchableOpacity onPress={onClose} className="p-2" accessibilityLabel="Close filters">
               <Ionicons name="close" size={24} color="#64748b" />
@@ -41,28 +60,56 @@ export function FilterSheet({ visible, onClose, filters, setFilters }: FilterShe
           </View>
 
           <ScrollView className="p-6">
+            <Text className="text-lg font-semibold text-slate-800 mb-4">Age Range</Text>
+            <View className="mb-6">
+              <View className="flex-row justify-between mb-2">
+                <Text className="text-slate-600">Min Age: {localFilters.minAge}</Text>
+                <Text className="text-slate-600">Max Age: {localFilters.maxAge}</Text>
+              </View>
+              <Text className="text-xs text-slate-400 mb-2">Adjust Max Age (Min 18):</Text>
+              <Slider
+                style={{ width: '100%', height: 40 }}
+                minimumValue={18}
+                maximumValue={99}
+                step={1}
+                value={localFilters.maxAge}
+                onValueChange={(val) => setLocalFilters({ ...localFilters, maxAge: val })}
+                minimumTrackTintColor="#208AEF"
+                maximumTrackTintColor="#cbd5e1"
+              />
+            </View>
+
+            <Text className="text-lg font-semibold text-slate-800 mb-4">Gender</Text>
+            <View className="flex-row mb-6 bg-slate-100 rounded-xl p-1">
+              {['Man', 'Woman', 'All'].map(gender => (
+                <TouchableOpacity
+                  key={gender}
+                  onPress={() => setLocalFilters({ ...localFilters, gender })}
+                  className={`flex-1 py-2 rounded-lg items-center justify-center ${localFilters.gender === gender ? 'bg-white shadow-sm' : ''}`}
+                >
+                  <Text className={localFilters.gender === gender ? 'font-semibold text-slate-900' : 'text-slate-500'}>{gender}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
             <Text className="text-lg font-semibold text-slate-800 mb-4">Relationship Goals</Text>
             <View className="flex-row flex-wrap mb-6">
               {['Marriage', 'Serious Relationship', 'Friendship'].map(goal => (
                 <TouchableOpacity
                   key={goal}
-                  className="bg-slate-100 px-4 py-2 rounded-full mr-2 mb-2"
+                  onPress={() => toggleGoal(goal)}
+                  className={`px-4 py-2 rounded-full mr-2 mb-2 border ${localFilters.relationshipGoals.includes(goal) ? 'bg-blue-50 border-blue-200' : 'bg-slate-50 border-slate-200'}`}
                 >
-                  <Text className="text-slate-700">{goal}</Text>
+                  <Text className={localFilters.relationshipGoals.includes(goal) ? 'text-blue-700 font-medium' : 'text-slate-600'}>{goal}</Text>
                 </TouchableOpacity>
               ))}
             </View>
 
-            <Text className="text-lg font-semibold text-slate-800 mb-4">Age Range</Text>
-            <View className="flex-row items-center justify-between mb-6">
-              <Text className="text-slate-600">18 - 99</Text>
-              {/* Add a slider component here later */}
-            </View>
-
             <Text className="text-lg font-semibold text-slate-800 mb-4">Region</Text>
-            <View className="bg-slate-100 p-4 rounded-xl mb-6">
-              <Text className="text-slate-500">Select Region</Text>
-            </View>
+            <TouchableOpacity className="bg-slate-100 p-4 rounded-xl mb-12 flex-row justify-between items-center">
+              <Text className="text-slate-700">All Regions</Text>
+              <Ionicons name="chevron-forward" size={20} color="#94a3b8" />
+            </TouchableOpacity>
           </ScrollView>
 
           <View className="p-6 border-t border-slate-100 pb-10">

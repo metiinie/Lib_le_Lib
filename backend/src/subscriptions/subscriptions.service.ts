@@ -75,7 +75,6 @@ export class SubscriptionsService {
               profile: user.profile
                 ? {
                     nickname: user.profile.nickname,
-                    displayName: user.profile.displayName,
                   }
                 : null,
             }

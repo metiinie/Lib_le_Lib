@@ -30,9 +30,43 @@ export default function DiscoverScreen() {
           revealGranted={true} // Photos are unblurred by default for verified users based on updated business rules
           photoUrl={primaryPhoto?.url}
         />
-        <View className="absolute bottom-0 inset-x-0 p-4 bg-gradient-to-t from-black/80 to-transparent pt-12">
-          <Text className="text-white font-bold text-lg">{item.nickname}, {item.age}</Text>
-          <Text className="text-white/80 text-sm">{item.region}</Text>
+        
+        {/* Top Badges */}
+        <View className="absolute top-2 left-2 right-2 flex-row justify-between">
+          {/* Compatibility Badge (if exists) */}
+          {item.compatibilityLevel ? (
+            <View className={`px-2 py-1 rounded-full bg-white/90 shadow-sm flex-row items-center ${
+              item.compatibilityLevel === 'High' ? 'border border-green-200' :
+              item.compatibilityLevel === 'Moderate' ? 'border border-yellow-200' : 'border border-slate-200'
+            }`}>
+              <Ionicons 
+                name="heart-half" 
+                size={12} 
+                color={item.compatibilityLevel === 'High' ? '#22c55e' : item.compatibilityLevel === 'Moderate' ? '#eab308' : '#64748b'} 
+              />
+              <Text className={`text-[10px] font-bold ml-1 ${
+                item.compatibilityLevel === 'High' ? 'text-green-600' :
+                item.compatibilityLevel === 'Moderate' ? 'text-yellow-600' : 'text-slate-600'
+              }`}>{item.compatibilityLevel}</Text>
+            </View>
+          ) : <View />}
+
+          {/* Relationship Goal Badge */}
+          {item.relationshipGoals && item.relationshipGoals.length > 0 && (
+            <View className="bg-blue-600/90 px-2 py-1 rounded-full shadow-sm">
+              <Text className="text-[10px] font-bold text-white">{item.relationshipGoals[0]}</Text>
+            </View>
+          )}
+        </View>
+
+        {/* Bottom Details */}
+        <View className="absolute bottom-0 inset-x-0 p-4 bg-gradient-to-t from-black/90 via-black/50 to-transparent pt-12">
+          <View className="flex-row items-center flex-wrap">
+            <Text className="text-white font-bold text-lg mr-1">{item.nickname}, {item.age}</Text>
+            {/* Verified Checkmark */}
+            <Ionicons name="checkmark-circle" size={16} color="#3b82f6" />
+          </View>
+          <Text className="text-white/80 text-sm mt-0.5">{item.region}</Text>
         </View>
       </TouchableOpacity>
     );

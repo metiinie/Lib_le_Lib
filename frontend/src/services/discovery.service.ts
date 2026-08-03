@@ -10,6 +10,7 @@ export interface DiscoveryProfile {
   relationshipGoals: string[];
   photos: { id: string; blurhash: string; url?: string; revealGranted: boolean }[];
   isBlocked: boolean; // Managed by backend but kept here for client-side defense checks
+  compatibilityLevel?: 'High' | 'Moderate' | 'Low';
 }
 
 export const discoveryService = {
@@ -43,6 +44,7 @@ export const discoveryService = {
           relationshipGoals: Array.isArray(p.relationshipGoals) ? p.relationshipGoals : [],
           photos,
           isBlocked: false,
+          compatibilityLevel: p.compatibilityLevel,
         };
       });
 

@@ -48,8 +48,6 @@ export class VerificationScheduler {
     }
   }
 
-  }
-
   /**
    * Daily at 00:00 - Expiration Cron
    * Transitions records past their expiry date to 'expired' and suspends user.
@@ -85,8 +83,8 @@ export class VerificationScheduler {
         // 3. Write audit log
         await this.auditLogsRepo.insertWithManager(
           {
-            actorId: null, // system
-            actorRole: null,
+            actorId: undefined, // system
+            actorRole: undefined,
             action: 'verification_expired',
             targetType: 'verification_record',
             targetId: record.id,
