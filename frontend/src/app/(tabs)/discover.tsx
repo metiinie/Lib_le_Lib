@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { DiscoveryProfile } from '@/services/discovery.service';
@@ -126,6 +126,7 @@ export default function DiscoverScreen() {
           removeClippedSubviews={true}
           initialNumToRender={6}
           maxToRenderPerBatch={10}
+          refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refetch} tintColor="#208AEF" />}
         />
       )}
 

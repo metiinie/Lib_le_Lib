@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert, Animated } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
@@ -129,6 +129,7 @@ export default function MatchesScreen() {
           data={matches}
           keyExtractor={(item) => item.id}
           renderItem={renderMatch}
+          refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refetch} tintColor="#208AEF" />}
           ListHeaderComponent={
             hasNewMatches ? (
               <View className="mx-4 mt-4 mb-2 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 p-4 rounded-2xl flex-row items-center shadow-sm">
