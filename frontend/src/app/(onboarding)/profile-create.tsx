@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Alert, ActivityIndicator, Platform } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -25,6 +27,7 @@ const FALLBACK_REGIONS = [
 
 export default function ProfileCreateScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [regions, setRegions] = useState<{ id: string; name: string }[]>(FALLBACK_REGIONS);
   const [isLoadingRegions, setIsLoadingRegions] = useState(true);
@@ -107,7 +110,7 @@ export default function ProfileCreateScreen() {
         }
       }
 
-      router.push('/(onboarding)/doc-upload');
+      router.push('/(onboarding)/photo-upload');
     } catch (error: any) {
       const msg = error?.response?.data?.error?.message || error?.message || 'Failed to create profile';
       Alert.alert('Error', msg);
@@ -117,8 +120,16 @@ export default function ProfileCreateScreen() {
   };
 
   return (
-    <ScrollView className="flex-1 bg-white px-6 pt-16">
-      <Text className="text-3xl font-bold text-slate-900 mb-8">Create your profile</Text>
+    <View style={{ flex: 1, backgroundColor: '#ffffff' }}>
+      <KeyboardAwareScrollView 
+        className="flex-1 bg-white px-6 pt-16"
+        contentContainerStyle={{ paddingBottom: 40 }}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        enableOnAndroid={true}
+        extraScrollHeight={20}
+      >
+        <Text className="text-3xl font-bold text-slate-900 mb-8">Create your profile</Text>
 
       {/* Nickname */}
       <View className="mb-6">
@@ -257,13 +268,27 @@ export default function ProfileCreateScreen() {
         {errors.bio && <Text className="text-red-500 mt-1">{errors.bio.message}</Text>}
       </View>
 
-      <TouchableOpacity
-        className={`bg-blue-600 p-4 rounded-xl items-center mb-12 ${isSubmitting ? 'opacity-50' : ''}`}
-        onPress={handleSubmit(onSubmit)}
-        disabled={isSubmitting}
+      </KeyboardAwareScrollView>
+
+      {/* Sticky Bottom Button */}
+      <View 
+        style={{ 
+          paddingHorizontal: 24, 
+          paddingTop: 16, 
+          paddingBottom: Math.max(insets.bottom, 24),
+          backgroundColor: '#ffffff',
+          borderTopWidth: 1,
+          borderTopColor: '#f1f5f9'
+        }}
       >
-        <Text className="text-white font-bold text-lg">{isSubmitting ? 'Saving...' : 'Continue'}</Text>
-      </TouchableOpacity>
-    </ScrollView>
+        <TouchableOpacity
+          className={`bg-blue-600 p-4 rounded-xl items-center ${isSubmitting ? 'opacity-50' : ''}`}
+          onPress={handleSubmit(onSubmit)}
+          disabled={isSubmitting}
+        >
+          <Text className="text-white font-bold text-lg">{isSubmitting ? 'Saving...' : 'Continue'}</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 }

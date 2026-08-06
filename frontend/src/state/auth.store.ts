@@ -4,13 +4,21 @@ import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 
 interface AuthState {
+  /** JWT access token — expires in 15 min. Never store without refreshToken. */
   token: string | null;
+  /** JWT refresh token — expires after 7 days of inactivity. Stored in SecureStore. */
+  refreshToken: string | null;
+  /** True once the persist middleware has finished reading from SecureStore. */
   _hasHydrated: boolean;
   setToken: (token: string) => void;
+  /** Stores both tokens atomically — always call this, never setToken alone. */
+  setTokens: (accessToken: string, refreshToken: string) => void;
+  /** Refreshes only the access token after a successful /auth/refresh call. */
+  updateAccessToken: (accessToken: string) => void;
   signOut: () => void;
 }
 
-// Custom storage object for Zustand persist middleware supporting both Native and Web
+// Custom storage supporting both Native (SecureStore) and Web (localStorage)
 const secureStorage = {
   getItem: async (name: string): Promise<string | null> => {
     if (Platform.OS === 'web') {
@@ -54,20 +62,31 @@ export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       token: null,
+      refreshToken: null,
       _hasHydrated: false,
+
       setToken: (token: string) => set({ token }),
-      signOut: () => set({ token: null }),
+
+      setTokens: (accessToken: string, refreshToken: string) =>
+        set({ token: accessToken, refreshToken }),
+
+      updateAccessToken: (accessToken: string) => set({ token: accessToken }),
+
+      signOut: () => set({ token: null, refreshToken: null }),
     }),
     {
       name: 'auth-storage',
       storage: createJSONStorage(() => secureStorage),
+      // Persist both tokens so the 7-day refresh window survives app restarts
+      partialize: (state) => ({
+        token: state.token,
+        refreshToken: state.refreshToken,
+      }),
       onRehydrateStorage: () => () => {
         // Called after hydration finishes (success or fail).
-        // We set _hasHydrated directly on the store so the root layout
-        // can gate on it before making any routing decisions.
+        // Gates the root layout before making any routing decisions.
         useAuthStore.setState({ _hasHydrated: true });
       },
     }
   )
 );
-

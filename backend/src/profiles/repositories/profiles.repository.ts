@@ -19,7 +19,7 @@ export class ProfilesRepository {
   async findByUserId(userId: string): Promise<Profile | null> {
     return this.profileRepo.findOne({
       where: { userId },
-      relations: ['region', 'interestTags'],
+      relations: ['region', 'interestTags', 'photos'],
     });
   }
 

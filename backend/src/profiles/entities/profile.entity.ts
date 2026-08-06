@@ -9,10 +9,12 @@ import {
   ManyToMany,
   JoinTable,
   OneToOne,
+  OneToMany,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Region } from './region.entity';
 import { InterestTag } from './interest-tag.entity';
+import { Photo } from '../../photos/entities/photo.entity';
 
 @Entity('profiles')
 export class Profile {
@@ -76,6 +78,9 @@ export class Profile {
     default: true,
   })
   photosVisibleToVerified: boolean;
+
+  @OneToMany(() => Photo, (photo) => photo.profile)
+  photos: Photo[];
 
   @ManyToMany(() => InterestTag)
   @JoinTable({

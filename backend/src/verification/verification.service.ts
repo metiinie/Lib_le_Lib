@@ -34,7 +34,7 @@ export class VerificationService {
   async submitVerification(userId: string, dto: SubmitVerificationDto) {
     // Check if a pending record already exists
     const existing = await this.recordsRepo.findByUserId(userId);
-    if (existing && ['submitted', 'in_review'].includes(existing.status)) {
+    if (existing && existing.status === 'in_review') {
       throw new ConflictException({
         error: {
           code: 'VERIFICATION_PENDING',
@@ -60,8 +60,11 @@ export class VerificationService {
       }
     }
 
-    // Create record
-    const record = await this.recordsRepo.create(userId, 'self_upload');
+    // Use existing submitted record or create a new one
+    let record = existing;
+    if (!record || record.status !== 'submitted') {
+      record = await this.recordsRepo.create(userId, 'self_upload');
+    }
 
     // Generate storage ref and signed URL
     const ext = dto.contentType ? dto.contentType.split('/')[1] : 'pdf';

@@ -58,6 +58,22 @@ export class UsersRepository {
   }
 
   /**
+   * Persists a bcrypt-hashed password for the given user.
+   * Called once after the user sets their password during registration.
+   */
+  async updatePasswordHash(id: string, hash: string): Promise<void> {
+    await this.repo.update(id, { passwordHash: hash });
+  }
+
+  /**
+   * Stamps the phone_verified_at timestamp once — after the one-time OTP is
+   * successfully verified during registration. Never reset thereafter.
+   */
+  async updatePhoneVerifiedAt(id: string, date: Date): Promise<void> {
+    await this.repo.update(id, { phoneVerifiedAt: date });
+  }
+
+  /**
    * Returns paginated users with optional search and role filtering (Admin endpoint).
    */
   async findAll(

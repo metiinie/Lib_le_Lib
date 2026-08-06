@@ -2,8 +2,18 @@ import { api } from '@/lib/api';
 
 export const photoService = {
   getUploadUrl: async (type: 'document' | 'selfie' | 'profile') => {
-    const response = await api.post<{ uploadUrl: string }>('/photos/upload-url', { type });
-    return response.data.uploadUrl;
+    const response = await api.post<{ uploadUrl: string, storageRef: string }>('/photos/upload-url', { type });
+    return response.data;
+  },
+
+  registerPhoto: async (storageRef: string, isPrimary: boolean = true) => {
+    const response = await api.post('/photos', { storageRef, isPrimary, position: 0 });
+    return response.data;
+  },
+
+  getPhotoReadUrl: async (photoId: string) => {
+    const response = await api.get<{ url: string; blurred: boolean }>(`/photos/${photoId}`);
+    return response.data.url;
   },
 
   uploadToSignedUrl: async (url: string, fileUri: string, mimeType: string = 'image/jpeg') => {

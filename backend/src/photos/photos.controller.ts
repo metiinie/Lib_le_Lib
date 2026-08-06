@@ -44,10 +44,9 @@ export class PhotosController {
 
   /**
    * Step 2: client registers the photo row after upload completes.
-   * Requires active member — pending members cannot register profile photos.
+   * Open to pending members so they can upload their profile photo during onboarding.
    */
   @Post()
-  @UseGuards(ActiveMemberGuard)
   @ApiResponse({ status: 201, description: 'Photo registered.' })
   async registerPhoto(
     @CurrentUser() user: { id: string },

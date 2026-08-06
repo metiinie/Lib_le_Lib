@@ -75,6 +75,13 @@ export class User {
   @Column({ name: 'last_login_at', type: 'timestamptz', nullable: true })
   lastLoginAt: Date | null;
 
+  /**
+   * Set once when the phone number is verified via OTP during registration.
+   * Never reset. Used to confirm phone ownership without re-verification.
+   */
+  @Column({ name: 'phone_verified_at', type: 'timestamptz', nullable: true })
+  phoneVerifiedAt: Date | null;
+
   // Inverse side of the Profile → User OneToOne relation.
   // Required so TypeORM can resolve `relations: ['user.profile']`
   // in the verification repository without throwing EntityPropertyNotFoundError.

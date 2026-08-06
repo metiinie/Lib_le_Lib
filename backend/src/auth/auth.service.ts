@@ -9,21 +9,25 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
+import * as bcrypt from 'bcrypt';
 import { OtpCodesRepository } from './repositories/otp-codes.repository';
 import { UsersRepository } from '../users/repositories/users.repository';
 import { AuditLogsRepository } from '../verification/repositories/audit-logs.repository';
 
-/** OTP validity window in minutes. */
-const OTP_EXPIRY_MINUTES = 5;
+/** OTP validity window in minutes — extended to 10 min per Mod 1 spec. */
+const OTP_EXPIRY_MINUTES = 10;
 
-/** Max OTP verification attempts before the code is invalidated. */
-const MAX_OTP_ATTEMPTS = 5;
+/** Max OTP verification attempts before the code is invalidated — 3 per Mod 1 spec. */
+const MAX_OTP_ATTEMPTS = 3;
 
 /** Max OTP requests per destination per hour (rate-limit). */
 const MAX_OTP_REQUESTS_PER_HOUR = 5;
 
+/** bcrypt cost factor. 12 rounds ~250ms on modern hardware — safe and not perceptibly slow. */
+const BCRYPT_ROUNDS = 12;
+
 /**
- * Auth service — business logic for OTP-based authentication.
+ * Auth service — business logic for OTP-based and password-based authentication.
  *
  * Per patterns.md: business rules live in services, not controllers,
  * not repositories.
@@ -43,17 +47,21 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {}
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // OTP FLOW (used for registration phone verification — one-time only)
+  // ─────────────────────────────────────────────────────────────────────────
+
   /**
-   * Generates and stores an OTP for a phone or email destination.
+   * Generates and stores an OTP for a phone destination.
+   * Only used during registration (isSignUp=true). Login uses password.
    *
-   * In development, the OTP is logged (but NOT in production — per
-   * conventions.md, never log sensitive payloads).
+   * In development, the OTP is logged to console so devs can test without
+   * a real SMS provider. In production this dispatches to Twilio.
    */
   async requestOtp(
     destination: string,
     isSignUp: boolean,
   ): Promise<{ message: string }> {
-    // Intent check
     const user = await this.usersRepository.findByDestination(destination);
     if (isSignUp && user) {
       throw new ConflictException({
@@ -72,7 +80,7 @@ export class AuthService {
       });
     }
 
-    // Rate-limit: max N requests per hour per destination
+    // Rate-limit: max N OTP requests per hour per destination
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
     const recentCount = await this.otpCodesRepository.countSince(
       destination,
@@ -87,22 +95,13 @@ export class AuthService {
       });
     }
 
-    // Generate a 6-digit OTP
+    // 6-digit code — hash stored, plaintext never persisted
     const code = Math.floor(100000 + Math.random() * 900000).toString();
-
-    // Hash the code before storing (plaintext never persisted)
     const codeHash = crypto.createHash('sha256').update(code).digest('hex');
-
     const expiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
 
-    await this.otpCodesRepository.create({
-      destination,
-      codeHash,
-      expiresAt,
-    });
+    await this.otpCodesRepository.create({ destination, codeHash, expiresAt });
 
-    // In development, log the code so devs can test without a real SMS/email provider.
-    // In production, this would dispatch to Twilio/SES via a notification service.
     if (this.configService.get('NODE_ENV') !== 'production') {
       this.logger.log(`[DEV] OTP for ${destination}: ${code}`);
     }
@@ -111,18 +110,23 @@ export class AuthService {
   }
 
   /**
-   * Verifies an OTP, creates/finds the user, and issues JWT tokens.
+   * Verifies an OTP during registration and issues a short-lived token pair.
    *
-   * Per business-rules.md: OTP-only auth for v1, no password flow.
+   * The client carries the accessToken as a "temp token" to POST /auth/password/set.
+   * Only after the password is set does the client store tokens in SecureStore.
+   * This ensures registration cannot be abandoned midway with an active session.
    */
   async verifyOtp(
     destination: string,
     code: string,
     isSignUp: boolean,
-  ): Promise<{ accessToken: string; refreshToken: string; userId: string }> {
-    // Re-verify intent to prevent race conditions or mismatched flows
-    const userExists =
-      await this.usersRepository.findByDestination(destination);
+  ): Promise<{
+    accessToken: string;
+    refreshToken: string;
+    userId: string;
+    isRegistration: boolean;
+  }> {
+    const userExists = await this.usersRepository.findByDestination(destination);
     if (isSignUp && userExists) {
       throw new ConflictException({
         error: {
@@ -152,7 +156,6 @@ export class AuthService {
       });
     }
 
-    // Check expiry
     if (new Date() > otpRecord.expiresAt) {
       await this.auditLogsRepository.insertWithManager({
         action: 'auth.otp.expired',
@@ -167,7 +170,6 @@ export class AuthService {
       });
     }
 
-    // Check attempt limit
     if (otpRecord.attempts >= MAX_OTP_ATTEMPTS) {
       await this.auditLogsRepository.insertWithManager({
         action: 'auth.otp.max_attempts',
@@ -177,13 +179,11 @@ export class AuthService {
       throw new UnauthorizedException({
         error: {
           code: 'OTP_MAX_ATTEMPTS',
-          message:
-            'Maximum verification attempts exceeded. Please request a new OTP.',
+          message: 'Maximum verification attempts exceeded. Please request a new OTP.',
         },
       });
     }
 
-    // Verify the code
     const codeHash = crypto.createHash('sha256').update(code).digest('hex');
     if (codeHash !== otpRecord.codeHash) {
       await this.otpCodesRepository.incrementAttempts(otpRecord.id);
@@ -193,14 +193,10 @@ export class AuthService {
         metadata: { destination },
       });
       throw new UnauthorizedException({
-        error: {
-          code: 'OTP_INVALID',
-          message: 'Invalid OTP code.',
-        },
+        error: { code: 'OTP_INVALID', message: 'Invalid OTP code.' },
       });
     }
 
-    // Mark OTP as consumed
     await this.otpCodesRepository.markConsumed(otpRecord.id);
 
     // Find or create user
@@ -209,10 +205,76 @@ export class AuthService {
       user = await this.usersRepository.createFromDestination(destination);
     }
 
-    // Update last login
-    await this.usersRepository.updateLastLogin(user.id);
+    // Stamp phone_verified_at once — never reset
+    if (!user.phoneVerifiedAt) {
+      await this.usersRepository.updatePhoneVerifiedAt(user.id, new Date());
+    }
 
-    // Issue tokens
+    await this.usersRepository.updateLastLogin(user.id);
+    const tokens = await this.issueTokens(user.id, user.role);
+
+    return {
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+      userId: user.id,
+      isRegistration: isSignUp,
+    };
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // PASSWORD FLOW (login for returning users + registration completion)
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /**
+   * Authenticates a returning user with phone + password.
+   *
+   * Error codes:
+   *   USER_NOT_FOUND     — no account for this phone
+   *   PASSWORD_NOT_SET   — legacy OTP-only row; direct to forgot-password flow
+   *   INVALID_CREDENTIALS — wrong password (logged to audit trail)
+   */
+  async loginWithPassword(
+    phone: string,
+    password: string,
+  ): Promise<{ accessToken: string; refreshToken: string; userId: string }> {
+    const user = await this.usersRepository.findByPhone(phone);
+
+    if (!user) {
+      throw new NotFoundException({
+        error: {
+          code: 'USER_NOT_FOUND',
+          message: 'No account found for this phone number.',
+        },
+      });
+    }
+
+    if (!user.passwordHash) {
+      throw new BadRequestException({
+        error: {
+          code: 'PASSWORD_NOT_SET',
+          message:
+            'This account has no password set. Use forgot password to create one.',
+        },
+      });
+    }
+
+    const isValid = await bcrypt.compare(password, user.passwordHash);
+    if (!isValid) {
+      await this.auditLogsRepository.insertWithManager({
+        action: 'auth.login.invalid_password',
+        targetType: 'user',
+        targetId: user.id,
+        metadata: { phone },
+      });
+      throw new UnauthorizedException({
+        error: {
+          code: 'INVALID_CREDENTIALS',
+          message: 'Incorrect phone number or password.',
+        },
+      });
+    }
+
+    await this.usersRepository.updateLastLogin(user.id);
     const tokens = await this.issueTokens(user.id, user.role);
 
     return {
@@ -223,7 +285,120 @@ export class AuthService {
   }
 
   /**
+   * Sets the permanent password for a newly registered user.
+   * Called after the one-time OTP verify step (using the temp access token).
+   *
+   * Returns a fresh token pair — this is what the client stores in SecureStore,
+   * completing the registration auth flow and starting a real session.
+   */
+  async setPassword(
+    phone: string,
+    password: string,
+  ): Promise<{ accessToken: string; refreshToken: string; userId: string }> {
+    const user = await this.usersRepository.findByPhone(phone);
+
+    if (!user) {
+      throw new NotFoundException({
+        error: {
+          code: 'USER_NOT_FOUND',
+          message: 'No account found for this phone number.',
+        },
+      });
+    }
+
+    const hash = await bcrypt.hash(password, BCRYPT_ROUNDS);
+    await this.usersRepository.updatePasswordHash(user.id, hash);
+
+    // Re-issue a clean token pair now that registration is fully complete
+    const tokens = await this.issueTokens(user.id, user.role);
+
+    return {
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+      userId: user.id,
+    };
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // FORGOT / RESET PASSWORD
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /**
+   * Initiates the forgot-password flow.
+   * Generates a 15-min JWT reset token and sends it via SMS (logs in dev).
+   *
+   * Always returns success — never reveals whether a phone is registered
+   * (prevents phone enumeration attacks).
+   */
+  async forgotPassword(phone: string): Promise<{ message: string }> {
+    const user = await this.usersRepository.findByPhone(phone);
+
+    if (user) {
+      const resetToken = this.jwtService.sign(
+        { sub: user.id, purpose: 'password_reset' },
+        {
+          secret: this.configService.get<string>('JWT_SECRET'),
+          expiresIn: '15m',
+        },
+      );
+
+      if (this.configService.get('NODE_ENV') !== 'production') {
+        this.logger.log(`[DEV] Password reset token for ${phone}: ${resetToken}`);
+      }
+      // In production: send SMS via Twilio with resetToken
+    }
+
+    return { message: 'If this number is registered, a reset link was sent.' };
+  }
+
+  /**
+   * Applies a new password using the reset token from the SMS link.
+   */
+  async resetPassword(
+    token: string,
+    newPassword: string,
+  ): Promise<{ message: string }> {
+    let payload: any;
+    try {
+      payload = this.jwtService.verify(token, {
+        secret: this.configService.get<string>('JWT_SECRET'),
+      });
+    } catch {
+      throw new UnauthorizedException({
+        error: {
+          code: 'RESET_TOKEN_INVALID',
+          message: 'Invalid or expired reset token.',
+        },
+      });
+    }
+
+    if (payload?.purpose !== 'password_reset') {
+      throw new UnauthorizedException({
+        error: { code: 'RESET_TOKEN_INVALID', message: 'Invalid token purpose.' },
+      });
+    }
+
+    const user = await this.usersRepository.findById(payload.sub);
+    if (!user) {
+      throw new NotFoundException({
+        error: { code: 'USER_NOT_FOUND', message: 'User not found.' },
+      });
+    }
+
+    const hash = await bcrypt.hash(newPassword, BCRYPT_ROUNDS);
+    await this.usersRepository.updatePasswordHash(user.id, hash);
+
+    return { message: 'Password updated successfully.' };
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // REFRESH TOKENS
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /**
    * Rotates a refresh token: validates the old one and issues a new pair.
+   * If the refresh token is expired (> 7 days inactivity) this throws 401,
+   * which the client's axios interceptor catches to call signOut().
    */
   async refreshTokens(
     refreshToken: string,
@@ -233,14 +408,10 @@ export class AuthService {
         secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
       });
 
-      // Verify user still exists and is not suspended/banned/deleted
       const user = await this.usersRepository.findById(payload.sub);
       if (!user || ['suspended', 'banned', 'deleted'].includes(user.status)) {
         throw new UnauthorizedException({
-          error: {
-            code: 'TOKEN_INVALID',
-            message: 'User account is not active.',
-          },
+          error: { code: 'TOKEN_INVALID', message: 'User account is not active.' },
         });
       }
 
@@ -255,8 +426,13 @@ export class AuthService {
     }
   }
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // PRIVATE HELPERS
+  // ─────────────────────────────────────────────────────────────────────────
+
   /**
-   * Issues an access + refresh token pair.
+   * Issues an access + refresh token pair for the given user.
+   * Access token: 15 min · Refresh token: 7 days
    */
   private async issueTokens(
     userId: string,

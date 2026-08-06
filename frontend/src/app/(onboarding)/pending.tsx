@@ -1,20 +1,37 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { verificationService } from '@/services/verification.service';
+import { profileService } from '@/services/profile.service';
+import { photoService } from '@/services/photo.service';
 import { BlurredPhoto } from '@/components/photos/BlurredPhoto';
 import { useAuthStore } from '@/state/auth.store';
 
 export default function PendingScreen() {
   const router = useRouter();
   const token = useAuthStore((state) => state.token);
-  const [activeTab, setActiveTab] = useState<'owner' | 'others'>('owner');
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    // Don't start polling until the auth token has hydrated from SecureStore.
-    // Without this guard, the first poll fires with no Authorization header,
-    // gets a 401, and the interceptor logs the user out.
     if (!token) return;
+
+    // Fetch user's profile to get their uploaded photo
+    const fetchProfile = async () => {
+      try {
+        const profile = await profileService.getProfile();
+        if (profile.photos && profile.photos.length > 0) {
+          const primaryPhoto = profile.photos.find((p: any) => p.isPrimary) || profile.photos[0];
+          if (primaryPhoto && primaryPhoto.id) {
+            const url = await photoService.getPhotoReadUrl(primaryPhoto.id);
+            setPhotoUrl(url);
+          }
+        }
+      } catch (err) {
+        console.warn('Failed to fetch profile photo for pending screen', err);
+      }
+    };
+
+    fetchProfile();
 
     let interval: ReturnType<typeof setInterval>;
 
@@ -51,62 +68,36 @@ export default function PendingScreen() {
           Our team is reviewing your documentation. This usually takes less than 24 hours. You'll be notified as soon as you're approved.
         </Text>
 
-        {/* Privacy & Photo Mechanics Interactive Preview */}
+        {/* Photo Privacy Information */}
         <View className="w-full bg-slate-50 p-5 rounded-2xl border border-slate-200">
           <Text className="text-lg font-bold text-slate-900 mb-1">
-            Photo Privacy Mechanics
+            Photo Privacy
           </Text>
           <Text className="text-slate-600 text-xs mb-4 leading-normal">
-            As the photo owner, you always see your own photos unblurred. All other members see your photos blurred by default until you grant access.
+            Your photos will be visible to other verified members by default. You can choose to blur them at any time from your privacy settings.
           </Text>
 
-          {/* View Switcher Tabs */}
-          <View className="flex-row bg-slate-200 p-1 rounded-xl mb-4">
-            <TouchableOpacity
-              onPress={() => setActiveTab('owner')}
-              className={`flex-1 py-2.5 rounded-lg items-center ${
-                activeTab === 'owner' ? 'bg-white shadow-sm' : ''
-              }`}
-            >
-              <Text
-                className={`font-semibold text-xs ${
-                  activeTab === 'owner' ? 'text-blue-600 font-bold' : 'text-slate-600'
-                }`}
-              >
-                👁️ Your View (Unblurred)
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => setActiveTab('others')}
-              className={`flex-1 py-2.5 rounded-lg items-center ${
-                activeTab === 'others' ? 'bg-white shadow-sm' : ''
-              }`}
-            >
-              <Text
-                className={`font-semibold text-xs ${
-                  activeTab === 'others' ? 'text-blue-600 font-bold' : 'text-slate-600'
-                }`}
-              >
-                🔒 Others' View (Blurred)
-              </Text>
-            </TouchableOpacity>
-          </View>
-
           {/* Photo Render */}
-          <View className="w-full aspect-[3/4] rounded-xl overflow-hidden bg-slate-200 relative">
-            <BlurredPhoto
-              blurhash="LEHV6nWB2yk8pyo0adR*.7kCMdnj"
-              revealGranted={activeTab === 'owner'} // Unblurred for owner, blurred for others
-              photoUrl="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=600"
-            />
+          <View className="w-full aspect-[3/4] rounded-xl overflow-hidden bg-slate-200 relative justify-center items-center">
+            {photoUrl ? (
+              <BlurredPhoto
+                blurhash="LEHV6nWB2yk8pyo0adR*.7kCMdnj"
+                revealGranted={true}
+                photoUrl={photoUrl}
+              />
+            ) : (
+              <View className="items-center justify-center p-6">
+                <Text className="text-6xl mb-4">👤</Text>
+                <Text className="text-slate-500 font-medium text-center">
+                  Your profile photo will appear here
+                </Text>
+              </View>
+            )}
             
             {/* Status Overlay Badge */}
             <View className="absolute bottom-3 left-3 right-3 bg-black/70 p-3 rounded-lg">
               <Text className="text-white text-xs font-semibold text-center">
-                {activeTab === 'owner'
-                  ? '✨ Visible to you because you own this profile'
-                  : '🔒 Permanently blurred to all other members by default'}
+                ✨ Visible to other verified members by default
               </Text>
             </View>
           </View>
