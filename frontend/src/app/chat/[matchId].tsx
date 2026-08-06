@@ -4,6 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { MessageBubble, MessageProps } from '@/components/chat/MessageBubble';
 import { cryptoService } from '@/services/crypto.service';
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/state/auth.store';
 import { ChatHeaderMenu } from '@/components/chat/ChatHeaderMenu';
@@ -66,8 +67,13 @@ export default function ChatScreen() {
           }
         });
       }
-    } catch (err) {
-      console.error('Failed to fetch messages', err);
+    } catch (err: any) {
+      if (err.isAxiosError && err.message === 'Network Error') {
+        // Suppress network error spam during background polling
+        if (!isPoll) console.warn('Failed to fetch messages (Network Error)');
+      } else {
+        console.warn('Failed to fetch messages', err?.message || err);
+      }
       setLoading(false);
     }
   };
@@ -107,8 +113,40 @@ export default function ChatScreen() {
 
       // Optimistic UI update
       setMessages(prev => [newMessage, ...prev]);
+    } catch (err: any) {
+      console.warn('Failed to send message', err?.message || err);
+    }
+  };
+
+  const pickImage = async () => {
+    try {
+      // Ask for permission first
+      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permissionResult.granted) {
+        alert("Permission to access gallery is required to send photos.");
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        // Mock sending the photo for now
+        const newMessage: MessageProps = {
+          id: Math.random().toString(),
+          senderId: getMyId(),
+          isMe: true,
+          ciphertext: '📷 Sent a photo',
+          type: 'text',
+          sentAt: new Date().toISOString(),
+        };
+        setMessages(prev => [newMessage, ...prev]);
+      }
     } catch (err) {
-      console.error('Failed to send message', err);
+      console.warn('Error picking image', err);
     }
   };
 
@@ -119,7 +157,7 @@ export default function ChatScreen() {
   return (
     <KeyboardAvoidingView 
       className="flex-1 bg-white"
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={90}
     >
       <View className="flex-row items-center justify-between px-4 py-3 border-b border-slate-100 bg-white">
@@ -151,7 +189,7 @@ export default function ChatScreen() {
       <View className="px-4 py-3 border-t border-slate-100 flex-row items-center bg-white pb-8">
         <TouchableOpacity 
           className="mr-3 p-2 min-w-[48px] min-h-[48px] items-center justify-center"
-          onPress={() => router.push(`/reveal/new`)} // Mock route for sharing photo
+          onPress={pickImage}
           accessibilityLabel="Share photo"
           accessibilityHint="Navigates to photo sharing screen"
           accessibilityRole="button"

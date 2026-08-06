@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { discoveryService, DiscoveryProfile } from '@/services/discovery.service';
+import { profileService } from '@/services/profile.service';
 import { BlurredPhoto } from '@/components/photos/BlurredPhoto';
 
 export default function ProfileDetailScreen() {
@@ -11,13 +12,42 @@ export default function ProfileDetailScreen() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // In a real app, we'd fetch the specific profile by ID.
-    // For now, we mock finding it from the discovery feed.
-    discoveryService.getProfiles().then(profiles => {
-      const found = profiles.find(p => p.id === id);
-      if (found) setProfile(found);
-      setLoading(false);
-    });
+    const fetchProfile = async () => {
+      try {
+        const myProfile = await profileService.getProfile().catch(() => null);
+        if (myProfile && (myProfile.id === id || myProfile.userId === id)) {
+          setProfile({
+            id: myProfile.id,
+            nickname: myProfile.nickname || 'Member',
+            age: myProfile.age || 25,
+            gender: myProfile.gender || 'Not specified',
+            region: myProfile.region || 'Nearby',
+            bio: myProfile.bio || '',
+            relationshipGoals: myProfile.relationshipGoals || [],
+            photos: myProfile.photos?.map((p: any) => ({
+              id: p.id,
+              blurhash: 'LEHV6nWB2yk8pyo0adR*.7kCMdnj',
+              url: p.url,
+              revealGranted: true
+            })) || [],
+            isBlocked: false,
+          } as DiscoveryProfile);
+          setLoading(false);
+          return;
+        }
+
+        // In a real app, we'd fetch the specific profile by ID.
+        // For now, we mock finding it from the discovery feed.
+        const profiles = await discoveryService.getProfiles().catch(() => []);
+        const found = profiles.find(p => p.id === id);
+        if (found) setProfile(found);
+      } catch (err) {
+        console.warn('Failed to load profile', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProfile();
   }, [id]);
 
   const handleAction = async (action: 'like' | 'pass') => {

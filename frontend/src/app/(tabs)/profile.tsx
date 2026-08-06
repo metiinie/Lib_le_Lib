@@ -64,41 +64,7 @@ export default function ProfileHubScreen() {
     <ScrollView className="flex-1 bg-slate-50 pt-16 px-4">
       <Text className="text-3xl font-bold text-slate-900 mb-6 px-2">Profile</Text>
 
-      {/* 1. Wellbeing Section (Top Priority per Spec) */}
-      <Text className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-2 px-2">Wellbeing & Support</Text>
-      <View className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden mb-6">
-        <TouchableOpacity className="p-4 border-b border-slate-50 flex-row items-center justify-between">
-          <View className="flex-row items-center">
-            <View className="w-8 h-8 bg-blue-50 rounded-full items-center justify-center mr-3">
-              <Ionicons name="library-outline" size={18} color="#1B4D5C" />
-            </View>
-            <Text className="text-base font-semibold text-slate-900">Health Resource Library</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={20} color="#4A7A8A" />
-        </TouchableOpacity>
-        
-        <TouchableOpacity className="p-4 border-b border-slate-50 flex-row items-center justify-between">
-          <View className="flex-row items-center">
-            <View className="w-8 h-8 bg-indigo-50 rounded-full items-center justify-center mr-3">
-              <Ionicons name="medical-outline" size={18} color="#C49A3C" />
-            </View>
-            <Text className="text-base font-semibold text-slate-900">Ask a Health Professional</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={20} color="#4A7A8A" />
-        </TouchableOpacity>
-
-        <TouchableOpacity className="p-4 flex-row items-center justify-between">
-          <View className="flex-row items-center">
-            <View className="w-8 h-8 bg-emerald-50 rounded-full items-center justify-center mr-3">
-              <Ionicons name="heart-half-outline" size={18} color="#4A9B7F" />
-            </View>
-            <Text className="text-base font-semibold text-slate-900">Success Stories</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={20} color="#4A7A8A" />
-        </TouchableOpacity>
-      </View>
-
-      {/* 2. My Profile & Verification */}
+      {/* 1. My Profile & Verification */}
       <Text className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-2 px-2">My Profile</Text>
       
       {showExpiryWarning && (
@@ -156,6 +122,40 @@ export default function ProfileHubScreen() {
             <Text className="text-white font-semibold">Edit Profile</Text>
           </TouchableOpacity>
         </View>
+      </View>
+
+      {/* 2. Wellbeing Section */}
+      <Text className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-2 px-2">Wellbeing & Support</Text>
+      <View className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden mb-6">
+        <TouchableOpacity className="p-4 border-b border-slate-50 flex-row items-center justify-between">
+          <View className="flex-row items-center">
+            <View className="w-8 h-8 bg-blue-50 rounded-full items-center justify-center mr-3">
+              <Ionicons name="library-outline" size={18} color="#1B4D5C" />
+            </View>
+            <Text className="text-base font-semibold text-slate-900">Health Resource Library</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color="#4A7A8A" />
+        </TouchableOpacity>
+        
+        <TouchableOpacity className="p-4 border-b border-slate-50 flex-row items-center justify-between">
+          <View className="flex-row items-center">
+            <View className="w-8 h-8 bg-indigo-50 rounded-full items-center justify-center mr-3">
+              <Ionicons name="medical-outline" size={18} color="#C49A3C" />
+            </View>
+            <Text className="text-base font-semibold text-slate-900">Ask a Health Professional</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color="#4A7A8A" />
+        </TouchableOpacity>
+
+        <TouchableOpacity className="p-4 flex-row items-center justify-between">
+          <View className="flex-row items-center">
+            <View className="w-8 h-8 bg-emerald-50 rounded-full items-center justify-center mr-3">
+              <Ionicons name="heart-half-outline" size={18} color="#4A9B7F" />
+            </View>
+            <Text className="text-base font-semibold text-slate-900">Success Stories</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color="#4A7A8A" />
+        </TouchableOpacity>
       </View>
 
       {/* 3. Settings & Account */}

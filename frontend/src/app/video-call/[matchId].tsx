@@ -12,7 +12,7 @@ export default function VideoCallScheduleScreen() {
   const handleSchedule = async () => {
     try {
       // MVP: Meta-data scheduling only. No actual WebRTC track initiation.
-      await api.post(`/calls/schedule`, { matchId });
+      await api.post(`/matches/${matchId}/video-calls`, {});
       setScheduled(true);
       Alert.alert("Scheduled", "A video call request has been sent to your match.");
     } catch (err) {

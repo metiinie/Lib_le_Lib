@@ -13,26 +13,42 @@ export default function PhotoRevealScreen() {
   const handleGrant = async () => {
     setLoading(true);
     try {
+      if (photoId === 'new' || !matchId) {
+        // Mock successful grant for 'new' photo placeholder
+        setTimeout(() => {
+          setGranted(true);
+          setLoading(false);
+        }, 800);
+        return;
+      }
       // POST /photos/:id/reveal-grants
       await api.post(`/photos/${photoId}/reveal-grants`, { targetUserId: matchId });
       setGranted(true);
     } catch (err) {
       console.error(err);
     } finally {
-      setLoading(false);
+      if (photoId !== 'new' && matchId) setLoading(false);
     }
   };
 
   const handleRevoke = async () => {
     setLoading(true);
     try {
+      if (photoId === 'new' || !matchId) {
+        // Mock successful revoke for 'new' photo placeholder
+        setTimeout(() => {
+          setGranted(false);
+          setLoading(false);
+        }, 800);
+        return;
+      }
       // DELETE /photos/:id/reveal-grants/:targetUserId
       await api.delete(`/photos/${photoId}/reveal-grants/${matchId}`);
       setGranted(false);
     } catch (err) {
       console.error(err);
     } finally {
-      setLoading(false);
+      if (photoId !== 'new' && matchId) setLoading(false);
     }
   };
 
