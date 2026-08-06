@@ -43,7 +43,7 @@ export default function PendingScreen() {
   return (
     <ScrollView className="flex-1 bg-white">
       <View className="px-6 pt-20 pb-12 items-center">
-        <ActivityIndicator size="large" color="#208AEF" className="mb-4" />
+        <ActivityIndicator size="large" color="#1B4D5C" className="mb-4" />
         <Text className="text-2xl font-bold text-slate-900 mb-2 text-center">
           Verification Pending
         </Text>

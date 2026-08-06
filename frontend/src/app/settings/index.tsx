@@ -20,7 +20,7 @@ export default function SettingsIndexScreen() {
     <ScrollView className="flex-1 bg-slate-50 pt-16 px-6">
       <View className="flex-row items-center mb-8">
         <TouchableOpacity onPress={() => router.back()} className="p-2 -ml-2 mr-4">
-          <Ionicons name="chevron-back" size={28} color="#0f172a" />
+          <Ionicons name="chevron-back" size={28} color="#0F1E24" />
         </TouchableOpacity>
         <Text className="text-2xl font-bold text-slate-900">Preferences</Text>
       </View>
@@ -36,7 +36,7 @@ export default function SettingsIndexScreen() {
           <Switch
             value={prefs.isDiscreetMode}
             onValueChange={(val) => prefs.setPreference('isDiscreetMode', val)}
-            trackColor={{ false: '#cbd5e1', true: '#4f46e5' }}
+            trackColor={{ false: '#D6DFE2', true: '#1B4D5C' }}
           />
         </View>
 
@@ -49,7 +49,7 @@ export default function SettingsIndexScreen() {
           <Switch
             value={prefs.isLowBandwidthMode}
             onValueChange={(val) => prefs.setPreference('isLowBandwidthMode', val)}
-            trackColor={{ false: '#cbd5e1', true: '#4f46e5' }}
+            trackColor={{ false: '#D6DFE2', true: '#1B4D5C' }}
           />
         </View>
 
@@ -62,7 +62,7 @@ export default function SettingsIndexScreen() {
           <Switch
             value={prefs.notificationsEnabled}
             onValueChange={(val) => prefs.setPreference('notificationsEnabled', val)}
-            trackColor={{ false: '#cbd5e1', true: '#4f46e5' }}
+            trackColor={{ false: '#D6DFE2', true: '#1B4D5C' }}
           />
         </View>
 
@@ -84,7 +84,7 @@ export default function SettingsIndexScreen() {
                 console.error('Failed to save photos visibility preference', err);
               }
             }}
-            trackColor={{ false: '#cbd5e1', true: '#4f46e5' }}
+            trackColor={{ false: '#D6DFE2', true: '#1B4D5C' }}
           />
         </View>
 
@@ -107,15 +107,15 @@ export default function SettingsIndexScreen() {
       <View className="bg-white rounded-2xl shadow-sm border border-slate-100 mb-6 overflow-hidden">
         <TouchableOpacity className="p-4 border-b border-slate-100 flex-row items-center justify-between" onPress={() => router.push('/settings/account')}>
           <View className="flex-row items-center">
-            <Ionicons name="trash-outline" size={20} color="#ef4444" />
+            <Ionicons name="trash-outline" size={20} color="#B84C4C" />
             <Text className="text-red-600 font-bold ml-3">Delete Account</Text>
           </View>
-          <Ionicons name="chevron-forward" size={20} color="#cbd5e1" />
+          <Ionicons name="chevron-forward" size={20} color="#4A7A8A" />
         </TouchableOpacity>
         
         <TouchableOpacity className="p-4 flex-row items-center justify-between" onPress={handleLogout}>
           <View className="flex-row items-center">
-            <Ionicons name="log-out-outline" size={20} color="#64748b" />
+            <Ionicons name="log-out-outline" size={20} color="#4A7A8A" />
             <Text className="text-slate-600 font-bold ml-3">Log out</Text>
           </View>
         </TouchableOpacity>

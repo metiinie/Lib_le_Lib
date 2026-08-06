@@ -95,7 +95,7 @@ export const HealthQA: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-3">
+          <h1 className="text-2xl font-bold text-slate-100 flex items-center gap-3">
             <Stethoscope className="w-7 h-7 text-emerald-400" />
             Medical & Health Q&A Desk
           </h1>
@@ -266,7 +266,7 @@ export const HealthQA: React.FC = () => {
             className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-xl p-8 shadow-2xl space-y-6"
           >
             <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-              <h3 className="text-xl font-bold text-white flex items-center gap-2">
+              <h3 className="text-xl font-bold text-slate-100 flex items-center gap-2">
                 <Stethoscope className="w-5 h-5 text-emerald-400" />
                 Publish Medical Reply
               </h3>

@@ -204,7 +204,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: propUser, onNavigate
           <span className="px-3 py-1 text-xs font-semibold rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
             Lib le Lib Staff Console
           </span>
-          <h1 className="text-3xl font-bold text-white mt-3">
+          <h1 className="text-3xl font-bold text-slate-100 mt-3">
             Welcome back, {user?.profile?.nickname || user?.profile?.displayName || user?.email || 'Staff Member'} 👋
           </h1>
           <p className="text-slate-400 mt-2 text-sm leading-relaxed">
@@ -258,7 +258,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: propUser, onNavigate
 
       {/* Quick Workspace Tiles — role-filtered */}
       <div>
-        <h2 className="text-lg font-bold text-white mb-4">Quick Workspaces</h2>
+        <h2 className="text-lg font-bold text-slate-100 mb-4">Quick Workspaces</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {visibleTiles.map((tile) => {
             const Icon = tile.icon;
@@ -277,7 +277,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user: propUser, onNavigate
                     className={`w-5 h-5 text-slate-600 ${accent.arrow} transition-colors`}
                   />
                 </div>
-                <h3 className="text-base font-bold text-slate-100 group-hover:text-white transition-colors">
+                <h3 className="text-base font-bold text-slate-100 group-hover:text-slate-100 transition-colors">
                   {tile.title}
                 </h3>
                 <p className="text-xs text-slate-400 mt-1">{tile.description}</p>

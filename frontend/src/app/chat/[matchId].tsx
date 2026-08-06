@@ -113,7 +113,7 @@ export default function ChatScreen() {
   };
 
   if (loading) {
-    return <View className="flex-1 justify-center"><ActivityIndicator color="#208AEF" /></View>;
+    return <View className="flex-1 justify-center"><ActivityIndicator color="#1B4D5C" /></View>;
   }
 
   return (
@@ -124,12 +124,12 @@ export default function ChatScreen() {
     >
       <View className="flex-row items-center justify-between px-4 py-3 border-b border-slate-100 bg-white">
         <TouchableOpacity onPress={() => router.back()} className="p-2 -ml-2">
-          <Ionicons name="chevron-back" size={24} color="#0f172a" />
+          <Ionicons name="chevron-back" size={24} color="#0F1E24" />
         </TouchableOpacity>
         <Text className="text-lg font-bold">Chat</Text>
         <View className="flex-row items-center">
           <TouchableOpacity onPress={() => router.push(`/video-call/${matchId}`)} className="p-2">
-            <Ionicons name="videocam-outline" size={24} color="#208AEF" />
+            <Ionicons name="videocam-outline" size={24} color="#1B4D5C" />
           </TouchableOpacity>
           <ChatHeaderMenu matchId={matchId} />
         </View>
@@ -156,13 +156,13 @@ export default function ChatScreen() {
           accessibilityHint="Navigates to photo sharing screen"
           accessibilityRole="button"
         >
-          <Ionicons name="add-circle-outline" size={28} color="#64748b" />
+          <Ionicons name="add-circle-outline" size={28} color="#4A7A8A" />
         </TouchableOpacity>
         
         <TextInput
           className="flex-1 bg-slate-100 rounded-full px-4 py-2.5 text-base text-slate-900 min-h-[48px]"
           placeholder="Type a message..."
-          placeholderTextColor="#94a3b8"
+          placeholderTextColor="#4A7A8A"
           value={input}
           onChangeText={setInput}
           multiline
@@ -176,7 +176,7 @@ export default function ChatScreen() {
           accessibilityLabel="Send message"
           accessibilityRole="button"
         >
-          <Ionicons name="send" size={18} color={input.trim() ? '#ffffff' : '#94a3b8'} className="ml-1" />
+          <Ionicons name="send" size={18} color={input.trim() ? '#ffffff' : '#4A7A8A'} className="ml-1" />
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>

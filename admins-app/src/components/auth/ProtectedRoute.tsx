@@ -22,7 +22,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
           <ShieldAlert className="w-9 h-9" />
         </div>
         <div className="max-w-md space-y-2">
-          <h2 className="text-xl font-bold text-white">Access Restricted Desk</h2>
+          <h2 className="text-xl font-bold text-slate-100">Access Restricted Desk</h2>
           <p className="text-sm text-slate-400 leading-relaxed">
             Your current staff authorization role (
             <span className="font-semibold text-rose-400 capitalize">

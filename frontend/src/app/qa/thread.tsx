@@ -65,7 +65,7 @@ export default function QaThreadScreen() {
   };
 
   if (loading) {
-    return <View className="flex-1 bg-white justify-center"><ActivityIndicator color="#4f46e5" /></View>;
+    return <View className="flex-1 bg-white justify-center"><ActivityIndicator color="#1B4D5C" /></View>;
   }
 
   return (
@@ -76,7 +76,7 @@ export default function QaThreadScreen() {
     >
       <View className="flex-row items-center px-4 py-3 border-b border-slate-100 bg-white">
         <TouchableOpacity onPress={() => router.back()} className="p-2 -ml-2 mr-2">
-          <Ionicons name="chevron-back" size={24} color="#0f172a" />
+          <Ionicons name="chevron-back" size={24} color="#0F1E24" />
         </TouchableOpacity>
         <View>
           <Text className="text-lg font-bold text-slate-900">Professional Q&A</Text>

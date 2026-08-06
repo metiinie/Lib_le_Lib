@@ -1,8 +1,46 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { ThemeProvider } from '@react-navigation/native';
+import type { Theme } from '@react-navigation/native';
 import { Stack, router, useSegments, useRootNavigationState } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { useColorScheme } from 'react-native';
+
+const LibLeLibDark: Theme = {
+  dark: true,
+  colors: {
+    primary: '#C4623A',      // Warm Terracotta — accent
+    background: '#0F1E24',   // Deep Ocean
+    card: '#162A33',         // Night Teal
+    text: '#EFF4F5',         // Warm White
+    border: '#1B3D48',
+    notification: '#D4784F', // Terracotta Light
+  },
+  fonts: {
+    regular: { fontFamily: 'System', fontWeight: '400' },
+    medium: { fontFamily: 'System', fontWeight: '500' },
+    bold: { fontFamily: 'System', fontWeight: '700' },
+    heavy: { fontFamily: 'System', fontWeight: '900' },
+  },
+};
+
+const LibLeLibLight: Theme = {
+  dark: false,
+  colors: {
+    primary: '#1B4D5C',      // Trusted Teal — primary brand
+    background: '#F5F7F8',   // Warm Off-white
+    card: '#FFFFFF',
+    text: '#0F1E24',         // Deep Ocean
+    border: '#D6DFE2',
+    notification: '#C4623A', // Warm Terracotta
+  },
+  fonts: {
+    regular: { fontFamily: 'System', fontWeight: '400' },
+    medium: { fontFamily: 'System', fontWeight: '500' },
+    bold: { fontFamily: 'System', fontWeight: '700' },
+    heavy: { fontFamily: 'System', fontWeight: '900' },
+  },
+};
 import { useAuth } from '@/hooks/useAuth';
 import { useAuthStore } from '@/state/auth.store';
 import { userService } from '@/services/user.service';
@@ -19,12 +57,21 @@ export default function RootLayout() {
   const { isAuthenticated } = useAuth();
   const segments = useSegments();
   const navigationState = useRootNavigationState();
+  const hasHydrated = useAuthStore((state) => state._hasHydrated);
+
+  // Keep splash screen visible until auth store has finished hydrating
+  // from SecureStore. Without this gate, `token` reads as null during
+  // hydration, triggering a premature redirect to auth, API 401s, and
+  // a redirect loop that freezes the app on slower devices.
+  useEffect(() => {
+    if (hasHydrated) {
+      SplashScreen.hideAsync();
+    }
+  }, [hasHydrated]);
 
   useEffect(() => {
-    SplashScreen.hideAsync();
-  }, []);
-
-  useEffect(() => {
+    // Don't navigate until both hydration and the navigation tree are ready
+    if (!hasHydrated) return;
     if (!navigationState?.key) return;
 
     const inAuthGroup = segments[0] === '(auth)';
@@ -102,13 +149,16 @@ export default function RootLayout() {
         isCancelled = true;
       };
     }
-  }, [isAuthenticated, segments, navigationState?.key]);
+  }, [isAuthenticated, segments, navigationState?.key, hasHydrated]);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack screenOptions={{ headerShown: false }} />
-      </ThemeProvider>
-    </QueryClientProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider value={colorScheme === 'dark' ? LibLeLibDark : LibLeLibLight}>
+          <Stack screenOptions={{ headerShown: false }} />
+        </ThemeProvider>
+      </QueryClientProvider>
+    </GestureHandlerRootView>
   );
 }
+

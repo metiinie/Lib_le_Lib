@@ -44,7 +44,7 @@ export const TelemetryDesk: React.FC = () => {
             <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-1">
               {endpoint.split(' ')[0]}
             </h3>
-            <p className="text-xl font-bold text-white truncate max-w-[200px]" title={endpoint.split(' ')[1]}>
+            <p className="text-xl font-bold text-slate-100 truncate max-w-[200px]" title={endpoint.split(' ')[1]}>
               {endpoint.split(' ')[1]}
             </p>
           </div>
@@ -89,7 +89,7 @@ export const TelemetryDesk: React.FC = () => {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-3">
+          <h1 className="text-2xl font-bold text-slate-100 flex items-center gap-3">
             <Activity className="w-7 h-7 text-indigo-400" />
             Performance Budget Telemetry
           </h1>
@@ -112,7 +112,7 @@ export const TelemetryDesk: React.FC = () => {
 
       <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl mt-8">
         <div className="p-5 border-b border-slate-800">
-          <h2 className="text-lg font-bold text-white">Full Telemetry Breakdown</h2>
+          <h2 className="text-lg font-bold text-slate-100">Full Telemetry Breakdown</h2>
           <p className="text-xs text-slate-400 mt-1">Detailed rolling metrics for the last 1,000 requests per endpoint.</p>
         </div>
 

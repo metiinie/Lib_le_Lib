@@ -31,7 +31,7 @@ export const Header: React.FC<HeaderProps> = ({ user, onMenuToggle }) => {
         {onMenuToggle && (
           <button
             onClick={onMenuToggle}
-            className="lg:hidden p-2 bg-slate-950 border border-slate-800 rounded-lg text-slate-300 hover:text-white"
+            className="lg:hidden p-2 bg-slate-950 border border-slate-800 rounded-lg text-slate-300 hover:text-slate-100"
             title="Open Mobile Navigation"
           >
             <Menu className="w-5 h-5" />

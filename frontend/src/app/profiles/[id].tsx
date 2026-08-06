@@ -37,7 +37,7 @@ export default function ProfileDetailScreen() {
   if (loading || !profile) {
     return (
       <View className="flex-1 bg-white justify-center items-center">
-        <ActivityIndicator size="large" color="#208AEF" />
+        <ActivityIndicator size="large" color="#1B4D5C" />
       </View>
     );
   }

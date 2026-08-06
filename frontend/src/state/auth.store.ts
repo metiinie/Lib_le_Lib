@@ -5,6 +5,7 @@ import * as SecureStore from 'expo-secure-store';
 
 interface AuthState {
   token: string | null;
+  _hasHydrated: boolean;
   setToken: (token: string) => void;
   signOut: () => void;
 }
@@ -53,12 +54,20 @@ export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       token: null,
+      _hasHydrated: false,
       setToken: (token: string) => set({ token }),
       signOut: () => set({ token: null }),
     }),
     {
       name: 'auth-storage',
       storage: createJSONStorage(() => secureStorage),
+      onRehydrateStorage: () => () => {
+        // Called after hydration finishes (success or fail).
+        // We set _hasHydrated directly on the store so the root layout
+        // can gate on it before making any routing decisions.
+        useAuthStore.setState({ _hasHydrated: true });
+      },
     }
   )
 );
+

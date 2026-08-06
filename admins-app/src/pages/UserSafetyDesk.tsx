@@ -124,7 +124,7 @@ export const UserSafetyDesk: React.FC = () => {
   return (
     <div className="space-y-6 max-w-5xl">
       <div>
-        <h1 className="text-2xl font-bold text-white flex items-center gap-3">
+        <h1 className="text-2xl font-bold text-slate-100 flex items-center gap-3">
           <ShieldAlert className="w-7 h-7 text-amber-400" />
           Account Enforcement Desk
         </h1>
@@ -135,7 +135,7 @@ export const UserSafetyDesk: React.FC = () => {
 
       {/* Search Header */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-        <h2 className="text-base font-bold text-white">Search Account to Enforce</h2>
+        <h2 className="text-base font-bold text-slate-100">Search Account to Enforce</h2>
         <form onSubmit={handleSearch} className="flex gap-3">
           <div className="relative flex-1">
             <Search className="w-5 h-5 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -216,7 +216,7 @@ export const UserSafetyDesk: React.FC = () => {
             className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-8 shadow-2xl space-y-6"
           >
             <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-              <h3 className="text-xl font-bold text-white flex items-center gap-2">
+              <h3 className="text-xl font-bold text-slate-100 flex items-center gap-2">
                 <AlertTriangle className="w-5 h-5 text-amber-400" />
                 Enforce Account Status
               </h3>
@@ -277,7 +277,7 @@ export const UserSafetyDesk: React.FC = () => {
 
           {/* Granular Content Moderation Panel */}
           <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
-            <h3 className="text-xl font-bold text-white flex items-center gap-2 border-b border-slate-800 pb-4">
+            <h3 className="text-xl font-bold text-slate-100 flex items-center gap-2 border-b border-slate-800 pb-4">
               <ImageIcon className="w-5 h-5 text-indigo-400" />
               Granular Content Moderation
             </h3>

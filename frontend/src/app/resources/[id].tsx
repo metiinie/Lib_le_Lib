@@ -39,17 +39,17 @@ export default function ResourceDetailScreen() {
   };
 
   if (loading || !article) {
-    return <View className="flex-1 bg-white justify-center"><ActivityIndicator color="#208AEF" /></View>;
+    return <View className="flex-1 bg-white justify-center"><ActivityIndicator color="#1B4D5C" /></View>;
   }
 
   return (
     <View className="flex-1 bg-white">
       <View className="flex-row items-center justify-between px-6 pt-16 pb-4 border-b border-slate-100">
         <TouchableOpacity onPress={() => router.back()} className="p-2 -ml-2">
-          <Ionicons name="chevron-back" size={28} color="#0f172a" />
+          <Ionicons name="chevron-back" size={28} color="#0F1E24" />
         </TouchableOpacity>
         <TouchableOpacity onPress={handleShare} className="p-2 -mr-2">
-          <Ionicons name="share-outline" size={24} color="#0f172a" />
+          <Ionicons name="share-outline" size={24} color="#0F1E24" />
         </TouchableOpacity>
       </View>
 
@@ -60,9 +60,9 @@ export default function ResourceDetailScreen() {
 
         <Markdown
           style={{
-            body: { fontSize: 18, lineHeight: 28, color: '#334155' },
-            heading1: { fontSize: 32, fontWeight: 'bold', color: '#0f172a', marginBottom: 16, marginTop: 8 },
-            strong: { fontWeight: 'bold', color: '#0f172a' }
+            body: { fontSize: 18, lineHeight: 28, color: '#7BA3B0' },
+            heading1: { fontSize: 32, fontWeight: 'bold', color: '#EFF4F5', marginBottom: 16, marginTop: 8 },
+            strong: { fontWeight: 'bold', color: '#EFF4F5' }
           }}
         >
           {article.content}

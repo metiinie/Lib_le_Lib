@@ -3,8 +3,92 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --color-slate-950: #EFF4F5;
+    --color-slate-900: #E8EEF0;
+    --color-slate-800: #D6DFE2;
+    --color-slate-700: #7BA3B0;
+    --color-slate-600: #7BA3B0;
+    --color-slate-500: #4A7A8A;
+    --color-slate-400: #4A7A8A;
+    --color-slate-300: #2A6B80;
+    --color-slate-200: #1B4D5C;
+    --color-slate-100: #162A33;
+    
+    --color-indigo-300: #2A6B80;
+    --color-indigo-400: #2A6B80;
+    --color-indigo-500: #1B4D5C;
+    --color-indigo-600: #163F4B;
+    --color-indigo-900: #E8EEF0;
+    --color-indigo-950: #D6DFE2;
+    --color-violet-500: #1B4D5C;
+    --color-violet-600: #163F4B;
+    --color-purple-400: #2A6B80;
+    --color-purple-500: #1B4D5C;
+    --color-purple-600: #163F4B;
+
+    --color-rose-400: #B84C4C;
+    --color-rose-500: #963E3E;
+    --color-rose-600: #743030;
+    --color-rose-950: #EACFCF;
+
+    --color-emerald-200: #3D8069;
+    --color-emerald-400: #4A9B7F;
+    --color-emerald-500: #3D8069;
+    --color-emerald-600: #306654;
+    --color-emerald-900: #CEE6DC;
+    --color-emerald-950: #A0D0BC;
+    
+    --color-amber-400: #D4784F;
+    --color-amber-500: #C4623A;
+    --color-amber-600: #A85230;
+    --color-amber-950: #F0DCBF;
+  }
+
+  .dark {
+    --color-slate-950: #0F1E24;
+    --color-slate-900: #162A33;
+    --color-slate-800: #1B4D5C;
+    --color-slate-700: #2A6B80;
+    --color-slate-600: #4A7A8A;
+    --color-slate-500: #7BA3B0;
+    --color-slate-400: #7BA3B0;
+    --color-slate-300: #D6DFE2;
+    --color-slate-200: #E8EEF0;
+    --color-slate-100: #EFF4F5;
+    
+    --color-indigo-300: #5AA0B1;
+    --color-indigo-400: #2A6B80;
+    --color-indigo-500: #1B4D5C;
+    --color-indigo-600: #163F4B;
+    --color-indigo-900: #0F1E24;
+    --color-indigo-950: #0A1519;
+    --color-violet-500: #1B4D5C;
+    --color-violet-600: #163F4B;
+    --color-purple-400: #2A6B80;
+    --color-purple-500: #1B4D5C;
+    --color-purple-600: #163F4B;
+
+    --color-rose-400: #B84C4C;
+    --color-rose-500: #963E3E;
+    --color-rose-600: #743030;
+    --color-rose-950: #2F1313;
+
+    --color-emerald-200: #A0D0BC;
+    --color-emerald-400: #4A9B7F;
+    --color-emerald-500: #3D8069;
+    --color-emerald-600: #306654;
+    --color-emerald-900: #16332A;
+    --color-emerald-950: #0C1C17;
+    
+    --color-amber-400: #D4784F;
+    --color-amber-500: #C4623A;
+    --color-amber-600: #A85230;
+    --color-amber-950: #4D2617;
+  }
+
   body {
-    @apply bg-slate-950 text-slate-100 font-sans antialiased;
+    @apply bg-slate-950 text-slate-100 font-sans antialiased transition-colors duration-200;
   }
 }
 

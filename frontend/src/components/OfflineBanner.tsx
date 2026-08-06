@@ -10,7 +10,7 @@ export function OfflineBanner() {
 
   return (
     <View className="bg-slate-900 px-4 py-2 flex-row items-center justify-center z-50">
-      <Ionicons name="cloud-offline" size={16} color="#fbbf24" />
+      <Ionicons name="cloud-offline" size={16} color="#D4784F" />
       <Text className="text-amber-400 font-semibold text-xs ml-2">
         You are offline. Actions will sync when reconnected.
       </Text>

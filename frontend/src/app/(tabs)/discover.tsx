@@ -42,7 +42,7 @@ export default function DiscoverScreen() {
               <Ionicons 
                 name="heart-half" 
                 size={12} 
-                color={item.compatibilityLevel === 'High' ? '#22c55e' : item.compatibilityLevel === 'Moderate' ? '#eab308' : '#64748b'} 
+                color={item.compatibilityLevel === 'High' ? '#4A9B7F' : item.compatibilityLevel === 'Moderate' ? '#D4784F' : '#4A7A8A'} 
               />
               <Text className={`text-[10px] font-bold ml-1 ${
                 item.compatibilityLevel === 'High' ? 'text-green-600' :
@@ -64,7 +64,7 @@ export default function DiscoverScreen() {
           <View className="flex-row items-center flex-wrap">
             <Text className="text-white font-bold text-lg mr-1">{item.nickname}, {item.age}</Text>
             {/* Verified Checkmark */}
-            <Ionicons name="checkmark-circle" size={16} color="#3b82f6" />
+            <Ionicons name="checkmark-circle" size={16} color="#4A9B7F" />
           </View>
           <Text className="text-white/80 text-sm mt-0.5">{item.region}</Text>
         </View>
@@ -87,9 +87,9 @@ export default function DiscoverScreen() {
       </View>
 
       {/* Educational Banner from Design Spec */}
-      <View className="mx-4 mt-4 mb-2 bg-[#002B5B] rounded-2xl p-4 shadow-sm flex-row">
+      <View className="mx-4 mt-4 mb-2 bg-[#162A33] rounded-2xl p-4 shadow-sm flex-row">
         <View className="w-10 h-10 bg-blue-500/20 rounded-xl items-center justify-center mr-3 mt-1">
-          <Ionicons name="compass-outline" size={24} color="#60A5FA" />
+          <Ionicons name="compass-outline" size={24} color="#2A6B80" />
         </View>
         <View className="flex-1">
           <Text className="text-white font-bold text-base mb-1">Discover</Text>
@@ -101,7 +101,7 @@ export default function DiscoverScreen() {
 
       {isLoading ? (
         <View className="flex-1 justify-center items-center">
-          <ActivityIndicator size="large" color="#208AEF" />
+          <ActivityIndicator size="large" color="#1B4D5C" />
         </View>
       ) : isError ? (
         <View className="flex-1 justify-center items-center p-4">
@@ -126,7 +126,7 @@ export default function DiscoverScreen() {
           removeClippedSubviews={true}
           initialNumToRender={6}
           maxToRenderPerBatch={10}
-          refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refetch} tintColor="#208AEF" />}
+          refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refetch} tintColor="#1B4D5C" />}
         />
       )}
 

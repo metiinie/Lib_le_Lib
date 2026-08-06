@@ -47,7 +47,7 @@ export const AuditLogs: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-3">
+          <h1 className="text-2xl font-bold text-slate-100 flex items-center gap-3">
             <ShieldAlert className="w-7 h-7 text-indigo-400" />
             System Audit Trail
           </h1>
@@ -153,7 +153,7 @@ export const AuditLogs: React.FC = () => {
         <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-6">
           <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-xl p-8 shadow-2xl space-y-6">
             <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-              <h3 className="text-xl font-bold text-white flex items-center gap-2 font-mono">
+              <h3 className="text-xl font-bold text-slate-100 flex items-center gap-2 font-mono">
                 <Code className="w-5 h-5 text-indigo-400" />
                 Audit Event Payload
               </h3>

@@ -14,7 +14,7 @@ export default function ProfileHubScreen() {
   if (isLoading) {
     return (
       <View className="flex-1 bg-slate-50 justify-center items-center">
-        <ActivityIndicator size="large" color="#4f46e5" />
+        <ActivityIndicator size="large" color="#1B4D5C" />
       </View>
     );
   }
@@ -70,31 +70,31 @@ export default function ProfileHubScreen() {
         <TouchableOpacity className="p-4 border-b border-slate-50 flex-row items-center justify-between">
           <View className="flex-row items-center">
             <View className="w-8 h-8 bg-blue-50 rounded-full items-center justify-center mr-3">
-              <Ionicons name="library-outline" size={18} color="#2563eb" />
+              <Ionicons name="library-outline" size={18} color="#1B4D5C" />
             </View>
             <Text className="text-base font-semibold text-slate-900">Health Resource Library</Text>
           </View>
-          <Ionicons name="chevron-forward" size={20} color="#cbd5e1" />
+          <Ionicons name="chevron-forward" size={20} color="#4A7A8A" />
         </TouchableOpacity>
         
         <TouchableOpacity className="p-4 border-b border-slate-50 flex-row items-center justify-between">
           <View className="flex-row items-center">
             <View className="w-8 h-8 bg-indigo-50 rounded-full items-center justify-center mr-3">
-              <Ionicons name="medical-outline" size={18} color="#4f46e5" />
+              <Ionicons name="medical-outline" size={18} color="#C49A3C" />
             </View>
             <Text className="text-base font-semibold text-slate-900">Ask a Health Professional</Text>
           </View>
-          <Ionicons name="chevron-forward" size={20} color="#cbd5e1" />
+          <Ionicons name="chevron-forward" size={20} color="#4A7A8A" />
         </TouchableOpacity>
 
         <TouchableOpacity className="p-4 flex-row items-center justify-between">
           <View className="flex-row items-center">
             <View className="w-8 h-8 bg-emerald-50 rounded-full items-center justify-center mr-3">
-              <Ionicons name="heart-half-outline" size={18} color="#059669" />
+              <Ionicons name="heart-half-outline" size={18} color="#4A9B7F" />
             </View>
             <Text className="text-base font-semibold text-slate-900">Success Stories</Text>
           </View>
-          <Ionicons name="chevron-forward" size={20} color="#cbd5e1" />
+          <Ionicons name="chevron-forward" size={20} color="#4A7A8A" />
         </TouchableOpacity>
       </View>
 
@@ -107,20 +107,20 @@ export default function ProfileHubScreen() {
           onPress={() => router.push('/(onboarding)/doc-upload')}
         >
           <View className="w-10 h-10 bg-amber-100 rounded-full items-center justify-center mr-4">
-            <Ionicons name="warning" size={20} color="#d97706" />
+            <Ionicons name="warning" size={20} color="#D4784F" />
           </View>
           <View className="flex-1">
             <Text className="text-amber-900 font-bold mb-1">Verification expires soon</Text>
             <Text className="text-amber-700 text-sm">Your verification expires in {daysToExpiry} days. Resubmit to keep full access.</Text>
           </View>
-          <Ionicons name="chevron-forward" size={20} color="#d97706" />
+          <Ionicons name="chevron-forward" size={20} color="#D4784F" />
         </TouchableOpacity>
       )}
 
       <View className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 items-center mb-6">
         <Image 
           source={{ uri: primaryPhotoUrl }} 
-          style={{ width: 100, height: 100, borderRadius: 50, marginBottom: 12, backgroundColor: '#e2e8f0' }}
+          style={{ width: 100, height: 100, borderRadius: 50, marginBottom: 12, backgroundColor: '#162A33' }}
         />
         <Text className="text-2xl font-bold text-slate-900 mb-1">{userProfile.nickname || 'Member'}</Text>
         
@@ -133,8 +133,8 @@ export default function ProfileHubScreen() {
             verificationStatus === 'Approved' ? "checkmark-circle" : 
             verificationStatus === 'Pending' ? "time" : "close-circle"
           } size={14} color={
-            verificationStatus === 'Approved' ? "#2563eb" : 
-            verificationStatus === 'Pending' ? "#d97706" : "#dc2626"
+            verificationStatus === 'Approved' ? "#1B4D5C" : 
+            verificationStatus === 'Pending' ? "#D4784F" : "#B84C4C"
           } />
           <Text className={`font-bold ml-1 text-xs ${
             verificationStatus === 'Approved' ? 'text-blue-700' : 
@@ -163,20 +163,20 @@ export default function ProfileHubScreen() {
       <View className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden mb-12">
         <TouchableOpacity className="p-4 border-b border-slate-50 flex-row items-center justify-between" onPress={() => router.push('/settings')}>
           <View className="flex-row items-center">
-            <Ionicons name="options-outline" size={20} color="#64748b" />
+            <Ionicons name="options-outline" size={20} color="#4A7A8A" />
             <Text className="text-base font-semibold text-slate-700 ml-3">Preferences</Text>
           </View>
-          <Ionicons name="chevron-forward" size={20} color="#cbd5e1" />
+          <Ionicons name="chevron-forward" size={20} color="#4A7A8A" />
         </TouchableOpacity>
 
         <TouchableOpacity className="p-4 border-b border-slate-50 flex-row items-center justify-between" onPress={() => router.push('/settings/subscription')}>
           <View className="flex-row items-center">
-            <Ionicons name="star-outline" size={20} color="#64748b" />
+            <Ionicons name="star-outline" size={20} color="#4A7A8A" />
             <Text className="text-base font-semibold text-slate-700 ml-3">Subscription</Text>
           </View>
           <View className="flex-row items-center">
             <Text className="text-slate-400 mr-2 text-sm">Free Plan</Text>
-            <Ionicons name="chevron-forward" size={20} color="#cbd5e1" />
+            <Ionicons name="chevron-forward" size={20} color="#4A7A8A" />
           </View>
         </TouchableOpacity>
 
@@ -187,14 +187,14 @@ export default function ProfileHubScreen() {
           ]);
         }}>
           <View className="flex-row items-center">
-            <Ionicons name="log-out-outline" size={20} color="#64748b" />
+            <Ionicons name="log-out-outline" size={20} color="#4A7A8A" />
             <Text className="text-base font-semibold text-slate-700 ml-3">Sign Out</Text>
           </View>
         </TouchableOpacity>
 
         <TouchableOpacity className="p-4 flex-row items-center justify-between" onPress={handleDeleteAccount}>
           <View className="flex-row items-center">
-            <Ionicons name="trash-outline" size={20} color="#ef4444" />
+            <Ionicons name="trash-outline" size={20} color="#B84C4C" />
             <Text className="text-base font-semibold text-red-500 ml-3">Delete Account</Text>
           </View>
         </TouchableOpacity>

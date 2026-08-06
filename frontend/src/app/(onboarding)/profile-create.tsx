@@ -186,7 +186,7 @@ export default function ProfileCreateScreen() {
             <View className="bg-slate-50 border border-slate-200 rounded-xl overflow-hidden">
               {isLoadingRegions ? (
                 <View className="p-4 items-center">
-                  <ActivityIndicator size="small" color="#208AEF" />
+                  <ActivityIndicator size="small" color="#1B4D5C" />
                 </View>
               ) : (
                 <Picker selectedValue={value} onValueChange={onChange}>

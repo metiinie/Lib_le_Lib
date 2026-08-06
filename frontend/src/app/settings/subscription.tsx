@@ -37,24 +37,24 @@ export default function SubscriptionScreen() {
     <ScrollView className="flex-1 bg-white pt-16 px-6">
       <View className="flex-row items-center mb-8">
         <TouchableOpacity onPress={() => router.back()} className="p-2 -ml-2 mr-4">
-          <Ionicons name="close" size={28} color="#0f172a" />
+          <Ionicons name="close" size={28} color="#0F1E24" />
         </TouchableOpacity>
         <Text className="text-2xl font-bold text-slate-900">Lib le Lib Premium</Text>
       </View>
 
       <View className="bg-slate-50 border border-slate-100 rounded-3xl p-6 mb-6">
         <Text className="text-xl font-bold text-slate-900 mb-4">Free Plan</Text>
-        <View className="flex-row items-center mb-2"><Ionicons name="checkmark" color="#22c55e" size={20} /><Text className="ml-2 text-slate-600">Discover grid</Text></View>
-        <View className="flex-row items-center mb-2"><Ionicons name="checkmark" color="#22c55e" size={20} /><Text className="ml-2 text-slate-600">End-to-End Encrypted Chat</Text></View>
-        <View className="flex-row items-center"><Ionicons name="checkmark" color="#22c55e" size={20} /><Text className="ml-2 text-slate-600">Q&A with Health Professionals</Text></View>
+        <View className="flex-row items-center mb-2"><Ionicons name="checkmark" color="#4A9B7F" size={20} /><Text className="ml-2 text-slate-600">Discover grid</Text></View>
+        <View className="flex-row items-center mb-2"><Ionicons name="checkmark" color="#4A9B7F" size={20} /><Text className="ml-2 text-slate-600">End-to-End Encrypted Chat</Text></View>
+        <View className="flex-row items-center"><Ionicons name="checkmark" color="#4A9B7F" size={20} /><Text className="ml-2 text-slate-600">Q&A with Health Professionals</Text></View>
       </View>
 
       <View className="bg-indigo-50 border border-indigo-200 rounded-3xl p-6 mb-8">
         <Text className="text-xl font-bold text-indigo-900 mb-1">Premium Plan</Text>
         <Text className="text-indigo-600 font-bold mb-4">ETB 500 / month</Text>
-        <View className="flex-row items-center mb-2"><Ionicons name="star" color="#4f46e5" size={20} /><Text className="ml-2 text-indigo-800 font-medium">See who liked you</Text></View>
-        <View className="flex-row items-center mb-2"><Ionicons name="star" color="#4f46e5" size={20} /><Text className="ml-2 text-indigo-800 font-medium">Advanced filtering</Text></View>
-        <View className="flex-row items-center"><Ionicons name="star" color="#4f46e5" size={20} /><Text className="ml-2 text-indigo-800 font-medium">Read receipts</Text></View>
+        <View className="flex-row items-center mb-2"><Ionicons name="star" color="#C49A3C" size={20} /><Text className="ml-2 text-indigo-800 font-medium">See who liked you</Text></View>
+        <View className="flex-row items-center mb-2"><Ionicons name="star" color="#C49A3C" size={20} /><Text className="ml-2 text-indigo-800 font-medium">Advanced filtering</Text></View>
+        <View className="flex-row items-center"><Ionicons name="star" color="#C49A3C" size={20} /><Text className="ml-2 text-indigo-800 font-medium">Read receipts</Text></View>
       </View>
 
       <TouchableOpacity 

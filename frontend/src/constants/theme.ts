@@ -9,18 +9,52 @@ import { Platform } from 'react-native';
 
 export const Colors = {
   light: {
-    text: '#000000',
-    background: '#ffffff',
-    backgroundElement: '#F0F0F3',
-    backgroundSelected: '#E0E1E6',
-    textSecondary: '#60646C',
+    // Backgrounds
+    text: '#0F1E24',
+    background: '#F5F7F8',
+    backgroundElement: '#FFFFFF',
+    backgroundSelected: '#E8EEF0',
+    // Text
+    textSecondary: '#4A7A8A',
+    textMuted: '#7BA3B0',
+    // Brand
+    primary: '#1B4D5C',
+    primaryHover: '#2A6B80',
+    accent: '#C4623A',
+    accentHover: '#D4784F',
+    // Semantic
+    success: '#4A9B7F',
+    premium: '#C49A3C',
+    alert: '#B84C4C',
+    // Utility
+    border: '#D6DFE2',
+    surfaceHighlight: '#EFF4F5',
+    icon: '#4A7A8A',
+    iconMuted: '#7BA3B0',
   },
   dark: {
-    text: '#ffffff',
-    background: '#000000',
-    backgroundElement: '#212225',
-    backgroundSelected: '#2E3135',
-    textSecondary: '#B0B4BA',
+    // Backgrounds
+    text: '#EFF4F5',
+    background: '#0F1E24',
+    backgroundElement: '#162A33',
+    backgroundSelected: '#1B3D48',
+    // Text
+    textSecondary: '#7BA3B0',
+    textMuted: '#4A7A8A',
+    // Brand
+    primary: '#1B4D5C',
+    primaryHover: '#2A6B80',
+    accent: '#C4623A',
+    accentHover: '#D4784F',
+    // Semantic
+    success: '#4A9B7F',
+    premium: '#C49A3C',
+    alert: '#B84C4C',
+    // Utility
+    border: '#1B3D48',
+    surfaceHighlight: '#1B3D48',
+    icon: '#7BA3B0',
+    iconMuted: '#4A7A8A',
   },
 } as const;
 

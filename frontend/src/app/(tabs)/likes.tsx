@@ -130,7 +130,7 @@ export default function LikesScreen() {
               <Ionicons name="close" size={16} color="white" />
             </TouchableOpacity>
             <TouchableOpacity
-              className="bg-[#208AEF] w-8 h-8 rounded-full items-center justify-center shadow-md border border-white/20"
+              className="bg-[#1B4D5C] w-8 h-8 rounded-full items-center justify-center shadow-md border border-white/20"
               onPress={(e) => {
                 e.stopPropagation();
                 handleLikeBack(item.id, item.nickname);
@@ -149,7 +149,7 @@ export default function LikesScreen() {
     return (
       <View className="flex-1 justify-center items-center px-8 mt-20">
         <View className="w-20 h-20 bg-slate-100 rounded-full items-center justify-center mb-6">
-          <Ionicons name={activeTab === 'received' ? "star-outline" : "heart-outline"} size={40} color="#94a3b8" />
+          <Ionicons name={activeTab === 'received' ? "star-outline" : "heart-outline"} size={40} color="#4A7A8A" />
         </View>
         <Text className="text-slate-900 text-xl font-bold text-center mb-2">
           {activeTab === 'received' ? 'No likes yet' : 'You haven\'t liked anyone'}
@@ -202,7 +202,7 @@ export default function LikesScreen() {
 
       {isLoading && !activeProfiles?.length ? (
         <View className="flex-1 justify-center items-center">
-          <ActivityIndicator size="large" color="#208AEF" />
+          <ActivityIndicator size="large" color="#1B4D5C" />
         </View>
       ) : (
         <FlatList
@@ -213,7 +213,7 @@ export default function LikesScreen() {
           contentContainerStyle={{ padding: 8, flexGrow: 1 }}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={renderEmptyState}
-          refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refetch} tintColor="#208AEF" />}
+          refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refetch} tintColor="#1B4D5C" />}
         />
       )}
     </View>

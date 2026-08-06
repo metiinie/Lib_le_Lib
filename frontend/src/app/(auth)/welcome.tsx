@@ -22,7 +22,7 @@ export default function WelcomeScreen() {
         <View className="w-full pb-8">
           <TouchableOpacity
             onPress={() => router.push('/(auth)/otp')}
-            className="w-full bg-blue-600 active:bg-blue-700 py-4 rounded-full flex-row justify-center items-center"
+            className="w-full bg-[#1B4D5C] active:bg-[#2A6B80] py-4 rounded-full flex-row justify-center items-center"
           >
             <Text className="text-white text-lg font-bold">Get Started</Text>
           </TouchableOpacity>

@@ -76,7 +76,7 @@ export default function ProfileEditScreen() {
   if (isLoading) {
     return (
       <View className="flex-1 bg-white justify-center items-center">
-        <ActivityIndicator size="large" color="#4f46e5" />
+        <ActivityIndicator size="large" color="#1B4D5C" />
       </View>
     );
   }
@@ -85,7 +85,7 @@ export default function ProfileEditScreen() {
     <ScrollView className="flex-1 bg-white px-6 pt-16">
       <View className="flex-row items-center justify-between mb-8">
         <TouchableOpacity onPress={() => router.back()} className="p-2 -ml-2">
-          <Ionicons name="chevron-back" size={28} color="#0f172a" />
+          <Ionicons name="chevron-back" size={28} color="#0F1E24" />
         </TouchableOpacity>
         <Text className="text-xl font-bold text-slate-900">Edit Profile</Text>
         <View className="w-10" />
@@ -141,7 +141,7 @@ export default function ProfileEditScreen() {
             <View key={photo.id} className="w-[48%] mb-4 relative">
               <Image 
                 source={{ uri: photo.uri }} 
-                style={{ width: '100%', aspectRatio: 3/4, borderRadius: 12, borderWidth: photo.isPrimary ? 4 : 1, borderColor: photo.isPrimary ? '#4f46e5' : '#e2e8f0' }} 
+                style={{ width: '100%', aspectRatio: 3/4, borderRadius: 12, borderWidth: photo.isPrimary ? 4 : 1, borderColor: photo.isPrimary ? '#1B4D5C' : '#162A33' }} 
               />
               
               <View className="absolute top-2 left-2 flex-row">
@@ -171,7 +171,7 @@ export default function ProfileEditScreen() {
           ))}
 
           <TouchableOpacity className="w-[48%] aspect-[3/4] bg-slate-100 border border-slate-200 border-dashed rounded-xl items-center justify-center">
-            <Ionicons name="add-circle-outline" size={32} color="#64748b" />
+            <Ionicons name="add-circle-outline" size={32} color="#4A7A8A" />
             <Text className="text-slate-600 font-medium mt-2">Add Photo</Text>
           </TouchableOpacity>
         </View>

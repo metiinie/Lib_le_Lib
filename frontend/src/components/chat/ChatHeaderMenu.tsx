@@ -36,7 +36,7 @@ export function ChatHeaderMenu({ matchId }: Props) {
   return (
     <View>
       <TouchableOpacity onPress={() => setMenuVisible(true)} className="p-2 -mr-2">
-        <Ionicons name="ellipsis-vertical" size={24} color="#0f172a" />
+        <Ionicons name="ellipsis-vertical" size={24} color="#EFF4F5" />
       </TouchableOpacity>
 
       <Modal visible={menuVisible} transparent animationType="fade">
@@ -47,17 +47,17 @@ export function ChatHeaderMenu({ matchId }: Props) {
         >
           <View className="bg-white rounded-xl shadow-lg w-56 overflow-hidden">
             <TouchableOpacity className="p-4 border-b border-slate-100 flex-row items-center" onPress={handleMeetupSafety}>
-              <Ionicons name="shield-checkmark-outline" size={20} color="#208AEF" />
+              <Ionicons name="shield-checkmark-outline" size={20} color="#1B4D5C" />
               <Text className="ml-3 text-slate-800 font-medium text-base">Plan to meet</Text>
             </TouchableOpacity>
 
             <TouchableOpacity className="p-4 border-b border-slate-100 flex-row items-center" onPress={handleReport}>
-              <Ionicons name="flag-outline" size={20} color="#eab308" />
+              <Ionicons name="flag-outline" size={20} color="#D4784F" />
               <Text className="ml-3 text-slate-800 font-medium text-base">Report User</Text>
             </TouchableOpacity>
 
             <TouchableOpacity className="p-4 flex-row items-center" onPress={handleBlock}>
-              <Ionicons name="ban" size={20} color="#ef4444" />
+              <Ionicons name="ban" size={20} color="#B84C4C" />
               <Text className="ml-3 text-red-600 font-medium text-base">Block User</Text>
             </TouchableOpacity>
           </View>

@@ -36,7 +36,7 @@ export default function SupportScreen() {
       <Text className="text-slate-600 mb-4 leading-relaxed" numberOfLines={2}>{item.summary}</Text>
       <View className="flex-row items-center">
         <Text className="text-blue-600 font-bold">Read article</Text>
-        <Ionicons name="arrow-forward" size={16} color="#2563eb" className="ml-1" />
+        <Ionicons name="arrow-forward" size={16} color="#1B4D5C" className="ml-1" />
       </View>
     </TouchableOpacity>
   );
@@ -49,7 +49,7 @@ export default function SupportScreen() {
           className="bg-slate-200 px-3 py-1.5 rounded-full flex-row items-center"
           onPress={() => setLanguage(lang => lang === 'en' ? 'am' : 'en')}
         >
-          <Ionicons name="language" size={16} color="#0f172a" />
+          <Ionicons name="language" size={16} color="#0F1E24" />
           <Text className="ml-1 font-bold text-slate-900">{language === 'en' ? 'English' : 'አማርኛ'}</Text>
         </TouchableOpacity>
       </View>
@@ -84,7 +84,7 @@ export default function SupportScreen() {
       </View>
 
       {loading ? (
-        <ActivityIndicator color="#208AEF" />
+        <ActivityIndicator color="#1B4D5C" />
       ) : (
         <FlatList
           data={articles}

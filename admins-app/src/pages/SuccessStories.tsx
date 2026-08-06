@@ -36,7 +36,7 @@ export const SuccessStories: React.FC = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white flex items-center gap-3">
+        <h1 className="text-2xl font-bold text-slate-100 flex items-center gap-3">
           <Heart className="w-7 h-7 text-rose-400" />
           Member Success Stories Approval
         </h1>
@@ -55,7 +55,7 @@ export const SuccessStories: React.FC = () => {
             {stories.map((story) => (
               <div key={story.id} className="p-6 space-y-3">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-bold text-white">{story.title}</h3>
+                  <h3 className="text-lg font-bold text-slate-100">{story.title}</h3>
                   <StatusBadge status={story.published || story.isApproved ? 'approved' : 'pending'} />
                 </div>
                 <p className="text-sm text-slate-300 leading-relaxed bg-slate-950 p-4 rounded-xl border border-slate-800">

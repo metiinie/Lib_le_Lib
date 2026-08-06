@@ -60,7 +60,7 @@ export const ResourceManagement: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-3">
+          <h1 className="text-2xl font-bold text-slate-100 flex items-center gap-3">
             <BookOpen className="w-7 h-7 text-purple-400" />
             Curated Resource Library
           </h1>
@@ -79,7 +79,7 @@ export const ResourceManagement: React.FC = () => {
 
       {showCreate && (
         <form onSubmit={handleCreate} className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4 shadow-xl">
-          <h3 className="text-lg font-bold text-white">Create New Resource Article</h3>
+          <h3 className="text-lg font-bold text-slate-100">Create New Resource Article</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">Title</label>
@@ -143,7 +143,7 @@ export const ResourceManagement: React.FC = () => {
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
-              <h3 className="text-lg font-bold text-white">{res.title}</h3>
+              <h3 className="text-lg font-bold text-slate-100">{res.title}</h3>
               <p className="text-xs text-slate-400 leading-relaxed line-clamp-3">{res.body}</p>
             </div>
           ))

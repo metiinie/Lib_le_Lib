@@ -137,7 +137,7 @@ export const VerificationQueue: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-3">
+          <h1 className="text-2xl font-bold text-slate-100 flex items-center gap-3">
             <ShieldCheck className="w-7 h-7 text-indigo-400" />
             Identity Verification Desk
           </h1>
@@ -281,7 +281,7 @@ export const VerificationQueue: React.FC = () => {
           <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-5xl max-h-[92vh] overflow-y-auto p-8 shadow-2xl space-y-6">
             <div className="flex items-center justify-between border-b border-slate-800 pb-4">
               <div>
-                <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                <h3 className="text-xl font-bold text-slate-100 flex items-center gap-2">
                   <FileText className="w-5 h-5 text-indigo-400" />
                   Government Document & Liveness Inspector
                 </h3>
@@ -371,7 +371,7 @@ export const VerificationQueue: React.FC = () => {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => setZoomLevel((z) => Math.max(z - 0.25, 0.75))}
-                        className="p-1.5 bg-slate-900 text-slate-300 hover:text-white rounded-lg border border-slate-800"
+                        className="p-1.5 bg-slate-900 text-slate-300 hover:text-slate-100 rounded-lg border border-slate-800"
                         title="Zoom Out"
                       >
                         <ZoomOut className="w-4 h-4" />
@@ -381,14 +381,14 @@ export const VerificationQueue: React.FC = () => {
                       </span>
                       <button
                         onClick={() => setZoomLevel((z) => Math.min(z + 0.25, 2.5))}
-                        className="p-1.5 bg-slate-900 text-slate-300 hover:text-white rounded-lg border border-slate-800"
+                        className="p-1.5 bg-slate-900 text-slate-300 hover:text-slate-100 rounded-lg border border-slate-800"
                         title="Zoom In"
                       >
                         <ZoomIn className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => setZoomLevel(1)}
-                        className="p-1.5 bg-slate-900 text-slate-300 hover:text-white rounded-lg border border-slate-800"
+                        className="p-1.5 bg-slate-900 text-slate-300 hover:text-slate-100 rounded-lg border border-slate-800"
                         title="Reset Zoom"
                       >
                         <RotateCcw className="w-4 h-4" />

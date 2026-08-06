@@ -93,7 +93,7 @@ export const SubscriptionDesk: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-3">
+          <h1 className="text-2xl font-bold text-slate-100 flex items-center gap-3">
             <CreditCard className="w-7 h-7 text-indigo-400" />
             Subscription & Billing Desk
           </h1>
@@ -264,7 +264,7 @@ export const SubscriptionDesk: React.FC = () => {
         <div className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-6">
           <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg shadow-2xl p-6 space-y-6">
             <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-              <h3 className="text-xl font-bold text-white flex items-center gap-2">
+              <h3 className="text-xl font-bold text-slate-100 flex items-center gap-2">
                 <AlertTriangle className="w-5 h-5 text-rose-400" />
                 Cancel Subscription
               </h3>

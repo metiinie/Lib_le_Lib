@@ -29,14 +29,14 @@ export default function VideoCallScheduleScreen() {
     <View className="flex-1 bg-white px-6 pt-16">
       <View className="flex-row items-center mb-12">
         <TouchableOpacity onPress={() => router.back()} className="p-2 -ml-2 mr-4">
-          <Ionicons name="close" size={28} color="#0f172a" />
+          <Ionicons name="close" size={28} color="#0F1E24" />
         </TouchableOpacity>
         <Text className="text-2xl font-bold text-slate-900">Video Call</Text>
       </View>
 
       <View className="flex-1 justify-center items-center pb-20">
         <View className="w-24 h-24 rounded-full bg-indigo-100 items-center justify-center mb-6">
-          <Ionicons name="videocam" size={48} color="#4f46e5" />
+          <Ionicons name="videocam" size={48} color="#1B4D5C" />
         </View>
 
         <Text className="text-xl font-bold text-center text-slate-900 mb-4">

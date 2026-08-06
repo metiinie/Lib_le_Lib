@@ -51,7 +51,7 @@ export function FilterSheet({ visible, onClose, filters, setFilters }: FilterShe
         <View className="bg-white rounded-t-3xl h-[85%]">
           <View className="p-4 border-b border-slate-100 flex-row justify-between items-center">
             <TouchableOpacity onPress={onClose} className="p-2" accessibilityLabel="Close filters">
-              <Ionicons name="close" size={24} color="#64748b" />
+              <Ionicons name="close" size={24} color="#4A7A8A" />
             </TouchableOpacity>
             <Text className="text-xl font-bold text-slate-900">Filters</Text>
             <TouchableOpacity onPress={clearFilters} className="p-2">
@@ -74,8 +74,8 @@ export function FilterSheet({ visible, onClose, filters, setFilters }: FilterShe
                 step={1}
                 value={localFilters.maxAge}
                 onValueChange={(val) => setLocalFilters({ ...localFilters, maxAge: val })}
-                minimumTrackTintColor="#208AEF"
-                maximumTrackTintColor="#cbd5e1"
+                minimumTrackTintColor="#1B4D5C"
+                maximumTrackTintColor="#D6DFE2"
               />
             </View>
 
@@ -108,14 +108,14 @@ export function FilterSheet({ visible, onClose, filters, setFilters }: FilterShe
             <Text className="text-lg font-semibold text-slate-800 mb-4">Region</Text>
             <TouchableOpacity className="bg-slate-100 p-4 rounded-xl mb-12 flex-row justify-between items-center">
               <Text className="text-slate-700">All Regions</Text>
-              <Ionicons name="chevron-forward" size={20} color="#94a3b8" />
+              <Ionicons name="chevron-forward" size={20} color="#4A7A8A" />
             </TouchableOpacity>
           </ScrollView>
 
           <View className="p-6 border-t border-slate-100 pb-10">
             <TouchableOpacity
               onPress={applyFilters}
-              className="bg-[#208AEF] py-4 rounded-2xl items-center"
+              className="bg-[#1B4D5C] py-4 rounded-2xl items-center"
             >
               <Text className="text-white font-bold text-lg">Apply Filters</Text>
             </TouchableOpacity>

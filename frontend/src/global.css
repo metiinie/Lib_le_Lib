@@ -4,10 +4,24 @@
 
 :root {
   --font-display:
-    Spline Sans, Inter, ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji,
+    Inter, ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji,
     Segoe UI Symbol, Noto Color Emoji;
   --font-mono:
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
   --font-rounded: 'SF Pro Rounded', 'Hiragino Maru Gothic ProN', Meiryo, 'MS PGothic', sans-serif;
   --font-serif: Georgia, 'Times New Roman', serif;
+
+  /* Lib le Lib palette */
+  --color-deep-ocean: #0F1E24;
+  --color-night-teal: #162A33;
+  --color-trusted-teal: #1B4D5C;
+  --color-teal-light: #2A6B80;
+  --color-terracotta: #C4623A;
+  --color-terracotta-light: #D4784F;
+  --color-sage-green: #4A9B7F;
+  --color-warm-gold: #C49A3C;
+  --color-muted-crimson: #B84C4C;
+  --color-warm-white: #EFF4F5;
+  --color-muted-teal: #7BA3B0;
+  --color-deep-muted: #4A7A8A;
 }

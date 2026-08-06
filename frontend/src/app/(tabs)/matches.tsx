@@ -107,7 +107,7 @@ export default function MatchesScreen() {
 
       {isLoading ? (
         <View className="flex-1 justify-center items-center">
-          <ActivityIndicator size="large" color="#208AEF" />
+          <ActivityIndicator size="large" color="#1B4D5C" />
         </View>
       ) : isError ? (
         <View className="flex-1 justify-center items-center p-4">
@@ -119,7 +119,7 @@ export default function MatchesScreen() {
       ) : matches?.length === 0 ? (
         <View className="flex-1 justify-center items-center px-6">
           <View className="w-20 h-20 bg-slate-100 rounded-full items-center justify-center mb-6">
-            <Ionicons name="chatbubble-outline" size={40} color="#94a3b8" />
+            <Ionicons name="chatbubble-outline" size={40} color="#4A7A8A" />
           </View>
           <Text className="text-slate-900 text-xl font-bold text-center mb-2">No matches yet</Text>
           <Text className="text-slate-500 text-center text-base">Keep discovering to find new connections.</Text>
@@ -129,7 +129,7 @@ export default function MatchesScreen() {
           data={matches}
           keyExtractor={(item) => item.id}
           renderItem={renderMatch}
-          refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refetch} tintColor="#208AEF" />}
+          refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refetch} tintColor="#1B4D5C" />}
           ListHeaderComponent={
             hasNewMatches ? (
               <View className="mx-4 mt-4 mb-2 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 p-4 rounded-2xl flex-row items-center shadow-sm">

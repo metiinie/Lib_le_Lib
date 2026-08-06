@@ -85,7 +85,7 @@ export const BlurredPhoto = ({
 const styles = StyleSheet.create({
   container: {
     overflow: 'hidden',
-    backgroundColor: '#cbd5e1', // slate-300 fallback
+    backgroundColor: '#162A33', // Night Teal fallback
     borderRadius: 8,
   },
   revealOverlay: {

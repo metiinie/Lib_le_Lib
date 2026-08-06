@@ -142,7 +142,7 @@ export default function OtpScreen() {
             <TextInput
               className="w-full bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white px-4 py-4 rounded-xl text-lg mb-6"
               placeholder="Phone number or email"
-              placeholderTextColor="#94a3b8"
+              placeholderTextColor="#4A7A8A"
               value={identifier}
               onChangeText={setIdentifier}
               keyboardType="email-address"
@@ -168,7 +168,7 @@ export default function OtpScreen() {
             <TextInput
               className="w-full bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white px-4 py-4 rounded-xl text-lg text-center tracking-widest mb-6"
               placeholder="000000"
-              placeholderTextColor="#94a3b8"
+              placeholderTextColor="#4A7A8A"
               value={code}
               onChangeText={setCode}
               keyboardType="number-pad"

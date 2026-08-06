@@ -82,7 +82,7 @@ export const ModerationQueue: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-3">
+          <h1 className="text-2xl font-bold text-slate-100 flex items-center gap-3">
             <Flag className="w-7 h-7 text-amber-400" />
             Safety & Moderation Center
           </h1>
@@ -227,7 +227,7 @@ export const ModerationQueue: React.FC = () => {
               <div className="flex items-center gap-3">
                 <AlertTriangle className="w-6 h-6 text-amber-400" />
                 <div>
-                  <h3 className="text-xl font-bold text-white">Report Case File</h3>
+                  <h3 className="text-xl font-bold text-slate-100">Report Case File</h3>
                   <p className="text-xs text-slate-400 font-mono mt-0.5">ID: {selectedReport.id}</p>
                 </div>
               </div>

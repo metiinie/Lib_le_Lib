@@ -46,7 +46,7 @@ export function MessageBubble({ message }: { message: MessageProps }) {
     <View className={`mb-4 max-w-[80%] ${isMe ? 'self-end' : 'self-start'}`}>
       <View className={`rounded-2xl px-4 py-3 ${isMe ? 'bg-blue-600 rounded-tr-sm' : 'bg-slate-100 rounded-tl-sm'}`}>
         {loading ? (
-          <ActivityIndicator size="small" color={isMe ? '#fff' : '#64748b'} />
+          <ActivityIndicator size="small" color={isMe ? '#fff' : '#4A7A8A'} />
         ) : message.type === 'text' ? (
           <Text className={`text-base ${isMe ? 'text-white' : 'text-slate-900'}`}>
             {plaintext}
@@ -64,11 +64,11 @@ export function MessageBubble({ message }: { message: MessageProps }) {
       {isMe && (
         <View className="flex-row justify-end mt-1 px-1">
           {message.readAt ? (
-            <Ionicons name="checkmark-done" size={16} color="#3b82f6" />
+            <Ionicons name="checkmark-done" size={16} color="#1B4D5C" />
           ) : message.deliveredAt ? (
-            <Ionicons name="checkmark-done" size={16} color="#94a3b8" />
+            <Ionicons name="checkmark-done" size={16} color="#4A7A8A" />
           ) : (
-            <Ionicons name="checkmark" size={16} color="#94a3b8" />
+            <Ionicons name="checkmark" size={16} color="#4A7A8A" />
           )}
         </View>
       )}
