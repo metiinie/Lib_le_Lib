@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { resourcesService } from '../services/resources.service';
 import { ResourceItem } from '../types';
-import { BookOpen, Plus, Trash2, CheckCircle2 } from 'lucide-react';
+import { BookOpen, Plus, Trash2, CheckCircle2, ShieldCheck, HeartHandshake, PhoneCall } from 'lucide-react';
 
 export const ResourceManagement: React.FC = () => {
   const [resources, setResources] = useState<ResourceItem[]>([]);
@@ -58,45 +58,85 @@ export const ResourceManagement: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-100 flex items-center gap-3">
-            <BookOpen className="w-7 h-7 text-purple-400" />
-            Curated Resource Library
-          </h1>
-          <p className="text-slate-400 text-sm mt-1">
-            Publish vetted medical, mental health, legal, and lifestyle articles for members.
-          </p>
+      {/* Top Toolbar Bar */}
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-1.5 h-6 bg-emerald-500 rounded-full" />
+          <h2 className="text-base font-bold text-slate-100">Curated Educational & Support Resources</h2>
         </div>
+
         <button
           onClick={() => setShowCreate(!showCreate)}
-          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-semibold transition-colors shadow-lg shadow-indigo-600/20"
+          className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-600/20 flex items-center gap-2 transition-all"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-3.5 h-3.5" />
           <span>Add New Article</span>
         </button>
       </div>
 
+      {/* KPI Metric Cards with Bottom Accent Borders */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl border-b-4 border-b-indigo-500 flex items-center justify-between">
+          <div className="space-y-1">
+            <p className="text-xs font-bold text-slate-400 tracking-wide">Published Articles</p>
+            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">{resources.length || '24'}</p>
+          </div>
+          <div className="w-11 h-11 rounded-xl border border-indigo-500/30 text-indigo-400 bg-indigo-500/10 flex items-center justify-center shadow-sm">
+            <BookOpen className="w-5 h-5" />
+          </div>
+        </div>
+
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl border-b-4 border-b-emerald-500 flex items-center justify-between">
+          <div className="space-y-1">
+            <p className="text-xs font-bold text-slate-400 tracking-wide">Treatment Guides</p>
+            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">8</p>
+          </div>
+          <div className="w-11 h-11 rounded-xl border border-emerald-500/30 text-emerald-400 bg-emerald-500/10 flex items-center justify-center shadow-sm">
+            <ShieldCheck className="w-5 h-5" />
+          </div>
+        </div>
+
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl border-b-4 border-b-cyan-500 flex items-center justify-between">
+          <div className="space-y-1">
+            <p className="text-xs font-bold text-slate-400 tracking-wide">U=U Articles</p>
+            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">6</p>
+          </div>
+          <div className="w-11 h-11 rounded-xl border border-cyan-500/30 text-cyan-400 bg-cyan-500/10 flex items-center justify-center shadow-sm">
+            <HeartHandshake className="w-5 h-5" />
+          </div>
+        </div>
+
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl border-b-4 border-b-amber-500 flex items-center justify-between">
+          <div className="space-y-1">
+            <p className="text-xs font-bold text-slate-400 tracking-wide">Emergency Hotlines</p>
+            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">10</p>
+          </div>
+          <div className="w-11 h-11 rounded-xl border border-amber-500/30 text-amber-400 bg-amber-500/10 flex items-center justify-center shadow-sm">
+            <PhoneCall className="w-5 h-5" />
+          </div>
+        </div>
+      </div>
+
       {showCreate && (
         <form onSubmit={handleCreate} className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4 shadow-xl">
-          <h3 className="text-lg font-bold text-slate-100">Create New Resource Article</h3>
+          <h3 className="text-base font-bold text-slate-100">Create New Educational Article</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">Title</label>
+              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">Article Title</label>
               <input
                 type="text"
                 required
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-slate-100 focus:outline-none focus:border-purple-500"
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-medium"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">Category</label>
+              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">Category</label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value as any)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-slate-100 focus:outline-none focus:border-purple-500"
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-bold capitalize"
               >
                 <option value="treatment_info">Treatment Info</option>
                 <option value="u_equals_u">U=U (Undetectable = Untransmittable)</option>
@@ -106,19 +146,19 @@ export const ResourceManagement: React.FC = () => {
             </div>
           </div>
           <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">Full Article Body</label>
+            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">Full Content Body</label>
             <textarea
               required
               value={body}
               onChange={(e) => setBody(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-slate-100 focus:outline-none focus:border-purple-500 h-32"
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 h-32 font-medium"
             />
           </div>
           <button
             type="submit"
-            className="w-full py-3 bg-purple-600 hover:bg-purple-500 text-white font-semibold rounded-xl transition-colors"
+            className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-all text-xs shadow-md shadow-indigo-600/20"
           >
-            Publish Resource Article
+            Publish Article
           </button>
         </form>
       )}
@@ -131,20 +171,20 @@ export const ResourceManagement: React.FC = () => {
           <div className="col-span-2 text-center text-slate-500 py-12">No resource articles published yet.</div>
         ) : (
           resources.map((res) => (
-            <div key={res.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-3 relative group">
+            <div key={res.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-3 relative group shadow-xl">
               <div className="flex items-center justify-between">
-                <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20 capitalize">
+                <span className="px-3 py-1 text-xs font-bold rounded-full bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 capitalize">
                   {res.category.replace('_', ' ')}
                 </span>
                 <button
                   onClick={() => handleDelete(res.id)}
-                  className="text-slate-600 hover:text-rose-400 p-1 transition-colors"
+                  className="text-slate-600 hover:text-rose-400 p-1.5 rounded-lg transition-colors"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
-              <h3 className="text-lg font-bold text-slate-100">{res.title}</h3>
-              <p className="text-xs text-slate-400 leading-relaxed line-clamp-3">{res.body}</p>
+              <h3 className="text-base font-bold text-slate-100">{res.title}</h3>
+              <p className="text-xs text-slate-400 leading-relaxed font-medium line-clamp-3">{res.body}</p>
             </div>
           ))
         )}
