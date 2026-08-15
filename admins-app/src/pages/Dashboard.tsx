@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { usersService } from '../services/users.service';
 import {
@@ -23,24 +24,16 @@ import {
 
 export const Dashboard: React.FC = () => {
   const { role = 'member', user } = useAuth();
-  const [stats, setStats] = useState({
-    totalUsers: 0,
-    verificationOfficers: 0,
-    moderators: 0,
-    healthProfessionals: 0,
-    admins: 0,
-    pendingVerifications: 0,
-    openReports: 0,
-    criticalReports: 0,
-    openQAThreads: 0,
-    activeSubscriptions: 0,
-    pendingSuccessStories: 0,
-    publishedResources: 0,
-  });
-  const [loading, setLoading] = useState(true);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedDesk = searchParams.get('desk') || 'all';
 
-  // Filter toolbar state
-  const [selectedDesk, setSelectedDesk] = useState('all');
+  const setSelectedDesk = (desk: string) => {
+    if (desk === 'all') {
+      setSearchParams({});
+    } else {
+      setSearchParams({ desk });
+    }
+  };
   const [hideCards, setHideCards] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [activeCardId, setActiveCardId] = useState<number | null>(2); // Default Pending Verifications as active filled card
