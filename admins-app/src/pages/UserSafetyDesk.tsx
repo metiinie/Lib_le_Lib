@@ -151,18 +151,18 @@ export const UserSafetyDesk: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl border-b-4 border-b-amber-500 flex items-center justify-between">
           <div className="space-y-1">
-            <p className="text-xs font-bold text-slate-400 tracking-wide">Active Warnings</p>
-            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">15</p>
+            <p className="text-xs font-bold text-slate-400 tracking-wide">Searched Accounts</p>
+            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">{loading ? '...' : users.length}</p>
           </div>
           <div className="w-11 h-11 rounded-xl border border-amber-500/30 text-amber-400 bg-amber-500/10 flex items-center justify-center shadow-sm">
-            <AlertTriangle className="w-5 h-5" />
+            <Search className="w-5 h-5" />
           </div>
         </div>
 
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl border-b-4 border-b-rose-400 flex items-center justify-between">
           <div className="space-y-1">
-            <p className="text-xs font-bold text-slate-400 tracking-wide">Temporary Suspensions</p>
-            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">12</p>
+            <p className="text-xs font-bold text-slate-400 tracking-wide">Suspended Accounts</p>
+            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">{loading ? '...' : users.filter(u => u.status === 'suspended').length}</p>
           </div>
           <div className="w-11 h-11 rounded-xl border border-rose-400/30 text-rose-400 bg-rose-500/10 flex items-center justify-center shadow-sm">
             <UserMinus className="w-5 h-5" />
@@ -171,21 +171,21 @@ export const UserSafetyDesk: React.FC = () => {
 
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl border-b-4 border-b-cyan-500 flex items-center justify-between">
           <div className="space-y-1">
-            <p className="text-xs font-bold text-slate-400 tracking-wide">Permanent Bans</p>
-            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">8</p>
+            <p className="text-xs font-bold text-slate-400 tracking-wide">Permanently Banned</p>
+            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">{loading ? '...' : users.filter(u => u.status === 'banned').length}</p>
           </div>
           <div className="w-11 h-11 rounded-xl border border-cyan-500/30 text-cyan-400 bg-cyan-500/10 flex items-center justify-center shadow-sm">
             <Ban className="w-5 h-5" />
           </div>
         </div>
 
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl border-b-4 border-b-blue-500 flex items-center justify-between">
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl border-b-4 border-b-emerald-500 flex items-center justify-between">
           <div className="space-y-1">
-            <p className="text-xs font-bold text-slate-400 tracking-wide">Appeals Under Review</p>
-            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">3</p>
+            <p className="text-xs font-bold text-slate-400 tracking-wide">Active Good Standing</p>
+            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">{loading ? '...' : users.filter(u => u.status === 'active' || u.status === 'verified').length}</p>
           </div>
-          <div className="w-11 h-11 rounded-xl border border-blue-500/30 text-blue-400 bg-blue-500/10 flex items-center justify-center shadow-sm">
-            <ShieldAlert className="w-5 h-5" />
+          <div className="w-11 h-11 rounded-xl border border-emerald-500/30 text-emerald-400 bg-emerald-500/10 flex items-center justify-center shadow-sm">
+            <ShieldCheck className="w-5 h-5" />
           </div>
         </div>
       </div>

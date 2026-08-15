@@ -207,7 +207,7 @@ export const UserManagement: React.FC = () => {
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl border-b-4 border-b-indigo-500 flex items-center justify-between">
           <div className="space-y-1">
             <p className="text-xs font-bold text-slate-400 tracking-wide">Total Registered Members</p>
-            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">{totalCount || '1,280'}</p>
+            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">{loading ? '...' : (totalCount || users.length)}</p>
           </div>
           <div className="w-11 h-11 rounded-xl border border-indigo-500/30 text-indigo-400 bg-indigo-500/10 flex items-center justify-center shadow-sm">
             <Users className="w-5 h-5" />
@@ -217,7 +217,7 @@ export const UserManagement: React.FC = () => {
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl border-b-4 border-b-cyan-500 flex items-center justify-between">
           <div className="space-y-1">
             <p className="text-xs font-bold text-slate-400 tracking-wide">Verification Officers</p>
-            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">12</p>
+            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">{loading ? '...' : users.filter(u => u.role === 'verification_officer').length}</p>
           </div>
           <div className="w-11 h-11 rounded-xl border border-cyan-500/30 text-cyan-400 bg-cyan-500/10 flex items-center justify-center shadow-sm">
             <ShieldCheck className="w-5 h-5" />
@@ -227,7 +227,7 @@ export const UserManagement: React.FC = () => {
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl border-b-4 border-b-amber-500 flex items-center justify-between">
           <div className="space-y-1">
             <p className="text-xs font-bold text-slate-400 tracking-wide">Safety Moderators</p>
-            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">8</p>
+            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">{loading ? '...' : users.filter(u => u.role === 'moderator').length}</p>
           </div>
           <div className="w-11 h-11 rounded-xl border border-amber-500/30 text-amber-400 bg-amber-500/10 flex items-center justify-center shadow-sm">
             <UserCheck className="w-5 h-5" />
@@ -237,7 +237,7 @@ export const UserManagement: React.FC = () => {
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl border-b-4 border-b-emerald-500 flex items-center justify-between">
           <div className="space-y-1">
             <p className="text-xs font-bold text-slate-400 tracking-wide">Health Professionals</p>
-            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">5</p>
+            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">{loading ? '...' : users.filter(u => u.role === 'health_professional').length}</p>
           </div>
           <div className="w-11 h-11 rounded-xl border border-emerald-500/30 text-emerald-400 bg-emerald-500/10 flex items-center justify-center shadow-sm">
             <Stethoscope className="w-5 h-5" />

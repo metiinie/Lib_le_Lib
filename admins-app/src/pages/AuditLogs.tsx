@@ -66,7 +66,7 @@ export const AuditLogs: React.FC = () => {
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl border-b-4 border-b-indigo-500 flex items-center justify-between">
           <div className="space-y-1">
             <p className="text-xs font-bold text-slate-400 tracking-wide">Total Audit Events</p>
-            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">{total || '1,420'}</p>
+            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">{loading ? '...' : (total || logs.length)}</p>
           </div>
           <div className="w-11 h-11 rounded-xl border border-indigo-500/30 text-indigo-400 bg-indigo-500/10 flex items-center justify-center shadow-sm">
             <ShieldAlert className="w-5 h-5" />
@@ -76,7 +76,7 @@ export const AuditLogs: React.FC = () => {
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl border-b-4 border-b-emerald-500 flex items-center justify-between">
           <div className="space-y-1">
             <p className="text-xs font-bold text-slate-400 tracking-wide">Staff Action Events</p>
-            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">850</p>
+            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">{loading ? '...' : logs.filter(l => l.actorRole && l.actorRole !== 'member').length}</p>
           </div>
           <div className="w-11 h-11 rounded-xl border border-emerald-500/30 text-emerald-400 bg-emerald-500/10 flex items-center justify-center shadow-sm">
             <UserCheck className="w-5 h-5" />
@@ -86,7 +86,7 @@ export const AuditLogs: React.FC = () => {
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl border-b-4 border-b-rose-400 flex items-center justify-between">
           <div className="space-y-1">
             <p className="text-xs font-bold text-slate-400 tracking-wide">Enforcement Decisions</p>
-            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">42</p>
+            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">{loading ? '...' : logs.filter(l => ['USER_STATUS_CHANGE', 'VERIFICATION_DECISION', 'REPORT_ACTION'].includes(l.action)).length}</p>
           </div>
           <div className="w-11 h-11 rounded-xl border border-rose-400/30 text-rose-400 bg-rose-500/10 flex items-center justify-center shadow-sm">
             <ShieldCheck className="w-5 h-5" />
@@ -96,7 +96,7 @@ export const AuditLogs: React.FC = () => {
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl border-b-4 border-b-cyan-500 flex items-center justify-between">
           <div className="space-y-1">
             <p className="text-xs font-bold text-slate-400 tracking-wide">System Auto-Triggers</p>
-            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">528</p>
+            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">{loading ? '...' : logs.filter(l => !l.actorRole || l.actorRole === 'system').length}</p>
           </div>
           <div className="w-11 h-11 rounded-xl border border-cyan-500/30 text-cyan-400 bg-cyan-500/10 flex items-center justify-center shadow-sm">
             <Activity className="w-5 h-5" />
