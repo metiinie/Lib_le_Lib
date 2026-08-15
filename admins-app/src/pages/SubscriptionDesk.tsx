@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { subscriptionService } from '../services/subscription.service';
 import { Subscription } from '../types';
 import { Pagination } from '../components/ui/Pagination';
@@ -18,15 +19,39 @@ import {
 
 export const SubscriptionDesk: React.FC = () => {
   const { showToast } = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const statusFilter = (searchParams.get('status') as 'active' | 'canceled' | 'expired' | 'past_due' | 'all') || 'all';
+  const planFilter = (searchParams.get('plan') as 'premium' | 'free' | 'all') || 'all';
+  const offset = parseInt(searchParams.get('offset') || '0', 10);
+
   const [items, setItems] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
-
-  const [statusFilter, setStatusFilter] = useState<'active' | 'canceled' | 'expired' | 'past_due' | 'all'>('all');
-  const [planFilter, setPlanFilter] = useState<'premium' | 'free' | 'all'>('all');
-
   const [limit, setLimit] = useState(10);
-  const [offset, setOffset] = useState(0);
+
+  const setStatusFilter = (status: string) => {
+    const params = new URLSearchParams(searchParams);
+    if (status === 'all') params.delete('status');
+    else params.set('status', status);
+    params.set('offset', '0');
+    setSearchParams(params);
+  };
+
+  const setPlanFilter = (plan: string) => {
+    const params = new URLSearchParams(searchParams);
+    if (plan === 'all') params.delete('plan');
+    else params.set('plan', plan);
+    params.set('offset', '0');
+    setSearchParams(params);
+  };
+
+  const setOffset = (newOffset: number) => {
+    const params = new URLSearchParams(searchParams);
+    if (newOffset === 0) params.delete('offset');
+    else params.set('offset', newOffset.toString());
+    setSearchParams(params);
+  };
 
   const [cancelModalItem, setCancelModalItem] = useState<Subscription | null>(null);
   const [cancelReason, setCancelReason] = useState('');

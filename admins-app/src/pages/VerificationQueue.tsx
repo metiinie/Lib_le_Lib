@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { verificationService } from '../services/verification.service';
 import { VerificationSubmission } from '../types';
 import { StatusBadge } from '../components/ui/StatusBadge';
@@ -29,15 +30,39 @@ import {
 
 export const VerificationQueue: React.FC = () => {
   const { showToast } = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const statusFilter = (searchParams.get('status') as 'submitted' | 'approved' | 'rejected' | 'expired' | 'all') || 'submitted';
+  const searchQuery = searchParams.get('q') || '';
+  const offset = parseInt(searchParams.get('offset') || '0', 10);
+
   const [items, setItems] = useState<VerificationSubmission[]>([]);
   const [loading, setLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState<'submitted' | 'approved' | 'rejected' | 'expired' | 'all'>('submitted');
   const [selectedItem, setSelectedItem] = useState<VerificationSubmission | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-
-  // Pagination state
   const [limit, setLimit] = useState(10);
-  const [offset, setOffset] = useState(0);
+
+  const setStatusFilter = (status: string) => {
+    const params = new URLSearchParams(searchParams);
+    if (status === 'submitted') params.delete('status');
+    else params.set('status', status);
+    params.set('offset', '0');
+    setSearchParams(params);
+  };
+
+  const setSearchQuery = (query: string) => {
+    const params = new URLSearchParams(searchParams);
+    if (!query) params.delete('q');
+    else params.set('q', query);
+    params.set('offset', '0');
+    setSearchParams(params);
+  };
+
+  const setOffset = (newOffset: number) => {
+    const params = new URLSearchParams(searchParams);
+    if (newOffset === 0) params.delete('offset');
+    else params.set('offset', newOffset.toString());
+    setSearchParams(params);
+  };
 
   // Inspector state
   const [zoomLevel, setZoomLevel] = useState(1);
