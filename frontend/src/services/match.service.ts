@@ -12,6 +12,15 @@ export interface Match {
   unreadCount?: number;
 }
 
+export interface DmRequest {
+  id: string;
+  senderId: string;
+  nickname: string;
+  avatarUrl?: string;
+  message: string;
+  createdAt: string;
+}
+
 export const matchService = {
   getMatches: async (): Promise<Match[]> => {
     const response = await api.get('/matches');
@@ -32,4 +41,12 @@ export const matchService = {
     // return response.data;
     return { success: true };
   },
+  getDmRequests: async (): Promise<DmRequest[]> => {
+    const response = await api.get('/dm-requests');
+    return Array.isArray(response.data) ? response.data : [];
+  },
+  acceptDmRequest: async (requestId: string) => {
+    const response = await api.patch(`/dm-requests/${requestId}/accept`);
+    return response.data;
+  }
 };

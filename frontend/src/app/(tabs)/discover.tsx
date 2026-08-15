@@ -1,117 +1,96 @@
 import React, { useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert, RefreshControl, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { DiscoveryProfile } from '@/services/discovery.service';
-import { BlurredPhoto } from '@/components/photos/BlurredPhoto';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { DiscoveryProfile, discoveryService } from '@/services/discovery.service';
 import { useDiscovery } from '@/hooks/useDiscovery';
+import { useSubscription } from '@/hooks/useSubscription';
 import { FilterSheet } from '@/components/discovery/FilterSheet';
+import { SwipeCard } from '@/components/discovery/SwipeCard';
+
+const { height } = Dimensions.get('window');
 
 export default function DiscoverScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [filters, setFilters] = useState({});
   const [isFilterVisible, setFilterVisible] = useState(false);
   
   const { data: profiles, isLoading, isError, refetch } = useDiscovery(filters);
+  const { isPremium, dmCredits } = useSubscription();
+
+  const handleLike = async (profileId: string) => {
+    try {
+      await discoveryService.likeProfile(profileId);
+      // In a real app we'd optimistically remove the item from the list or advance to next
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handlePass = async (profileId: string) => {
+    try {
+      await discoveryService.passProfile(profileId);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleDM = async (profileId: string) => {
+    if (!isPremium) {
+      Alert.alert(
+        'Premium Required',
+        'Upgrade to Premium to send direct messages without matching first.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Upgrade', style: 'default', onPress: () => router.push('/(tabs)') }
+        ]
+      );
+      return;
+    }
+
+    if (dmCredits <= 0) {
+      Alert.alert('Out of Credits', 'You have no DM credits left.');
+      return;
+    }
+
+    try {
+      // In a real flow, this would open a composer or navigation to a DM request screen
+      // where they type the first message, and THEN we call API. 
+      // For now, we simulate this flow.
+      router.push(`/chat/${profileId}?type=request`);
+    } catch (err: any) {
+      console.error(err);
+    }
+  };
 
   const renderItem = ({ item }: { item: DiscoveryProfile }) => {
-    const primaryPhoto = item.photos?.[0];
-
     return (
-      <TouchableOpacity
-        className="flex-1 m-2 aspect-[3/4] bg-slate-100 rounded-2xl overflow-hidden shadow-sm min-h-[48px] min-w-[48px]"
-        onPress={() => router.push(`/profiles/${item.id}`)}
-        activeOpacity={0.9}
-        accessibilityRole="button"
-        accessibilityLabel={`View profile of ${item.nickname}, ${item.age} years old from ${item.region}`}
-      >
-        <BlurredPhoto
-          blurhash={primaryPhoto?.blurhash || 'LEHV6nWB2yk8pyo0adR*.7kCMdnj'}
-          revealGranted={true} // Photos are unblurred by default for verified users based on updated business rules
-          photoUrl={primaryPhoto?.url}
-        />
-        
-        {/* Top Badges */}
-        <View className="absolute top-2 left-2 right-2 flex-row justify-between">
-          {/* Compatibility Badge (if exists) */}
-          {item.compatibilityLevel ? (
-            <View className={`px-2 py-1 rounded-full bg-white/90 shadow-sm flex-row items-center ${
-              item.compatibilityLevel === 'High' ? 'border border-green-200' :
-              item.compatibilityLevel === 'Moderate' ? 'border border-yellow-200' : 'border border-slate-200'
-            }`}>
-              <Ionicons 
-                name="heart-half" 
-                size={12} 
-                color={item.compatibilityLevel === 'High' ? '#4A9B7F' : item.compatibilityLevel === 'Moderate' ? '#D4784F' : '#4A7A8A'} 
-              />
-              <Text className={`text-[10px] font-bold ml-1 ${
-                item.compatibilityLevel === 'High' ? 'text-green-600' :
-                item.compatibilityLevel === 'Moderate' ? 'text-yellow-600' : 'text-slate-600'
-              }`}>{item.compatibilityLevel}</Text>
-            </View>
-          ) : <View />}
-
-          {/* Relationship Goal Badge */}
-          {item.relationshipGoals && item.relationshipGoals.length > 0 && (
-            <View className="bg-blue-600/90 px-2 py-1 rounded-full shadow-sm">
-              <Text className="text-[10px] font-bold text-white">{item.relationshipGoals[0]}</Text>
-            </View>
-          )}
-        </View>
-
-        {/* Bottom Details */}
-        <View className="absolute bottom-0 inset-x-0 p-4 bg-gradient-to-t from-black/90 via-black/50 to-transparent pt-12">
-          <View className="flex-row items-center flex-wrap">
-            <Text className="text-white font-bold text-lg mr-1">{item.nickname}, {item.age}</Text>
-            {/* Verified Checkmark */}
-            <Ionicons name="checkmark-circle" size={16} color="#4A9B7F" />
-          </View>
-          <Text className="text-white/80 text-sm mt-0.5">{item.region}</Text>
-        </View>
-      </TouchableOpacity>
+      <SwipeCard
+        profile={item}
+        onLike={() => handleLike(item.id)}
+        onPass={() => handlePass(item.id)}
+        onDM={() => handleDM(item.id)}
+      />
     );
   };
 
   return (
-    <View className="flex-1 bg-white">
-      <View className="px-4 pt-4 pb-2 flex-row justify-between items-center border-b border-slate-100">
-        <Text className="text-2xl font-bold text-slate-900">Discover</Text>
-        <TouchableOpacity 
-          className="bg-slate-100 px-4 py-2 rounded-full min-h-[48px] min-w-[48px] justify-center items-center"
-          accessibilityRole="button"
-          accessibilityLabel="Filter profiles"
-          onPress={() => setFilterVisible(true)}
-        >
-          <Text className="text-slate-700 font-semibold text-sm">Filters</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Educational Banner from Design Spec */}
-      <View className="mx-4 mt-4 mb-2 bg-[#162A33] rounded-2xl p-4 shadow-sm flex-row">
-        <View className="w-10 h-10 bg-blue-500/20 rounded-xl items-center justify-center mr-3 mt-1">
-          <Ionicons name="compass-outline" size={24} color="#2A6B80" />
-        </View>
-        <View className="flex-1">
-          <Text className="text-white font-bold text-base mb-1">Discover</Text>
-          <Text className="text-blue-100/90 text-sm leading-relaxed">
-            Browse verified members. Photos are visible to verified members unless the owner chose to hide them. Like or pass — nothing more happens until a match forms.
-          </Text>
-        </View>
-      </View>
-
+    <View className="flex-1 bg-black relative">
       {isLoading ? (
         <View className="flex-1 justify-center items-center">
-          <ActivityIndicator size="large" color="#1B4D5C" />
+          <ActivityIndicator size="large" color="#4A9B7F" />
         </View>
       ) : isError ? (
-        <View className="flex-1 justify-center items-center p-4">
+        <View className="flex-1 justify-center items-center p-4 bg-white">
           <Text className="text-slate-500 text-center mb-4">Something went wrong while loading profiles.</Text>
           <TouchableOpacity onPress={() => refetch()} className="bg-blue-50 px-4 py-2 rounded-full">
             <Text className="text-blue-600 font-semibold">Try Again</Text>
           </TouchableOpacity>
         </View>
       ) : profiles?.length === 0 ? (
-        <View className="flex-1 justify-center items-center p-4">
+        <View className="flex-1 justify-center items-center p-4 bg-white">
           <Text className="text-slate-500 text-center text-lg mb-2">No profiles found</Text>
           <Text className="text-slate-400 text-center">Try adjusting your filters to see more people.</Text>
         </View>
@@ -120,15 +99,38 @@ export default function DiscoverScreen() {
           data={profiles}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
-          numColumns={2}
-          contentContainerStyle={{ padding: 8 }}
+          pagingEnabled
           showsVerticalScrollIndicator={false}
+          snapToInterval={height} // Snaps to screen height
+          snapToAlignment="start"
+          decelerationRate="fast"
           removeClippedSubviews={true}
-          initialNumToRender={6}
-          maxToRenderPerBatch={10}
-          refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refetch} tintColor="#1B4D5C" />}
+          initialNumToRender={3}
+          maxToRenderPerBatch={5}
+          windowSize={5}
+          refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refetch} tintColor="#ffffff" />}
+          style={{ flex: 1 }}
         />
       )}
+
+      {/* Floating Header */}
+      <View 
+        className="absolute top-0 left-0 right-0 flex-row justify-between items-center px-4"
+        style={{ paddingTop: Math.max(insets.top, 16), paddingBottom: 16 }}
+        pointerEvents="box-none"
+      >
+        <Text className="text-3xl font-bold text-white shadow-sm" style={{ textShadowColor: 'rgba(0,0,0,0.5)', textShadowOffset: {width: 0, height: 1}, textShadowRadius: 2 }}>
+          Discover
+        </Text>
+        <TouchableOpacity 
+          className="bg-black/30 px-4 py-2 rounded-full min-h-[48px] min-w-[48px] justify-center items-center border border-white/20 backdrop-blur-md"
+          accessibilityRole="button"
+          accessibilityLabel="Filter profiles"
+          onPress={() => setFilterVisible(true)}
+        >
+          <Ionicons name="options" size={20} color="#ffffff" />
+        </TouchableOpacity>
+      </View>
 
       <FilterSheet 
         visible={isFilterVisible} 

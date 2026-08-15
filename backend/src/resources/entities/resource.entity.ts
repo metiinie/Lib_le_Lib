@@ -41,6 +41,7 @@ export class Resource {
   @Column({
     type: 'enum',
     enum: LanguageCode,
+    enumName: 'resources_language_enum',
     default: LanguageCode.EN,
   })
   language: LanguageCode;

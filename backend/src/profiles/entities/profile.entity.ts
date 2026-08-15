@@ -63,9 +63,22 @@ export class Profile {
     name: 'preferred_language',
     type: 'enum',
     enum: ['am', 'en'],
+    enumName: 'profiles_preferred_language_enum',
     default: 'en',
   })
   preferredLanguage: string;
+
+  @Column({
+    name: 'looking_for',
+    type: 'enum',
+    enum: ['men', 'women', 'everyone'],
+    array: true,
+    default: ['everyone'],
+  })
+  lookingFor: string[];
+
+  @Column({ name: 'virus_type', type: 'text', nullable: true })
+  virusType: string;
 
   /**
    * When true, verified (active) members can see this user's photos

@@ -14,7 +14,7 @@ export class UsersRepository {
   constructor(
     @InjectRepository(User)
     private readonly repo: Repository<User>,
-  ) {}
+  ) { }
 
   async findById(id: string): Promise<User | null> {
     return this.repo.findOne({ where: { id } });
@@ -51,6 +51,10 @@ export class UsersRepository {
       email: isEmail ? destination : null,
     });
     return this.repo.save(user);
+  }
+
+  async updateUserRole(id: string, role: UserRole): Promise<void> {
+    await this.repo.update(id, { role, status: 'active' });
   }
 
   async updateLastLogin(id: string): Promise<void> {

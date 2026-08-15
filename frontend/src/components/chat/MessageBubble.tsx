@@ -9,7 +9,8 @@ export interface MessageProps {
   senderId: string;
   isMe: boolean;
   ciphertext: string;
-  type: 'text' | 'image';
+  type: 'text' | 'image' | 'voice';
+  duration?: number;
   photoDetails?: {
     blurhash: string;
     url?: string;
@@ -51,6 +52,18 @@ export function MessageBubble({ message }: { message: MessageProps }) {
           <Text className={`text-base ${isMe ? 'text-white' : 'text-slate-900'}`}>
             {plaintext}
           </Text>
+        ) : message.type === 'voice' ? (
+          <View className="flex-row items-center space-x-3 gap-3 min-w-[150px]">
+            <View className={`w-10 h-10 rounded-full items-center justify-center ${isMe ? 'bg-white/20' : 'bg-blue-100'}`}>
+              <Ionicons name="play" size={20} color={isMe ? 'white' : '#1B4D5C'} className="ml-1" />
+            </View>
+            <View className="flex-1 h-1 bg-white/30 rounded-full overflow-hidden">
+              <View className={`h-full w-1/3 ${isMe ? 'bg-white' : 'bg-blue-600'}`} />
+            </View>
+            <Text className={`text-xs font-medium ${isMe ? 'text-white/90' : 'text-slate-500'}`}>
+              {message.duration ? `${Math.floor(message.duration / 60)}:${(message.duration % 60).toString().padStart(2, '0')}` : '0:00'}
+            </Text>
+          </View>
         ) : (
           <View className="w-48 h-64 rounded-xl overflow-hidden bg-slate-200">
             <BlurredPhoto

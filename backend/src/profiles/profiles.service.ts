@@ -7,6 +7,35 @@ import {
 import { ProfilesRepository } from './repositories/profiles.repository';
 import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import * as crypto from 'crypto';
+
+const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'default_secret_key_32_bytes_long_'; // Must be 32 bytes
+const IV_LENGTH = 16;
+
+function encrypt(text: string): string {
+  if (!text) return text;
+  const iv = crypto.randomBytes(IV_LENGTH);
+  const cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(ENCRYPTION_KEY.padEnd(32, '0').slice(0, 32)), iv);
+  let encrypted = cipher.update(text);
+  encrypted = Buffer.concat([encrypted, cipher.final()]);
+  return iv.toString('hex') + ':' + encrypted.toString('hex');
+}
+
+function decrypt(text: string): string {
+  if (!text) return text;
+  try {
+    const textParts = text.split(':');
+    if (textParts.length !== 2) return text; // Probably not encrypted or old data
+    const iv = Buffer.from(textParts.shift()!, 'hex');
+    const encryptedText = Buffer.from(textParts.join(':'), 'hex');
+    const decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(ENCRYPTION_KEY.padEnd(32, '0').slice(0, 32)), iv);
+    let decrypted = decipher.update(encryptedText);
+    decrypted = Buffer.concat([decrypted, decipher.final()]);
+    return decrypted.toString();
+  } catch (e) {
+    return text; // Return as-is if decryption fails
+  }
+}
 
 @Injectable()
 export class ProfilesService {
@@ -18,6 +47,9 @@ export class ProfilesService {
       throw new NotFoundException({
         error: { code: 'PROFILE_NOT_FOUND', message: 'Profile not found.' },
       });
+    }
+    if (profile.virusType) {
+      profile.virusType = decrypt(profile.virusType);
     }
     return profile;
   }
@@ -58,6 +90,8 @@ export class ProfilesService {
       discreetMode: dto.discreetMode,
       lowBandwidthMode: dto.lowBandwidthMode,
       preferredLanguage: dto.preferredLanguage,
+      lookingFor: dto.lookingFor || ['everyone'],
+      virusType: dto.virusType ? encrypt(dto.virusType) : undefined,
       photosVisibleToVerified: dto.photosVisibleToVerified ?? true,
       interestTags,
     };
@@ -101,6 +135,8 @@ export class ProfilesService {
       profile.preferredLanguage = dto.preferredLanguage;
     if (dto.photosVisibleToVerified !== undefined)
       profile.photosVisibleToVerified = dto.photosVisibleToVerified;
+    if (dto.lookingFor !== undefined) profile.lookingFor = dto.lookingFor;
+    if (dto.virusType !== undefined) profile.virusType = encrypt(dto.virusType);
 
     if (dto.interestTagIds !== undefined) {
       profile.interestTags = await this.profilesRepository.findTagsByIds(

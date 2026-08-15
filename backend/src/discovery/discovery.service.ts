@@ -15,6 +15,7 @@ export class DiscoveryService {
     private readonly swipesRepo: SwipesRepository,
     private readonly matchesRepo: MatchesRepository,
     private readonly discoveryRepo: DiscoveryRepository,
+    private readonly dataSource: DataSource,
   ) {}
 
   async getDiscoveryFeed(
@@ -33,9 +34,21 @@ export class DiscoveryService {
       ...new Set([userId, ...blockedIds, ...swipedIds, ...matchedIds]),
     ];
 
+    // Fetch viewer profile to apply bidirectional filtering
+    const viewerProfile = await this.dataSource
+      .query('SELECT gender, looking_for, region_id FROM profiles WHERE user_id = $1', [userId]);
+
+    const viewerGender = viewerProfile[0]?.gender || 'other';
+    const viewerLookingFor = viewerProfile[0]?.looking_for || 'both';
+    const viewerRegionId = viewerProfile[0]?.region_id || null;
+
     // 2. Fetch the paged and filtered results using the repository
     const rawProfiles = await this.discoveryRepo.findDiscoverablePaged(
       userId,
+      viewerRegionId,
+      null, // viewerGoals
+      viewerGender,
+      viewerLookingFor,
       excludedIds,
       filters,
     );

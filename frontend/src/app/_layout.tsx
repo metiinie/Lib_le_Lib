@@ -109,13 +109,13 @@ export default function RootLayout() {
             hasProfile = true;
           } catch (err: any) {
             if (err?.response?.status === 404) {
-              router.replace('/(onboarding)/profile-create');
+              router.replace('/(onboarding)/step-1-nickname');
               return;
             }
           }
 
           if (!hasProfile) {
-            router.replace('/(onboarding)/profile-create');
+            router.replace('/(onboarding)/step-1-nickname');
             return;
           }
 

@@ -67,6 +67,24 @@ export class CreateProfileDto {
   photosVisibleToVerified?: boolean;
 
   @ApiProperty({
+    enum: ['men', 'women', 'everyone'],
+    isArray: true,
+    required: false,
+  })
+  @IsArray()
+  @IsEnum(['men', 'women', 'everyone'], { each: true })
+  @IsOptional()
+  lookingFor?: string[];
+
+  @ApiProperty({
+    enum: ['HIV-1', 'HIV-2', 'Both', 'prefer_not_to_say'],
+    required: false,
+  })
+  @IsEnum(['HIV-1', 'HIV-2', 'Both', 'prefer_not_to_say'])
+  @IsOptional()
+  virusType?: string;
+
+  @ApiProperty({
     type: [String],
     description: 'Array of InterestTag UUIDs',
     required: false,

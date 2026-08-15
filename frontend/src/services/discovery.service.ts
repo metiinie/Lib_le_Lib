@@ -65,4 +65,10 @@ export const discoveryService = {
     const response = await api.post('/blocks', { blockedId: targetId });
     return response.data;
   },
+
+  sendDM: async (targetId: string) => {
+    // TODO: Implement Premium Check in Mod 3
+    // For now we will just simulate a failure that requires premium
+    throw new Error('Premium required for DMs (Coming soon in Mod 3)');
+  },
 };

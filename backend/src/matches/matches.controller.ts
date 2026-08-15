@@ -6,6 +6,8 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  Param,
+  Patch,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
@@ -42,5 +44,20 @@ export class MatchesController {
   @Get('swipes/sent-likes')
   async getSentLikes(@CurrentUser() user: any) {
     return this.matchesService.getSentLikes(user.id);
+  }
+
+  @Get('dm-requests')
+  async getDmRequests(@CurrentUser() user: any) {
+    return this.matchesService.getDmRequests(user.id);
+  }
+
+  @Post('dm-requests')
+  async createDmRequest(@CurrentUser() user: any, @Body() dto: { recipientId: string; firstMessage: string }) {
+    return this.matchesService.createDmRequest(user.id, dto.recipientId, dto.firstMessage);
+  }
+
+  @Patch('dm-requests/:id/accept')
+  async acceptDmRequest(@CurrentUser() user: any, @Param('id') requestId: string) {
+    return this.matchesService.acceptDmRequest(user.id, requestId);
   }
 }

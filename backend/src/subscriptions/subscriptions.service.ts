@@ -112,4 +112,27 @@ export class SubscriptionsService {
       });
     });
   }
+
+  async isPremium(userId: string): Promise<boolean> {
+    const sub = await this.subscriptionRepository.findByUserId(userId);
+    return Boolean(sub && sub.status === SubscriptionStatus.ACTIVE);
+  }
+
+  async getDmCredits(userId: string): Promise<number> {
+    const result = await this.dataSource.query(
+      `SELECT balance FROM dm_credits WHERE user_id = $1`,
+      [userId],
+    );
+    return result.length > 0 ? result[0].balance : 0;
+  }
+
+  async consumeDmCredit(userId: string): Promise<void> {
+    const result = await this.dataSource.query(
+      `UPDATE dm_credits SET balance = balance - 1, updated_at = now() WHERE user_id = $1 AND balance > 0 RETURNING balance`,
+      [userId],
+    );
+    if (result[1] === 0) {
+      throw new Error('Insufficient DM credits');
+    }
+  }
 }

@@ -7,11 +7,13 @@ import { MatchesRepository } from './repositories/matches.repository';
 import { MatchesService } from './matches.service';
 import { MatchesController } from './matches.controller';
 import { SafetyModule } from '../safety/safety.module';
+import { SubscriptionsModule } from '../subscriptions/subscriptions.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Swipe, Match]),
     SafetyModule, // Provides BlocksRepository
+    SubscriptionsModule,
   ],
   controllers: [MatchesController],
   providers: [SwipesRepository, MatchesRepository, MatchesService],

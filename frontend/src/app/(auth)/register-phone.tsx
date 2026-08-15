@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  Alert,
 } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -26,6 +27,14 @@ export default function RegisterPhoneScreen() {
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const handleApple = () => {
+    Alert.alert('Coming Soon', 'Apple Sign In will be available in the next update.');
+  };
+
+  const handleGoogle = () => {
+    Alert.alert('Coming Soon', 'Google Sign In will be available in the next update.');
+  };
 
   const handleContinue = async () => {
     setError('');
@@ -92,10 +101,40 @@ export default function RegisterPhoneScreen() {
           style={styles.content}
         >
           <Text style={styles.stepLabel}>Step 1 of 3</Text>
-          <Text style={styles.title}>Your phone number</Text>
+          <Text style={styles.title}>Create your account</Text>
           <Text style={styles.subtitle}>
-            We'll send a 6-digit code to verify your number. This is a one-time step.
+            Join Lib le Lib to find meaningful connections.
           </Text>
+
+          <View style={styles.socialButtonsContainer}>
+            {/* Apple Sign In */}
+            <TouchableOpacity
+              id="register-apple-btn"
+              style={styles.appleBtn}
+              activeOpacity={0.85}
+              onPress={handleApple}
+            >
+              <Ionicons name="logo-apple" size={20} color="#FFFFFF" />
+              <Text style={styles.appleBtnText}>Continue with Apple</Text>
+            </TouchableOpacity>
+
+            {/* Google Sign In */}
+            <TouchableOpacity
+              id="register-google-btn"
+              style={styles.googleBtn}
+              activeOpacity={0.85}
+              onPress={handleGoogle}
+            >
+              <Text style={styles.googleG}>G</Text>
+              <Text style={styles.googleBtnText}>Continue with Google</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.divider}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>or register with phone</Text>
+            <View style={styles.dividerLine} />
+          </View>
 
           {/* Phone input */}
           <Text style={styles.label}>Phone number</Text>
@@ -208,7 +247,63 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#6B9BAA',
     lineHeight: 22,
-    marginBottom: 36,
+    marginBottom: 20,
+  },
+  socialButtonsContainer: {
+    gap: 12,
+    marginBottom: 20,
+  },
+  appleBtn: {
+    backgroundColor: '#000000',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    borderRadius: 50,
+    gap: 10,
+    borderWidth: 1,
+    borderColor: '#222',
+  },
+  appleBtnText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  googleBtn: {
+    backgroundColor: '#FFFFFF',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    borderRadius: 50,
+    gap: 10,
+  },
+  googleG: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#4285F4',
+  },
+  googleBtnText: {
+    color: '#0F1E24',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 20,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#1B3D48',
+  },
+  dividerText: {
+    color: '#4A7A8A',
+    fontSize: 13,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   label: {
     fontSize: 13,

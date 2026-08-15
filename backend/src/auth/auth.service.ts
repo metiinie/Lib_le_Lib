@@ -45,7 +45,7 @@ export class AuthService {
     private readonly auditLogsRepository: AuditLogsRepository,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
-  ) {}
+  ) { }
 
   // ─────────────────────────────────────────────────────────────────────────
   // OTP FLOW (used for registration phone verification — one-time only)
@@ -62,7 +62,7 @@ export class AuthService {
     destination: string,
     isSignUp: boolean,
   ): Promise<{ message: string }> {
-    const user = await this.usersRepository.findByDestination(destination);
+    let user = await this.usersRepository.findByDestination(destination);
     if (isSignUp && user) {
       throw new ConflictException({
         error: {
@@ -72,12 +72,31 @@ export class AuthService {
       });
     }
     if (!isSignUp && !user) {
-      throw new NotFoundException({
-        error: {
-          code: 'USER_NOT_FOUND',
-          message: 'No account found for this destination.',
-        },
-      });
+      if (this.configService.get('NODE_ENV') !== 'production') {
+        // Auto-provision test account in dev mode if destination doesn't exist
+        const role = destination.includes('officer')
+          ? 'verification_officer'
+          : destination.includes('mod')
+            ? 'moderator'
+            : destination.includes('doc')
+              ? 'health_professional'
+              : destination.includes('member')
+                ? 'member'
+                : 'admin';
+
+        user = await this.usersRepository.createFromDestination(destination);
+        user.role = role;
+        user.status = 'active';
+        await this.usersRepository.updateUserRole(user.id, role);
+        this.logger.log(`[DEV] Auto-provisioned staff test account: ${destination} (${role})`);
+      } else {
+        throw new NotFoundException({
+          error: {
+            code: 'USER_NOT_FOUND',
+            message: 'No account found for this destination.',
+          },
+        });
+      }
     }
 
     // Rate-limit: max N OTP requests per hour per destination
@@ -126,7 +145,7 @@ export class AuthService {
     userId: string;
     isRegistration: boolean;
   }> {
-    const userExists = await this.usersRepository.findByDestination(destination);
+    let userExists = await this.usersRepository.findByDestination(destination);
     if (isSignUp && userExists) {
       throw new ConflictException({
         error: {
@@ -136,12 +155,29 @@ export class AuthService {
       });
     }
     if (!isSignUp && !userExists) {
-      throw new NotFoundException({
-        error: {
-          code: 'USER_NOT_FOUND',
-          message: 'No account found for this destination.',
-        },
-      });
+      if (this.configService.get('NODE_ENV') !== 'production') {
+        const role = destination.includes('officer')
+          ? 'verification_officer'
+          : destination.includes('mod')
+            ? 'moderator'
+            : destination.includes('doc')
+              ? 'health_professional'
+              : destination.includes('member')
+                ? 'member'
+                : 'admin';
+
+        userExists = await this.usersRepository.createFromDestination(destination);
+        userExists.role = role;
+        userExists.status = 'active';
+        await this.usersRepository.updateUserRole(userExists.id, role);
+      } else {
+        throw new NotFoundException({
+          error: {
+            code: 'USER_NOT_FOUND',
+            message: 'No account found for this destination.',
+          },
+        });
+      }
     }
 
     const otpRecord =

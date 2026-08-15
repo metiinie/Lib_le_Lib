@@ -16,6 +16,6 @@ import { ModerationModule } from '../moderation/moderation.module';
   ],
   controllers: [SubscriptionsController],
   providers: [SubscriptionsService, PlanGuard, SubscriptionsRepository],
-  exports: [TypeOrmModule, PlanGuard, SubscriptionsRepository],
+  exports: [TypeOrmModule, PlanGuard, SubscriptionsRepository, SubscriptionsService],
 })
 export class SubscriptionsModule {}

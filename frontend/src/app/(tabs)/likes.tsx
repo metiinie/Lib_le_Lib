@@ -4,13 +4,12 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurredPhoto } from '@/components/photos/BlurredPhoto';
 import { useLikes, LikeProfile } from '@/hooks/useLikes';
-
-// Mock subscription state for MVP demo
-const IS_PREMIUM = false;
+import { useSubscription } from '@/hooks/useSubscription';
 
 export default function LikesScreen() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'received' | 'sent'>('received');
+  const { isPremium } = useSubscription();
   
   const { data: activeProfiles, isLoading, isError, refetch, passProfile, likeBack, withdrawLike } = useLikes(activeTab);
 
@@ -68,7 +67,7 @@ export default function LikesScreen() {
     const primaryPhoto = item.photos?.[0];
 
     // Premium Upsell CTA injection
-    if (activeTab === 'received' && index === 2 && !IS_PREMIUM) {
+    if (activeTab === 'received' && index === 2 && !isPremium) {
       return (
         <TouchableOpacity
           className="flex-1 m-2 aspect-[3/4] bg-blue-600 rounded-2xl overflow-hidden shadow-sm min-h-[48px] min-w-[48px] items-center justify-center p-4"
@@ -82,7 +81,7 @@ export default function LikesScreen() {
       );
     }
 
-    const isReceivedFree = activeTab === 'received' && !IS_PREMIUM;
+    const isReceivedFree = activeTab === 'received' && !isPremium;
     const displayName = isReceivedFree ? 'Secret Admirer' : item.nickname;
 
     return (
@@ -176,14 +175,14 @@ export default function LikesScreen() {
             style={activeTab === 'received' ? { backgroundColor: 'white', shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 2, elevation: 1 } : undefined}
             onPress={() => setActiveTab('received')}
           >
-            <Text className={activeTab === 'received' ? 'font-semibold text-slate-900' : 'font-semibold text-slate-500'}>Who Liked Me</Text>
+            <Text className={activeTab === 'received' ? 'font-semibold text-slate-900' : 'font-semibold text-slate-500'}>Received ❤️</Text>
           </TouchableOpacity>
           <TouchableOpacity 
             className="flex-1 py-2 rounded-lg items-center justify-center"
             style={activeTab === 'sent' ? { backgroundColor: 'white', shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 2, elevation: 1 } : undefined}
             onPress={() => setActiveTab('sent')}
           >
-            <Text className={activeTab === 'sent' ? 'font-semibold text-slate-900' : 'font-semibold text-slate-500'}>People I Liked</Text>
+            <Text className={activeTab === 'sent' ? 'font-semibold text-slate-900' : 'font-semibold text-slate-500'}>Sent ❤️</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -191,8 +190,8 @@ export default function LikesScreen() {
       {/* Free Tier Like Count */}
       {activeTab === 'received' && activeProfiles && activeProfiles.length > 0 && (
         <View className="px-4 py-3 border-b border-slate-50 flex-row items-center justify-between">
-          <Text className="text-slate-600 font-medium">{activeProfiles.length} people liked your profile.</Text>
-          {!IS_PREMIUM && (
+          <Text className="text-slate-600 font-medium">{activeProfiles.length} people liked you</Text>
+          {!isPremium && (
             <TouchableOpacity onPress={() => router.push('/settings/subscription')}>
               <Text className="text-blue-600 font-semibold text-sm">See all</Text>
             </TouchableOpacity>

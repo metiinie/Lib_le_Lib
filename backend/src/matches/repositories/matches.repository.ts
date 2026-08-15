@@ -90,4 +90,17 @@ export class MatchesRepository {
 
     return qb.getRawMany();
   }
+
+  /**
+   * Creates a match explicitly (e.g. from a DM request acceptance)
+   */
+  async createMatch(manager: any, userAId: string, userBId: string): Promise<string> {
+    const result = await manager.query(
+      `INSERT INTO matches (user_a_id, user_b_id, status) VALUES ($1, $2, 'active') RETURNING id`,
+      [userAId, userBId]
+    );
+    // Depending on postgres driver / typeorm return format
+    const rows = Array.isArray(result) && Array.isArray(result[0]) ? result[0] : result;
+    return rows[0].id;
+  }
 }

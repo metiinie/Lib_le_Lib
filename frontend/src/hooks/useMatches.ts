@@ -9,6 +9,11 @@ export const useMatches = () => {
     queryFn: () => matchService.getMatches(),
   });
 
+  const dmRequestsQuery = useQuery({
+    queryKey: ['dmRequests'],
+    queryFn: () => matchService.getDmRequests(),
+  });
+
   const unmatchMutation = useMutation({
     mutationFn: (matchId: string) => matchService.unmatch(matchId),
     onSuccess: (_, matchId) => {
@@ -29,9 +34,20 @@ export const useMatches = () => {
     },
   });
 
+  const acceptDmRequestMutation = useMutation({
+    mutationFn: (requestId: string) => matchService.acceptDmRequest(requestId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dmRequests'] });
+      queryClient.invalidateQueries({ queryKey: ['matches'] });
+    }
+  });
+
   return {
     ...query,
+    dmRequests: dmRequestsQuery.data || [],
+    isLoadingDmRequests: dmRequestsQuery.isLoading,
     unmatch: unmatchMutation.mutateAsync,
     block: blockMutation.mutateAsync,
+    acceptDmRequest: acceptDmRequestMutation.mutateAsync,
   };
 };

@@ -3,13 +3,13 @@ import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert, Refre
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
-import { Match } from '@/services/match.service';
+import { Match, DmRequest } from '@/services/match.service';
 import { BlurredPhoto } from '@/components/photos/BlurredPhoto';
 import { useMatches } from '@/hooks/useMatches';
 
 export default function MatchesScreen() {
   const router = useRouter();
-  const { data: matches, isLoading, isError, refetch, unmatch, block } = useMatches();
+  const { data: matches, isLoading, isError, refetch, unmatch, block, dmRequests, acceptDmRequest } = useMatches();
 
   // Reference for swipeable items to close them
   const swipeableRefs = useRef<Map<string, Swipeable>>(new Map());
@@ -44,6 +44,26 @@ export default function MatchesScreen() {
         >
           <Ionicons name="ban" size={24} color="white" className="mb-1" />
           <Text className="text-white text-xs font-bold">Block</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
+  const renderDmRequest = ({ item }: { item: DmRequest }) => {
+    return (
+      <View className="flex-row items-center p-4 border-b border-slate-100 bg-amber-50">
+        <View className="w-16 h-16 rounded-full overflow-hidden bg-slate-200 mr-4">
+          <BlurredPhoto blurhash="LEHV6nWB2yk8pyo0adR*.7kCMdnj" revealGranted={true} photoUrl={item.avatarUrl} />
+        </View>
+        <View className="flex-1 justify-center">
+          <Text className="text-lg font-bold text-slate-900 mb-1">{item.nickname}</Text>
+          <Text className="text-slate-800 font-medium italic" numberOfLines={1}>"{item.message}"</Text>
+        </View>
+        <TouchableOpacity 
+          className="bg-blue-600 px-4 py-2 rounded-full"
+          onPress={() => acceptDmRequest(item.id)}
+        >
+          <Text className="text-white font-bold">Accept</Text>
         </TouchableOpacity>
       </View>
     );
@@ -131,15 +151,26 @@ export default function MatchesScreen() {
           renderItem={renderMatch}
           refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refetch} tintColor="#1B4D5C" />}
           ListHeaderComponent={
-            hasNewMatches ? (
-              <View className="mx-4 mt-4 mb-2 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 p-4 rounded-2xl flex-row items-center shadow-sm">
-                <View className="w-12 h-12 bg-white rounded-full items-center justify-center mr-3 shadow-sm border border-blue-100">
-                  <Text className="text-2xl">🎉</Text>
-                </View>
-                <View className="flex-1">
-                  <Text className="text-blue-900 font-bold text-base mb-0.5">You have new matches!</Text>
-                  <Text className="text-blue-700/80 text-sm">Say hi before the spark fades.</Text>
-                </View>
+            hasNewMatches || (dmRequests && dmRequests.length > 0) ? (
+              <View>
+                {dmRequests && dmRequests.length > 0 && (
+                  <View>
+                    <Text className="px-4 py-2 text-sm font-bold text-slate-500 uppercase tracking-wider">Message Requests</Text>
+                    {dmRequests.map(req => <React.Fragment key={req.id}>{renderDmRequest({ item: req })}</React.Fragment>)}
+                    <Text className="px-4 py-2 mt-2 text-sm font-bold text-slate-500 uppercase tracking-wider">Your Matches</Text>
+                  </View>
+                )}
+                {hasNewMatches && (
+                  <View className="mx-4 mt-4 mb-2 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 p-4 rounded-2xl flex-row items-center shadow-sm">
+                    <View className="w-12 h-12 bg-white rounded-full items-center justify-center mr-3 shadow-sm border border-blue-100">
+                      <Text className="text-2xl">🎉</Text>
+                    </View>
+                    <View className="flex-1">
+                      <Text className="text-blue-900 font-bold text-base mb-0.5">You have new matches!</Text>
+                      <Text className="text-blue-700/80 text-sm">Say hi before the spark fades.</Text>
+                    </View>
+                  </View>
+                )}
               </View>
             ) : null
           }

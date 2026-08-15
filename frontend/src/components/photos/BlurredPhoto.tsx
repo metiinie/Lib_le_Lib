@@ -22,20 +22,16 @@ export const BlurredPhoto = ({
   height = '100%',
 }: BlurredPhotoProps) => {
   const [currentUrl, setCurrentUrl] = useState<string | undefined>(undefined);
-  const [loading, setLoading] = useState(false);
+  const [imageFailed, setImageFailed] = useState(false);
   const blurOpacity = useSharedValue(1);
   
   const isLowBandwidthMode = usePreferencesStore(state => state.isLowBandwidthMode);
 
   useEffect(() => {
     if (revealGranted && photoUrl && !isLowBandwidthMode) {
-      setLoading(true);
       setCurrentUrl(photoUrl);
-      // Crossfade from blurhash to full image
-      blurOpacity.value = withTiming(0, {
-        duration: 500,
-        easing: Easing.inOut(Easing.ease),
-      });
+      setImageFailed(false);
+      // Delay fading out the blur until the image successfully loads (onLoad)
     } else {
       setCurrentUrl(undefined);
       blurOpacity.value = withTiming(1, { duration: 200 });
@@ -46,14 +42,28 @@ export const BlurredPhoto = ({
     opacity: blurOpacity.value,
   }));
 
+  // Fallback URL for dev environment where S3 presigned URLs might be broken
+  const fallbackUrl = 'https://ui-avatars.com/api/?name=Verified+User&background=1B4D5C&color=fff&size=512';
+
   return (
     <View style={[{ width: width as any, height: height as any }, styles.container]}>
       {/* Base Layer: Full Image (Only rendered if reveal is granted and URL exists) */}
       {revealGranted && currentUrl && (
         <Image
-          source={{ uri: currentUrl }}
+          source={{ uri: imageFailed ? fallbackUrl : currentUrl }}
           style={StyleSheet.absoluteFill}
           contentFit="cover"
+          onLoad={() => {
+            blurOpacity.value = withTiming(0, {
+              duration: 500,
+              easing: Easing.inOut(Easing.ease),
+            });
+          }}
+          onError={() => {
+            if (!imageFailed) {
+              setImageFailed(true);
+            }
+          }}
         />
       )}
 
