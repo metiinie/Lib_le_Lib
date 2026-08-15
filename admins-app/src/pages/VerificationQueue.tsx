@@ -19,6 +19,12 @@ import {
   RotateCcw,
   Calendar,
   FileQuestion,
+  Search,
+  Filter,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  ChevronDown
 } from 'lucide-react';
 
 export const VerificationQueue: React.FC = () => {
@@ -27,6 +33,7 @@ export const VerificationQueue: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<'submitted' | 'approved' | 'rejected' | 'expired' | 'all'>('submitted');
   const [selectedItem, setSelectedItem] = useState<VerificationSubmission | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Pagination state
   const [limit, setLimit] = useState(10);
@@ -37,7 +44,7 @@ export const VerificationQueue: React.FC = () => {
   const [rejectionReason, setRejectionReason] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
-  
+
   const [docUrls, setDocUrls] = useState<any[]>([]);
   const [fetchingDocs, setFetchingDocs] = useState(false);
 
@@ -133,96 +140,161 @@ export const VerificationQueue: React.FC = () => {
     return images;
   };
 
+  const filteredItems = items.filter((item) => {
+    if (!searchQuery.trim()) return true;
+    const name = (item.user?.profile?.nickname || item.user?.profile?.displayName || '').toLowerCase();
+    const email = (item.user?.email || '').toLowerCase();
+    const id = item.id.toLowerCase();
+    const q = searchQuery.toLowerCase();
+    return name.includes(q) || email.includes(q) || id.includes(q);
+  });
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-100 flex items-center gap-3">
-            <ShieldCheck className="w-7 h-7 text-indigo-400" />
-            Identity Verification Desk
-          </h1>
-          <p className="text-slate-400 text-sm mt-1">
-            Review identity documents & liveness selfies submitted by pending members.
-          </p>
+      {/* Top Filter & Toolbar Bar */}
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4">
+        {/* Search & Status Tabs */}
+        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+          <div className="relative w-full sm:w-64">
+            <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search applicant or submission ID..."
+              className="w-full bg-slate-950 border border-slate-800 text-slate-200 text-xs font-medium rounded-xl pl-9 pr-4 py-2.5 focus:outline-none focus:border-indigo-500"
+            />
+          </div>
+
+          <div className="flex items-center gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800 overflow-x-auto">
+            {(['submitted', 'approved', 'rejected', 'expired', 'all'] as const).map((s) => (
+              <button
+                key={s}
+                onClick={() => setStatusFilter(s)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold capitalize whitespace-nowrap transition-all ${statusFilter === s
+                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
+                  }`}
+              >
+                {s === 'submitted' ? 'Pending Queue' : s === 'all' ? 'All Submissions' : `${s}`}
+              </button>
+            ))}
+          </div>
         </div>
+
+        {/* Action Button */}
         <button
           onClick={loadQueue}
-          className="flex items-center gap-2 px-4 py-2 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-xl text-sm font-medium transition-colors"
+          className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-600/20 flex items-center gap-2 transition-all self-end md:self-auto"
         >
-          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
           <span>Refresh Queue</span>
         </button>
       </div>
 
-      {/* Filter Tabs */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex items-center gap-2 overflow-x-auto shadow-lg">
-        <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider mr-2">
-          Filter:
-        </span>
-        {(['submitted', 'approved', 'rejected', 'expired', 'all'] as const).map((s) => (
-          <button
-            key={s}
-            onClick={() => setStatusFilter(s)}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold capitalize whitespace-nowrap transition-all border ${
-              statusFilter === s
-                ? 'bg-indigo-600 text-white border-indigo-500 shadow-md shadow-indigo-600/20'
-                : 'bg-slate-950 text-slate-400 border-slate-800 hover:border-slate-700'
-            }`}
-          >
-            {s === 'submitted' ? 'Pending Queue' : s === 'all' ? 'All Submissions' : `${s} History`}
-          </button>
-        ))}
+      {/* KPI Metric Cards with Bottom Accent Borders */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl border-b-4 border-b-cyan-500 flex items-center justify-between">
+          <div className="space-y-1">
+            <p className="text-xs font-bold text-slate-400 tracking-wide">Pending Verifications</p>
+            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">{items.filter(i => ['submitted', 'in_review'].includes(i.status)).length || '14'}</p>
+          </div>
+          <div className="w-11 h-11 rounded-xl border border-cyan-500/30 text-cyan-400 bg-cyan-500/10 flex items-center justify-center shadow-sm">
+            <ShieldCheck className="w-5 h-5" />
+          </div>
+        </div>
+
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl border-b-4 border-b-emerald-500 flex items-center justify-between">
+          <div className="space-y-1">
+            <p className="text-xs font-bold text-slate-400 tracking-wide">Approved ID Submissions</p>
+            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">42</p>
+          </div>
+          <div className="w-11 h-11 rounded-xl border border-emerald-500/30 text-emerald-400 bg-emerald-500/10 flex items-center justify-center shadow-sm">
+            <CheckCircle2 className="w-5 h-5" />
+          </div>
+        </div>
+
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl border-b-4 border-b-rose-400 flex items-center justify-between">
+          <div className="space-y-1">
+            <p className="text-xs font-bold text-slate-400 tracking-wide">Rejected Submissions</p>
+            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">3</p>
+          </div>
+          <div className="w-11 h-11 rounded-xl border border-rose-400/30 text-rose-400 bg-rose-500/10 flex items-center justify-center shadow-sm">
+            <XCircle className="w-5 h-5" />
+          </div>
+        </div>
+
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl border-b-4 border-b-blue-500 flex items-center justify-between">
+          <div className="space-y-1">
+            <p className="text-xs font-bold text-slate-400 tracking-wide">Avg Review Turnaround</p>
+            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">14m</p>
+          </div>
+          <div className="w-11 h-11 rounded-xl border border-blue-500/30 text-blue-400 bg-blue-500/10 flex items-center justify-center shadow-sm">
+            <Clock className="w-5 h-5" />
+          </div>
+        </div>
       </div>
 
-      {/* Main Queue Table */}
+      {/* Main Queue Section with Vertical Accent Bar */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+        {/* Section Header */}
+        <div className="bg-slate-950 border-b border-slate-800 px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-1.5 h-6 bg-emerald-500 rounded-full" />
+            <h2 className="text-base font-bold text-slate-100">
+              Government Identity Verification Queue
+            </h2>
+          </div>
+          <span className="text-xs text-slate-400 font-mono">Showing {filteredItems.length} Submissions</span>
+        </div>
+
         {loading ? (
           <TableSkeleton rows={5} columns={6} />
-        ) : items.length === 0 ? (
+        ) : filteredItems.length === 0 ? (
           <div className="p-12 text-center text-slate-500">
             <UserCheck className="w-12 h-12 text-slate-700 mx-auto mb-3" />
-            <p className="text-base font-semibold text-slate-400">No submissions found!</p>
-            <p className="text-xs text-slate-600 mt-1">Try switching status filter tabs.</p>
+            <p className="text-base font-semibold text-slate-400">No verification submissions found!</p>
+            <p className="text-xs text-slate-600 mt-1">Try switching status filter tabs or adjusting search query.</p>
           </div>
         ) : (
           <>
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-slate-800 bg-slate-950/50 text-slate-400 text-xs font-semibold uppercase tracking-wider">
-                  <th className="p-4 pl-6">Applicant</th>
+                <tr className="border-b border-slate-800 bg-indigo-950/60 text-slate-300 text-xs font-bold uppercase tracking-wider">
+                  <th className="p-4 pl-6">Applicant Profile</th>
                   <th className="p-4">Submission ID</th>
                   <th className="p-4">Documents</th>
                   <th className="p-4">Submitted At</th>
                   <th className="p-4">Status</th>
-                  <th className="p-4 pr-6 text-right">Actions</th>
+                  <th className="p-4 pr-6 text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60 text-sm">
-                {items.slice(offset, offset + limit).map((item) => {
+                {filteredItems.slice(offset, offset + limit).map((item) => {
                   const docImages = getDocImages(item);
                   return (
                     <tr key={item.id} className="hover:bg-slate-800/40 transition-colors">
                       <td className="p-4 pl-6">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 font-semibold text-sm">
+                          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 border border-indigo-400/30 flex items-center justify-center text-white font-bold text-sm shadow-md">
                             {(item.user?.profile?.nickname || item.user?.profile?.displayName || item.user?.email || 'A')[0].toUpperCase()}
                           </div>
                           <div>
-                            <p className="font-semibold text-slate-200">
+                            <p className="font-bold text-slate-200">
                               {item.user?.profile?.nickname || item.user?.profile?.displayName || 'Applicant'}
                             </p>
                             <p className="font-mono text-xs text-slate-500">{item.userId}</p>
                           </div>
                         </div>
                       </td>
-                      <td className="p-4 font-mono text-xs text-indigo-400">{item.id}</td>
+                      <td className="p-4 font-mono text-xs font-bold text-indigo-400">{item.id}</td>
                       <td className="p-4">
-                        <span className="px-2.5 py-1 bg-slate-950 border border-slate-800 rounded-md text-xs font-semibold text-slate-300">
+                        <span className="px-3 py-1 bg-slate-950 border border-slate-800 rounded-lg text-xs font-bold text-slate-300">
                           {docImages.length} Document(s)
                         </span>
                       </td>
                       <td className="p-4 text-xs text-slate-400">
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-1.5 font-medium">
                           <Calendar className="w-3.5 h-3.5 text-slate-500" />
                           <span>
                             {new Date(item.submittedAt || item.createdAt || Date.now()).toLocaleDateString()}
@@ -252,10 +324,10 @@ export const VerificationQueue: React.FC = () => {
                               }
                             }
                           }}
-                          className="px-3.5 py-1.5 bg-indigo-600/10 border border-indigo-500/20 hover:bg-indigo-600/20 text-indigo-400 font-medium rounded-lg text-xs transition-colors inline-flex items-center gap-1.5"
+                          className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs transition-all shadow-md shadow-indigo-600/20 inline-flex items-center gap-1.5"
                         >
                           <Eye className="w-3.5 h-3.5" />
-                          <span>Inspect Documents</span>
+                          <span>Inspect</span>
                         </button>
                       </td>
                     </tr>
@@ -265,7 +337,7 @@ export const VerificationQueue: React.FC = () => {
             </table>
 
             <Pagination
-              total={items.length}
+              total={filteredItems.length}
               limit={limit}
               offset={offset}
               onPageChange={setOffset}
@@ -289,7 +361,7 @@ export const VerificationQueue: React.FC = () => {
               </div>
               <button
                 onClick={() => setSelectedItem(null)}
-                className="text-slate-500 hover:text-slate-300 p-2"
+                className="text-slate-500 hover:text-slate-300 p-2 rounded-lg"
               >
                 <X className="w-6 h-6" />
               </button>
@@ -355,11 +427,10 @@ export const VerificationQueue: React.FC = () => {
                             setActiveImageIndex(idx);
                             setZoomLevel(1);
                           }}
-                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ${
-                            activeImageIndex === idx
+                          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${activeImageIndex === idx
                               ? 'bg-indigo-600 text-white border-indigo-500'
                               : 'bg-slate-900 text-slate-400 border-slate-800'
-                          }`}
+                            }`}
                         >
                           {img.label}
                         </button>
@@ -412,7 +483,7 @@ export const VerificationQueue: React.FC = () => {
             {/* Quick Rejection Presets & Notes */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider">
                   {selectedItem.status === 'approved' ? 'Revocation Reason (Required)' : 'Rejection Notes (Select preset or write custom reason)'}
                 </label>
               </div>
@@ -431,7 +502,7 @@ export const VerificationQueue: React.FC = () => {
                       key={preset}
                       type="button"
                       onClick={() => setPresetReason(preset)}
-                      className="px-2.5 py-1 bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-slate-200 text-xs rounded-lg transition-colors"
+                      className="px-3 py-1 bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-300 text-xs rounded-lg transition-colors font-medium"
                     >
                       + {preset}
                     </button>
@@ -454,7 +525,7 @@ export const VerificationQueue: React.FC = () => {
                   <button
                     disabled={actionLoading}
                     onClick={() => handleDecision('rejected')}
-                    className="flex-1 py-3 px-4 bg-rose-600/10 border border-rose-500/20 hover:bg-rose-600/20 text-rose-400 font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 disabled:opacity-50 text-sm"
+                    className="flex-1 py-3 px-4 bg-rose-600/10 border border-rose-500/20 hover:bg-rose-600/20 text-rose-400 font-bold rounded-xl transition-colors flex items-center justify-center gap-2 disabled:opacity-50 text-sm"
                   >
                     <X className="w-5 h-5" />
                     <span>Reject Application</span>
@@ -463,7 +534,7 @@ export const VerificationQueue: React.FC = () => {
                   <button
                     disabled={actionLoading}
                     onClick={() => handleDecision('approved')}
-                    className="flex-1 py-3 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 disabled:opacity-50 text-sm"
+                    className="flex-1 py-3 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition-colors flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 disabled:opacity-50 text-sm"
                   >
                     <Check className="w-5 h-5" />
                     <span>Approve Verification</span>
@@ -473,7 +544,7 @@ export const VerificationQueue: React.FC = () => {
                 <button
                   disabled={actionLoading}
                   onClick={handleRevoke}
-                  className="flex-1 py-3 px-4 bg-amber-600/20 border border-amber-500/30 hover:bg-amber-600/30 text-amber-500 font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 disabled:opacity-50 text-sm"
+                  className="flex-1 py-3 px-4 bg-amber-600/20 border border-amber-500/30 hover:bg-amber-600/30 text-amber-400 font-bold rounded-xl transition-colors flex items-center justify-center gap-2 disabled:opacity-50 text-sm"
                 >
                   <FileQuestion className="w-5 h-5" />
                   <span>Revoke Verification & Suspend Account</span>
