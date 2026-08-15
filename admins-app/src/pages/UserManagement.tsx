@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { usersService } from '../services/users.service';
 import { User, UserRole } from '../types';
 import { StatusBadge } from '../components/ui/StatusBadge';
@@ -51,16 +52,47 @@ const PERMISSION_MATRIX: RolePermission[] = [
 
 export const UserManagement: React.FC = () => {
   const { showToast } = useToast();
-  const [activeTab, setActiveTab] = useState<'directory' | 'matrix'>('directory');
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const activeTab = (searchParams.get('tab') as 'directory' | 'matrix') || 'directory';
+  const roleFilter = (searchParams.get('role') as UserRole | 'all') || 'all';
+  const search = searchParams.get('q') || '';
+  const offset = parseInt(searchParams.get('offset') || '0', 10);
+
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [roleFilter, setRoleFilter] = useState<UserRole | 'all'>('all');
   const [totalCount, setTotalCount] = useState(0);
-
-  // Pagination state
   const [limit, setLimit] = useState(10);
-  const [offset, setOffset] = useState(0);
+
+  const setActiveTab = (tab: 'directory' | 'matrix') => {
+    const params = new URLSearchParams(searchParams);
+    if (tab === 'directory') params.delete('tab');
+    else params.set('tab', tab);
+    setSearchParams(params);
+  };
+
+  const setRoleFilter = (role: string) => {
+    const params = new URLSearchParams(searchParams);
+    if (role === 'all') params.delete('role');
+    else params.set('role', role);
+    params.set('offset', '0');
+    setSearchParams(params);
+  };
+
+  const setSearch = (query: string) => {
+    const params = new URLSearchParams(searchParams);
+    if (!query) params.delete('q');
+    else params.set('q', query);
+    params.set('offset', '0');
+    setSearchParams(params);
+  };
+
+  const setOffset = (newOffset: number) => {
+    const params = new URLSearchParams(searchParams);
+    if (newOffset === 0) params.delete('offset');
+    else params.set('offset', newOffset.toString());
+    setSearchParams(params);
+  };
 
   // Selected User for Role Modal
   const [editingUser, setEditingUser] = useState<User | null>(null);
@@ -150,8 +182,8 @@ export const UserManagement: React.FC = () => {
           <button
             onClick={() => setActiveTab('directory')}
             className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${activeTab === 'directory'
-                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
-                : 'text-slate-400 hover:text-slate-200'
+              ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
+              : 'text-slate-400 hover:text-slate-200'
               }`}
           >
             <Users className="w-3.5 h-3.5" />
@@ -160,8 +192,8 @@ export const UserManagement: React.FC = () => {
           <button
             onClick={() => setActiveTab('matrix')}
             className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${activeTab === 'matrix'
-                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
-                : 'text-slate-400 hover:text-slate-200'
+              ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
+              : 'text-slate-400 hover:text-slate-200'
               }`}
           >
             <Shield className="w-3.5 h-3.5" />
@@ -238,8 +270,8 @@ export const UserManagement: React.FC = () => {
                     key={r}
                     onClick={() => setRoleFilter(r)}
                     className={`px-3 py-1.5 rounded-lg text-xs font-bold capitalize whitespace-nowrap transition-all ${roleFilter === r
-                        ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
-                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
+                      ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
                       }`}
                   >
                     {r === 'all' ? 'All Roles' : r.replace('_', ' ')}
