@@ -66,6 +66,7 @@ export const is18OrOlder = (dateOfBirth: string) => {
 };
 
 export const profileSchema = z.object({
+  fullName: z.string().min(2, 'Legal full name must be at least 2 characters').max(60).optional(),
   nickname: z.string().min(2, 'Nickname must be at least 2 characters').max(30),
   dateOfBirth: z.string().refine((val) => {
     const parsed = parseAndNormalizeDate(val);

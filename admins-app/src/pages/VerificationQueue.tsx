@@ -396,9 +396,16 @@ export const VerificationQueue: React.FC = () => {
             {selectedItem.user && (
               <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
                 <div>
-                  <span className="text-slate-500 uppercase font-semibold block">Applicant Name</span>
+                  <span className="text-slate-500 uppercase font-semibold block">Legal Full Name (Private)</span>
                   <span className="font-semibold text-slate-200 text-sm">
-                    {selectedItem.user.profile?.displayName || 'N/A'}
+                    {selectedItem.user.profile?.fullName ? (
+                      <>
+                        <span className="text-indigo-400 font-bold">{selectedItem.user.profile.fullName}</span>
+                        <span className="text-slate-400 font-normal ml-1.5">(Nickname: {selectedItem.user.profile?.nickname || selectedItem.user.profile?.displayName || 'N/A'})</span>
+                      </>
+                    ) : (
+                      selectedItem.user.profile?.nickname || selectedItem.user.profile?.displayName || 'N/A'
+                    )}
                   </span>
                 </div>
                 <div>

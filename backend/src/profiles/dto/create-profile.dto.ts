@@ -11,6 +11,11 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateProfileDto {
+  @ApiProperty({ example: 'Johnathan Alexander Doe', description: 'Legal name for medical verification (kept private)', required: false })
+  @IsString()
+  @IsOptional()
+  fullName?: string;
+
   @ApiProperty({ example: 'Alex' })
   @IsString()
   @MinLength(2)

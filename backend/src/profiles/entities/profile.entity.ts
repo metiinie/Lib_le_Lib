@@ -25,6 +25,9 @@ export class Profile {
   @JoinColumn({ name: 'user_id' })
   user: User;
 
+  @Column({ name: 'full_name', type: 'text', nullable: true })
+  fullName: string | null;
+
   @Column({ type: 'text' })
   nickname: string;
 
