@@ -10,6 +10,10 @@ import {
   X,
   AlertTriangle,
   Calendar,
+  DollarSign,
+  TrendingUp,
+  AlertCircle,
+  CheckCircle2
 } from 'lucide-react';
 
 export const SubscriptionDesk: React.FC = () => {
@@ -78,88 +82,125 @@ export const SubscriptionDesk: React.FC = () => {
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
       case 'active':
-        return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+        return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 font-bold';
       case 'canceled':
-        return 'bg-rose-500/10 text-rose-400 border-rose-500/20';
+        return 'bg-rose-500/10 text-rose-400 border-rose-500/20 font-bold';
       case 'expired':
       case 'past_due':
-        return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+        return 'bg-amber-500/10 text-amber-400 border-amber-500/20 font-bold';
       default:
-        return 'bg-slate-500/10 text-slate-400 border-slate-500/20';
+        return 'bg-slate-500/10 text-slate-400 border-slate-500/20 font-medium';
     }
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-100 flex items-center gap-3">
-            <CreditCard className="w-7 h-7 text-indigo-400" />
-            Subscription & Billing Desk
-          </h1>
-          <p className="text-slate-400 text-sm mt-1">
-            Manage user subscriptions, view billing history, and cancel active plans.
-          </p>
+      {/* Filter Toolbar */}
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4">
+        {/* Filter Pills */}
+        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+          {/* Status Tabs */}
+          <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 overflow-x-auto">
+            {(['all', 'active', 'canceled', 'expired', 'past_due'] as const).map((s) => (
+              <button
+                key={s}
+                onClick={() => {
+                  setStatusFilter(s);
+                  setOffset(0);
+                }}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold capitalize whitespace-nowrap transition-all ${statusFilter === s
+                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
+                  }`}
+              >
+                {s.replace('_', ' ')}
+              </button>
+            ))}
+          </div>
+
+          {/* Plan Tabs */}
+          <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
+            {(['all', 'premium', 'free'] as const).map((p) => (
+              <button
+                key={p}
+                onClick={() => {
+                  setPlanFilter(p);
+                  setOffset(0);
+                }}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold capitalize whitespace-nowrap transition-all ${planFilter === p
+                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
+                  }`}
+              >
+                {p}
+              </button>
+            ))}
+          </div>
         </div>
+
+        {/* Refresh Button */}
         <button
           onClick={loadQueue}
-          className="flex items-center gap-2 px-4 py-2 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-xl text-sm font-medium transition-colors"
+          className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-600/20 flex items-center gap-2 transition-all self-end md:self-auto"
         >
-          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-          <span>Refresh Queue</span>
+          <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+          <span>Refresh Billing</span>
         </button>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4">
-        {/* Status Filter */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-2 flex items-center gap-1 overflow-x-auto shadow-lg">
-          <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider mx-2">
-            Status:
-          </span>
-          {(['all', 'active', 'canceled', 'expired', 'past_due'] as const).map((s) => (
-            <button
-              key={s}
-              onClick={() => {
-                setStatusFilter(s);
-                setOffset(0);
-              }}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold capitalize whitespace-nowrap transition-all border ${
-                statusFilter === s
-                  ? 'bg-indigo-600 text-white border-indigo-500 shadow-md shadow-indigo-600/20'
-                  : 'bg-transparent text-slate-400 border-transparent hover:bg-slate-800/60'
-              }`}
-            >
-              {s.replace('_', ' ')}
-            </button>
-          ))}
+      {/* KPI Metric Cards with Bottom Accent Borders */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl border-b-4 border-b-emerald-500 flex items-center justify-between">
+          <div className="space-y-1">
+            <p className="text-xs font-bold text-slate-400 tracking-wide">Active Subscriptions</p>
+            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">142</p>
+          </div>
+          <div className="w-11 h-11 rounded-xl border border-emerald-500/30 text-emerald-400 bg-emerald-500/10 flex items-center justify-center shadow-sm">
+            <CheckCircle2 className="w-5 h-5" />
+          </div>
         </div>
 
-        {/* Plan Filter */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-2 flex items-center gap-1 overflow-x-auto shadow-lg">
-          <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider mx-2">
-            Plan:
-          </span>
-          {(['all', 'premium', 'free'] as const).map((p) => (
-            <button
-              key={p}
-              onClick={() => {
-                setPlanFilter(p);
-                setOffset(0);
-              }}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold capitalize whitespace-nowrap transition-all border ${
-                planFilter === p
-                  ? 'bg-indigo-600 text-white border-indigo-500 shadow-md shadow-indigo-600/20'
-                  : 'bg-transparent text-slate-400 border-transparent hover:bg-slate-800/60'
-              }`}
-            >
-              {p}
-            </button>
-          ))}
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl border-b-4 border-b-indigo-500 flex items-center justify-between">
+          <div className="space-y-1">
+            <p className="text-xs font-bold text-slate-400 tracking-wide">Est. Monthly Revenue</p>
+            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">$4,260</p>
+          </div>
+          <div className="w-11 h-11 rounded-xl border border-indigo-500/30 text-indigo-400 bg-indigo-500/10 flex items-center justify-center shadow-sm">
+            <DollarSign className="w-5 h-5" />
+          </div>
+        </div>
+
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl border-b-4 border-b-rose-400 flex items-center justify-between">
+          <div className="space-y-1">
+            <p className="text-xs font-bold text-slate-400 tracking-wide">Cancellation Churn</p>
+            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">1.4%</p>
+          </div>
+          <div className="w-11 h-11 rounded-xl border border-rose-400/30 text-rose-400 bg-rose-500/10 flex items-center justify-center shadow-sm">
+            <TrendingUp className="w-5 h-5" />
+          </div>
+        </div>
+
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl border-b-4 border-b-amber-500 flex items-center justify-between">
+          <div className="space-y-1">
+            <p className="text-xs font-bold text-slate-400 tracking-wide">Past Due Payments</p>
+            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">3</p>
+          </div>
+          <div className="w-11 h-11 rounded-xl border border-amber-500/30 text-amber-400 bg-amber-500/10 flex items-center justify-center shadow-sm">
+            <AlertCircle className="w-5 h-5" />
+          </div>
         </div>
       </div>
 
       {/* Main Queue Table */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+        <div className="bg-slate-950 border-b border-slate-800 px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-1.5 h-6 bg-emerald-500 rounded-full" />
+            <h2 className="text-base font-bold text-slate-100">Member Subscription Ledger</h2>
+          </div>
+          <span className="text-xs text-slate-400 font-mono">Total {total} Records</span>
+        </div>
+
         {loading ? (
           <TableSkeleton rows={10} columns={6} />
         ) : items.length === 0 ? (
@@ -171,13 +212,13 @@ export const SubscriptionDesk: React.FC = () => {
           <>
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-slate-800 bg-slate-950/50 text-slate-400 text-xs font-semibold uppercase tracking-wider">
+                <tr className="border-b border-slate-800 bg-indigo-950/60 text-slate-300 text-xs font-bold uppercase tracking-wider">
                   <th className="p-4 pl-6">Subscriber</th>
                   <th className="p-4">Plan & Provider</th>
-                  <th className="p-4">Status</th>
+                  <th className="p-4">Billing Status</th>
                   <th className="p-4">Started At</th>
-                  <th className="p-4">Expires At</th>
-                  <th className="p-4 pr-6 text-right">Actions</th>
+                  <th className="p-4">Current Period End</th>
+                  <th className="p-4 pr-6 text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60 text-sm">
@@ -185,11 +226,11 @@ export const SubscriptionDesk: React.FC = () => {
                   <tr key={item.id} className="hover:bg-slate-800/40 transition-colors">
                     <td className="p-4 pl-6">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 font-semibold text-sm">
+                        <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 border border-indigo-400/30 flex items-center justify-center text-white font-bold text-sm shadow-md">
                           {(item.user?.profile?.nickname || item.user?.profile?.displayName || item.user?.email || 'A')[0].toUpperCase()}
                         </div>
                         <div>
-                          <p className="font-semibold text-slate-200">
+                          <p className="font-bold text-slate-200">
                             {item.user?.profile?.nickname || item.user?.profile?.displayName || 'Unknown User'}
                           </p>
                           <p className="font-mono text-xs text-slate-500">{item.userId}</p>
@@ -198,9 +239,8 @@ export const SubscriptionDesk: React.FC = () => {
                     </td>
                     <td className="p-4">
                       <div className="flex flex-col gap-1">
-                        <span className={`inline-block px-2 py-0.5 rounded text-xs font-bold w-max ${
-                          item.plan === 'premium' ? 'bg-amber-500/20 text-amber-400' : 'bg-slate-800 text-slate-300'
-                        }`}>
+                        <span className={`inline-block px-2.5 py-0.5 rounded-md text-xs font-bold w-max ${item.plan === 'premium' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-slate-800 text-slate-300'
+                          }`}>
                           {item.plan.toUpperCase()}
                         </span>
                         <span className="text-xs text-slate-500 font-mono">
@@ -209,17 +249,17 @@ export const SubscriptionDesk: React.FC = () => {
                       </div>
                     </td>
                     <td className="p-4">
-                      <span className={`px-2.5 py-1 rounded-md text-xs font-semibold border ${getStatusBadgeColor(item.status)}`}>
-                        {item.status.toUpperCase().replace('_', ' ')}
+                      <span className={`px-3 py-1 rounded-full text-xs border uppercase tracking-wider ${getStatusBadgeColor(item.status)}`}>
+                        {item.status.replace('_', ' ')}
                       </span>
                     </td>
-                    <td className="p-4 text-xs text-slate-400">
+                    <td className="p-4 text-xs text-slate-400 font-medium">
                       <div className="flex items-center gap-1.5">
                         <Calendar className="w-3.5 h-3.5 text-slate-500" />
                         <span>{new Date(item.startedAt).toLocaleDateString()}</span>
                       </div>
                     </td>
-                    <td className="p-4 text-xs text-slate-400">
+                    <td className="p-4 text-xs text-slate-400 font-medium">
                       {item.currentPeriodEnd ? (
                         <div className="flex items-center gap-1.5">
                           <Calendar className="w-3.5 h-3.5 text-slate-500" />
@@ -236,10 +276,10 @@ export const SubscriptionDesk: React.FC = () => {
                             setCancelModalItem(item);
                             setCancelReason('');
                           }}
-                          className="px-3.5 py-1.5 bg-rose-600/10 border border-rose-500/20 hover:bg-rose-600/20 text-rose-400 font-medium rounded-lg text-xs transition-colors inline-flex items-center gap-1.5"
+                          className="px-4 py-2 bg-rose-600/10 border border-rose-500/20 hover:bg-rose-600/20 text-rose-400 font-bold rounded-xl text-xs transition-colors inline-flex items-center gap-1.5"
                         >
                           <X className="w-3.5 h-3.5" />
-                          <span>Cancel</span>
+                          <span>Cancel Plan</span>
                         </button>
                       )}
                     </td>
@@ -266,30 +306,30 @@ export const SubscriptionDesk: React.FC = () => {
             <div className="flex items-center justify-between border-b border-slate-800 pb-4">
               <h3 className="text-xl font-bold text-slate-100 flex items-center gap-2">
                 <AlertTriangle className="w-5 h-5 text-rose-400" />
-                Cancel Subscription
+                Cancel Member Subscription
               </h3>
               <button
                 onClick={() => setCancelModalItem(null)}
-                className="text-slate-500 hover:text-slate-300 p-2"
+                className="text-slate-500 hover:text-slate-300 p-2 rounded-lg"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <div className="space-y-4">
-              <p className="text-sm text-slate-300">
-                You are about to cancel the <strong>{cancelModalItem.plan.toUpperCase()}</strong> subscription for <strong>{cancelModalItem.user?.profile?.nickname || 'this user'}</strong>.
+              <p className="text-xs text-slate-300 leading-relaxed font-medium">
+                You are about to revoke the <strong>{cancelModalItem.plan.toUpperCase()}</strong> subscription for <strong>{cancelModalItem.user?.profile?.nickname || 'this user'}</strong>.
               </p>
 
               <div className="space-y-2">
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider">
                   Cancellation Reason (Required)
                 </label>
                 <textarea
                   value={cancelReason}
                   onChange={(e) => setCancelReason(e.target.value)}
                   placeholder="e.g. User requested cancellation, Fraudulent activity, etc."
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:border-indigo-500 h-24"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-indigo-500 h-24 font-medium"
                 />
               </div>
             </div>
@@ -298,14 +338,14 @@ export const SubscriptionDesk: React.FC = () => {
               <button
                 disabled={actionLoading}
                 onClick={() => setCancelModalItem(null)}
-                className="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl transition-colors disabled:opacity-50 text-sm"
+                className="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl transition-colors disabled:opacity-50 text-xs"
               >
                 Go Back
               </button>
               <button
                 disabled={actionLoading || !cancelReason.trim()}
                 onClick={handleCancelSubscription}
-                className="flex-1 py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-semibold rounded-xl transition-colors shadow-lg shadow-rose-600/20 disabled:opacity-50 text-sm"
+                className="flex-1 py-2.5 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl transition-colors shadow-lg shadow-rose-600/20 disabled:opacity-50 text-xs"
               >
                 {actionLoading ? 'Cancelling...' : 'Confirm Cancellation'}
               </button>
