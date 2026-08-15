@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { reportsService } from '../services/reports.service';
 import { ModerationReport, ReportCategory, ReportSeverity, ReportStatus } from '../types';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { Pagination } from '../components/ui/Pagination';
+import { useToast } from '../context/ToastContext';
 import {
   Flag,
   ShieldAlert,
@@ -22,16 +24,53 @@ import {
 } from 'lucide-react';
 
 export const ModerationQueue: React.FC = () => {
+  const { showToast } = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const statusFilter = (searchParams.get('status') as ReportStatus | 'all') || 'open';
+  const severityFilter = (searchParams.get('severity') as ReportSeverity | 'all') || 'all';
+  const offset = parseInt(searchParams.get('offset') || '0', 10);
+
   const [reports, setReports] = useState<ModerationReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
   const [limit, setLimit] = useState(10);
-  const [offset, setOffset] = useState(0);
-  const [statusFilter, setStatusFilter] = useState<ReportStatus | 'all'>('open');
-  const [severityFilter, setSeverityFilter] = useState<ReportSeverity | 'all'>('all');
+
   const [selectedReport, setSelectedReport] = useState<ModerationReport | null>(null);
   const [actionReason, setActionReason] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
+
+  const setStatusFilter = (status: string) => {
+    const params = new URLSearchParams(searchParams);
+    if (status === 'open') {
+      params.delete('status');
+    } else {
+      params.set('status', status);
+    }
+    params.set('offset', '0');
+    setSearchParams(params);
+  };
+
+  const setSeverityFilter = (severity: string) => {
+    const params = new URLSearchParams(searchParams);
+    if (severity === 'all') {
+      params.delete('severity');
+    } else {
+      params.set('severity', severity);
+    }
+    params.set('offset', '0');
+    setSearchParams(params);
+  };
+
+  const setOffset = (newOffset: number) => {
+    const params = new URLSearchParams(searchParams);
+    if (newOffset === 0) {
+      params.delete('offset');
+    } else {
+      params.set('offset', newOffset.toString());
+    }
+    setSearchParams(params);
+  };
 
   const loadReports = async () => {
     setLoading(true);
@@ -46,6 +85,7 @@ export const ModerationQueue: React.FC = () => {
       setTotal(res.total || 0);
     } catch (err) {
       console.error('Failed to load moderation reports:', err);
+      showToast('Error', 'Failed to load moderation reports', 'error');
     } finally {
       setLoading(false);
     }
@@ -62,11 +102,13 @@ export const ModerationQueue: React.FC = () => {
     setActionLoading(true);
     try {
       await reportsService.performAction(selectedReport.id, action, actionReason);
+      showToast('Action Applied', `Moderation decision '${action}' executed successfully.`, 'success');
       setSelectedReport(null);
       setActionReason('');
       await loadReports();
     } catch (err) {
       console.error('Moderation action failed:', err);
+      showToast('Action Failed', 'Failed to execute moderation action.', 'error');
     } finally {
       setActionLoading(false);
     }

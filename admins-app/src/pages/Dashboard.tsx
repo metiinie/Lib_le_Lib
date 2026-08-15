@@ -34,6 +34,22 @@ export const Dashboard: React.FC = () => {
       setSearchParams({ desk });
     }
   };
+
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    verificationOfficers: 0,
+    moderators: 0,
+    healthProfessionals: 0,
+    admins: 0,
+    pendingVerifications: 0,
+    openReports: 0,
+    criticalReports: 0,
+    openQAThreads: 0,
+    activeSubscriptions: 0,
+    pendingSuccessStories: 0,
+    publishedResources: 0,
+  });
+  const [loading, setLoading] = useState(true);
   const [hideCards, setHideCards] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [activeCardId, setActiveCardId] = useState<number | null>(2); // Default Pending Verifications as active filled card
