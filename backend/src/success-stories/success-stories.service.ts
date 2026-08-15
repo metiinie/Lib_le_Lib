@@ -7,7 +7,7 @@ import { SuccessStoryResponseDto } from './dto/success-story-response.dto';
 export class SuccessStoriesService {
   constructor(
     private readonly successStoriesRepository: SuccessStoriesRepository,
-  ) {}
+  ) { }
 
   async getPublishedStories(
     limit = 20,
@@ -56,5 +56,13 @@ export class SuccessStoriesService {
     story.approvedByUserId = adminUserId;
 
     await this.successStoriesRepository.saveStory(story);
+  }
+
+  async deleteStory(id: string): Promise<void> {
+    const story = await this.successStoriesRepository.findById(id);
+    if (!story) {
+      throw new NotFoundException('Success story not found');
+    }
+    await this.successStoriesRepository.deleteStory(id);
   }
 }

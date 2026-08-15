@@ -12,6 +12,11 @@ export const resourcesService = {
     return res.data;
   },
 
+  updateResource: async (id: string, data: Partial<ResourceItem>) => {
+    const res = await api.patch(`/resources/${id}`, data);
+    return res.data;
+  },
+
   deleteResource: async (id: string) => {
     const res = await api.delete(`/resources/${id}`);
     return res.data;
@@ -24,6 +29,11 @@ export const resourcesService = {
 
   approveSuccessStory: async (id: string) => {
     const res = await api.post(`/success-stories/${id}/approve`);
+    return res.data;
+  },
+
+  deleteSuccessStory: async (id: string) => {
+    const res = await api.delete(`/success-stories/${id}`);
     return res.data;
   },
 };

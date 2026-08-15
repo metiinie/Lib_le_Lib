@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { reportsService } from '../services/reports.service';
 import { ModerationReport, ReportCategory, ReportSeverity, ReportStatus } from '../types';
 import { StatusBadge } from '../components/ui/StatusBadge';
+import { Pagination } from '../components/ui/Pagination';
 import {
   Flag,
   ShieldAlert,
@@ -23,6 +24,9 @@ import {
 export const ModerationQueue: React.FC = () => {
   const [reports, setReports] = useState<ModerationReport[]>([]);
   const [loading, setLoading] = useState(true);
+  const [total, setTotal] = useState(0);
+  const [limit, setLimit] = useState(10);
+  const [offset, setOffset] = useState(0);
   const [statusFilter, setStatusFilter] = useState<ReportStatus | 'all'>('open');
   const [severityFilter, setSeverityFilter] = useState<ReportSeverity | 'all'>('all');
   const [selectedReport, setSelectedReport] = useState<ModerationReport | null>(null);
@@ -33,12 +37,13 @@ export const ModerationQueue: React.FC = () => {
     setLoading(true);
     try {
       const res = await reportsService.getQueue(
-        50,
-        0,
+        limit,
+        offset,
         statusFilter === 'all' ? undefined : statusFilter,
         severityFilter === 'all' ? undefined : severityFilter
       );
       setReports(res.data || []);
+      setTotal(res.total || 0);
     } catch (err) {
       console.error('Failed to load moderation reports:', err);
     } finally {
@@ -48,7 +53,7 @@ export const ModerationQueue: React.FC = () => {
 
   useEffect(() => {
     loadReports();
-  }, [statusFilter, severityFilter]);
+  }, [limit, offset, statusFilter, severityFilter]);
 
   const handleAction = async (
     action: 'warn' | 'suspend' | 'ban' | 'request_resubmission' | 'none'
@@ -93,8 +98,8 @@ export const ModerationQueue: React.FC = () => {
                 key={s}
                 onClick={() => setStatusFilter(s)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold capitalize whitespace-nowrap transition-all ${statusFilter === s
-                    ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
+                  ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
                   }`}
               >
                 {s === 'all' ? 'All Reports' : s}
@@ -261,6 +266,17 @@ export const ModerationQueue: React.FC = () => {
             </tbody>
           </table>
         )}
+
+        <Pagination
+          total={total}
+          limit={limit}
+          offset={offset}
+          onPageChange={setOffset}
+          onLimitChange={(newLimit) => {
+            setLimit(newLimit);
+            setOffset(0);
+          }}
+        />
       </div>
 
       {/* Investigation Inspector Modal */}

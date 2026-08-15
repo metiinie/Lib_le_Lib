@@ -16,7 +16,8 @@ import {
   Inbox,
   CheckCircle2,
   UserCheck,
-  HelpCircle
+  HelpCircle,
+  UserPlus
 } from 'lucide-react';
 
 interface QAMessage {
@@ -69,6 +70,15 @@ export const HealthQA: React.FC = () => {
     setExpandedThreads(next);
   };
 
+  const handleAssign = async (threadId: string) => {
+    try {
+      await qaService.assignThread(threadId);
+      await loadThreads();
+    } catch (err) {
+      console.error('Failed to assign thread:', err);
+    }
+  };
+
   const handleReply = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedThread || !replyText.trim()) return;
@@ -105,8 +115,8 @@ export const HealthQA: React.FC = () => {
               key={s}
               onClick={() => setStatusFilter(s)}
               className={`px-3.5 py-1.5 rounded-lg text-xs font-bold capitalize whitespace-nowrap transition-all ${statusFilter === s
-                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
+                ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
                 }`}
             >
               {s === 'open' ? 'Open Questions' : s === 'all' ? 'All Threads' : `${s} Threads`}
@@ -237,6 +247,16 @@ export const HealthQA: React.FC = () => {
                     </div>
 
                     <div className="flex items-center gap-2 shrink-0">
+                      {thread.status === 'open' && !thread.healthProfessionalId && (
+                        <button
+                          onClick={() => handleAssign(thread.id)}
+                          className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs transition-all shadow-md shadow-indigo-600/20 flex items-center gap-1.5"
+                          title="Assign this medical thread to yourself"
+                        >
+                          <UserPlus className="w-3.5 h-3.5" />
+                          <span>Assign to Me</span>
+                        </button>
+                      )}
                       {thread.status === 'open' && (
                         <button
                           onClick={() => {
@@ -283,8 +303,8 @@ export const HealthQA: React.FC = () => {
                             </div>
                             <div
                               className={`p-3.5 rounded-xl text-xs leading-relaxed font-medium ${isHP
-                                  ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-200'
-                                  : 'bg-slate-950 border border-slate-800 text-slate-300'
+                                ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-200'
+                                : 'bg-slate-950 border border-slate-800 text-slate-300'
                                 }`}
                             >
                               {msg.content}
@@ -333,8 +353,8 @@ export const HealthQA: React.FC = () => {
                     </span>
                     <div
                       className={`p-3 rounded-xl leading-relaxed font-medium ${isHP
-                          ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-200'
-                          : 'bg-slate-950 border border-slate-800 text-slate-300'
+                        ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-200'
+                        : 'bg-slate-950 border border-slate-800 text-slate-300'
                         }`}
                     >
                       {msg.content}

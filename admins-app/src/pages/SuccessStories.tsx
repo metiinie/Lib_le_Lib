@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { resourcesService } from '../services/resources.service';
 import { SuccessStory } from '../types';
-import { Heart, CheckCircle2, Check, Sparkles, Clock, Users } from 'lucide-react';
+import { Heart, CheckCircle2, Check, Sparkles, Clock, Users, Trash2 } from 'lucide-react';
 import { StatusBadge } from '../components/ui/StatusBadge';
 
 export const SuccessStories: React.FC = () => {
@@ -30,6 +30,16 @@ export const SuccessStories: React.FC = () => {
       await loadStories();
     } catch (err) {
       console.error('Failed to approve story:', err);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to reject and delete this testimonial submission?')) return;
+    try {
+      await resourcesService.deleteSuccessStory(id);
+      await loadStories();
+    } catch (err) {
+      console.error('Failed to delete story:', err);
     }
   };
 
@@ -123,15 +133,24 @@ export const SuccessStories: React.FC = () => {
                   "{story.storyText || story.storyContent}"
                 </p>
 
-                {!(story.published || story.isApproved) && (
+                <div className="flex items-center gap-3">
+                  {!(story.published || story.isApproved) && (
+                    <button
+                      onClick={() => handleApprove(story.id)}
+                      className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-emerald-600/20 flex items-center gap-2"
+                    >
+                      <Check className="w-4 h-4" />
+                      <span>Approve Story</span>
+                    </button>
+                  )}
                   <button
-                    onClick={() => handleApprove(story.id)}
-                    className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-emerald-600/20 flex items-center gap-2"
+                    onClick={() => handleDelete(story.id)}
+                    className="px-4 py-2.5 bg-rose-600/20 border border-rose-500/30 hover:bg-rose-600/30 text-rose-300 text-xs font-bold rounded-xl transition-all flex items-center gap-2"
                   >
-                    <Check className="w-4 h-4" />
-                    <span>Approve Story for Community Publication</span>
+                    <Trash2 className="w-4 h-4" />
+                    <span>Reject & Delete Story</span>
                   </button>
-                )}
+                </div>
               </div>
             ))}
           </div>

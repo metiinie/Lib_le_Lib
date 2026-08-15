@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { resourcesService } from '../services/resources.service';
 import { ResourceItem } from '../types';
-import { BookOpen, Plus, Trash2, CheckCircle2, ShieldCheck, HeartHandshake, PhoneCall } from 'lucide-react';
+import { BookOpen, Plus, Trash2, CheckCircle2, ShieldCheck, HeartHandshake, PhoneCall, Pencil, X } from 'lucide-react';
 
 export const ResourceManagement: React.FC = () => {
   const [resources, setResources] = useState<ResourceItem[]>([]);
@@ -11,6 +11,13 @@ export const ResourceManagement: React.FC = () => {
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState<'treatment_info' | 'u_equals_u' | 'hotline' | 'general'>('treatment_info');
   const [body, setBody] = useState('');
+
+  // Editing state
+  const [editingResource, setEditingResource] = useState<ResourceItem | null>(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editCategory, setEditCategory] = useState<'treatment_info' | 'u_equals_u' | 'hotline' | 'general'>('treatment_info');
+  const [editBody, setEditBody] = useState('');
+  const [updating, setUpdating] = useState(false);
 
   const loadResources = async () => {
     setLoading(true);
@@ -43,6 +50,32 @@ export const ResourceManagement: React.FC = () => {
       await loadResources();
     } catch (err) {
       console.error('Create resource error:', err);
+    }
+  };
+
+  const startEdit = (resource: ResourceItem) => {
+    setEditingResource(resource);
+    setEditTitle(resource.title);
+    setEditCategory(resource.category as any);
+    setEditBody(resource.body);
+  };
+
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingResource) return;
+    setUpdating(true);
+    try {
+      await resourcesService.updateResource(editingResource.id, {
+        title: editTitle,
+        category: editCategory,
+        body: editBody,
+      });
+      setEditingResource(null);
+      await loadResources();
+    } catch (err) {
+      console.error('Update resource error:', err);
+    } finally {
+      setUpdating(false);
     }
   };
 
@@ -176,12 +209,22 @@ export const ResourceManagement: React.FC = () => {
                 <span className="px-3 py-1 text-xs font-bold rounded-full bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 capitalize">
                   {res.category.replace('_', ' ')}
                 </span>
-                <button
-                  onClick={() => handleDelete(res.id)}
-                  className="text-slate-600 hover:text-rose-400 p-1.5 rounded-lg transition-colors"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => startEdit(res)}
+                    className="text-slate-500 hover:text-indigo-400 p-1.5 rounded-lg transition-colors"
+                    title="Edit Resource"
+                  >
+                    <Pencil className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(res.id)}
+                    className="text-slate-600 hover:text-rose-400 p-1.5 rounded-lg transition-colors"
+                    title="Delete Resource"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
               <h3 className="text-base font-bold text-slate-100">{res.title}</h3>
               <p className="text-xs text-slate-400 leading-relaxed font-medium line-clamp-3">{res.body}</p>
@@ -189,6 +232,84 @@ export const ResourceManagement: React.FC = () => {
           ))
         )}
       </div>
+
+      {/* Edit Resource Modal */}
+      {editingResource && (
+        <div className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-6">
+          <form
+            onSubmit={handleUpdate}
+            className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg p-8 shadow-2xl space-y-5"
+          >
+            <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+              <h3 className="text-lg font-bold text-slate-100 flex items-center gap-2">
+                <Pencil className="w-5 h-5 text-indigo-400" />
+                Edit Educational Article
+              </h3>
+              <button
+                type="button"
+                onClick={() => setEditingResource(null)}
+                className="text-slate-500 hover:text-slate-300 p-2 rounded-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">Article Title</label>
+                <input
+                  type="text"
+                  required
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-medium"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">Category</label>
+                <select
+                  value={editCategory}
+                  onChange={(e) => setEditCategory(e.target.value as any)}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 font-bold capitalize"
+                >
+                  <option value="treatment_info">Treatment Info</option>
+                  <option value="u_equals_u">U=U (Undetectable = Untransmittable)</option>
+                  <option value="hotline">Hotline</option>
+                  <option value="general">General</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">Full Content Body</label>
+                <textarea
+                  required
+                  value={editBody}
+                  onChange={(e) => setEditBody(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 h-36 font-medium"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
+              <button
+                type="button"
+                onClick={() => setEditingResource(null)}
+                className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={updating}
+                className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-600/20 transition-all disabled:opacity-50"
+              >
+                {updating ? 'Saving...' : 'Save Changes'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 };

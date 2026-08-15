@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Delete,
   Body,
   Param,
   UseGuards,
@@ -23,7 +24,7 @@ import { Roles } from '../auth/decorators/roles.decorator';
 @UseGuards(JwtAuthGuard)
 @Controller('success-stories')
 export class SuccessStoriesController {
-  constructor(private readonly successStoriesService: SuccessStoriesService) {}
+  constructor(private readonly successStoriesService: SuccessStoriesService) { }
 
   @Get()
   async getPublishedStories(
@@ -68,5 +69,13 @@ export class SuccessStoriesController {
   async approveStory(@Request() req, @Param('id') id: string) {
     await this.successStoriesService.approveStory(id, req.user.id);
     return { success: true, message: 'Story approved and published.' };
+  }
+
+  @Delete(':id')
+  @UseGuards(RolesGuard)
+  @Roles('admin')
+  async deleteStory(@Param('id') id: string) {
+    await this.successStoriesService.deleteStory(id);
+    return { success: true, message: 'Story deleted.' };
   }
 }
