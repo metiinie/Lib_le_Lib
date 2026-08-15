@@ -107,8 +107,10 @@ export const TelemetryDesk: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl border-b-4 border-b-emerald-500 flex items-center justify-between">
           <div className="space-y-1">
-            <p className="text-xs font-bold text-slate-400 tracking-wide">Overall p95 Latency</p>
-            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">185ms</p>
+            <p className="text-xs font-bold text-slate-400 tracking-wide">Overall Avg p95 Latency</p>
+            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">
+              {loading ? '...' : (metrics.length > 0 ? `${(metrics.reduce((acc, m) => acc + m.p95, 0) / metrics.length).toFixed(0)}ms` : '0ms')}
+            </p>
           </div>
           <div className="w-11 h-11 rounded-xl border border-emerald-500/30 text-emerald-400 bg-emerald-500/10 flex items-center justify-center shadow-sm">
             <Zap className="w-5 h-5" />
@@ -118,7 +120,7 @@ export const TelemetryDesk: React.FC = () => {
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl border-b-4 border-b-indigo-500 flex items-center justify-between">
           <div className="space-y-1">
             <p className="text-xs font-bold text-slate-400 tracking-wide">Monitored Endpoints</p>
-            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">8</p>
+            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">{loading ? '...' : metrics.length}</p>
           </div>
           <div className="w-11 h-11 rounded-xl border border-indigo-500/30 text-indigo-400 bg-indigo-500/10 flex items-center justify-center shadow-sm">
             <Server className="w-5 h-5" />
@@ -128,7 +130,9 @@ export const TelemetryDesk: React.FC = () => {
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl border-b-4 border-b-cyan-500 flex items-center justify-between">
           <div className="space-y-1">
             <p className="text-xs font-bold text-slate-400 tracking-wide">SLA Violations</p>
-            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">0</p>
+            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">
+              {loading ? '...' : metrics.filter(m => BUDGETS[m.endpoint] && m.p95 > BUDGETS[m.endpoint]).length}
+            </p>
           </div>
           <div className="w-11 h-11 rounded-xl border border-cyan-500/30 text-cyan-400 bg-cyan-500/10 flex items-center justify-center shadow-sm">
             <ShieldCheck className="w-5 h-5" />
@@ -137,8 +141,10 @@ export const TelemetryDesk: React.FC = () => {
 
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl border-b-4 border-b-blue-500 flex items-center justify-between">
           <div className="space-y-1">
-            <p className="text-xs font-bold text-slate-400 tracking-wide">Rolling Request Samples</p>
-            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">10,000</p>
+            <p className="text-xs font-bold text-slate-400 tracking-wide">Total Request Samples</p>
+            <p className="text-3xl font-extrabold text-slate-100 tracking-tight font-mono">
+              {loading ? '...' : metrics.reduce((acc, m) => acc + m.count, 0).toLocaleString()}
+            </p>
           </div>
           <div className="w-11 h-11 rounded-xl border border-blue-500/30 text-blue-400 bg-blue-500/10 flex items-center justify-center shadow-sm">
             <Gauge className="w-5 h-5" />

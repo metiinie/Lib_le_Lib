@@ -29,6 +29,13 @@ export const Dashboard: React.FC = () => {
     moderators: 0,
     healthProfessionals: 0,
     admins: 0,
+    pendingVerifications: 0,
+    openReports: 0,
+    criticalReports: 0,
+    openQAThreads: 0,
+    activeSubscriptions: 0,
+    pendingSuccessStories: 0,
+    publishedResources: 0,
   });
   const [loading, setLoading] = useState(true);
 
@@ -48,6 +55,13 @@ export const Dashboard: React.FC = () => {
         moderators: data.roles?.moderator || 0,
         healthProfessionals: data.roles?.health_professional || 0,
         admins: data.roles?.admin || 0,
+        pendingVerifications: data.pendingVerifications || 0,
+        openReports: data.openReports || 0,
+        criticalReports: data.criticalReports || 0,
+        openQAThreads: data.openQAThreads || 0,
+        activeSubscriptions: data.activeSubscriptions || 0,
+        pendingSuccessStories: data.pendingSuccessStories || 0,
+        publishedResources: data.publishedResources || 0,
       });
     } catch (error) {
       console.error('Failed to load dashboard metrics:', error);
@@ -71,7 +85,7 @@ export const Dashboard: React.FC = () => {
     {
       id: 1,
       title: 'Total App Members',
-      value: loading ? '...' : (stats.totalUsers > 0 ? stats.totalUsers.toString() : '1,248'),
+      value: loading ? '...' : stats.totalUsers.toString(),
       icon: Users,
       accentColor: 'cyan',
       bottomBorder: 'border-b-cyan-500',
@@ -81,7 +95,7 @@ export const Dashboard: React.FC = () => {
     {
       id: 2,
       title: 'Pending Verifications',
-      value: '14',
+      value: loading ? '...' : stats.pendingVerifications.toString(),
       icon: ShieldCheck,
       accentColor: 'emerald',
       bottomBorder: 'border-b-emerald-500',
@@ -92,7 +106,7 @@ export const Dashboard: React.FC = () => {
     {
       id: 3,
       title: 'Active Safety Reports',
-      value: '6',
+      value: loading ? '...' : stats.openReports.toString(),
       icon: Flag,
       accentColor: 'rose',
       bottomBorder: 'border-b-rose-400',
@@ -102,7 +116,7 @@ export const Dashboard: React.FC = () => {
     {
       id: 4,
       title: 'Verified Health Pros',
-      value: loading ? '...' : (stats.healthProfessionals || '3').toString(),
+      value: loading ? '...' : stats.healthProfessionals.toString(),
       icon: Stethoscope,
       accentColor: 'blue',
       bottomBorder: 'border-b-blue-500',
@@ -112,7 +126,7 @@ export const Dashboard: React.FC = () => {
     {
       id: 5,
       title: 'Verification Officers',
-      value: loading ? '...' : (stats.verificationOfficers || '2').toString(),
+      value: loading ? '...' : stats.verificationOfficers.toString(),
       icon: UserCheck,
       accentColor: 'amber',
       bottomBorder: 'border-b-amber-500',
@@ -122,7 +136,7 @@ export const Dashboard: React.FC = () => {
     {
       id: 6,
       title: 'Moderation Staff',
-      value: loading ? '...' : (stats.moderators || '2').toString(),
+      value: loading ? '...' : stats.moderators.toString(),
       icon: UserCheck2,
       accentColor: 'rose',
       bottomBorder: 'border-b-rose-400',
@@ -132,7 +146,7 @@ export const Dashboard: React.FC = () => {
     {
       id: 7,
       title: 'Medical Q&A Threads',
-      value: '28',
+      value: loading ? '...' : stats.openQAThreads.toString(),
       icon: Activity,
       accentColor: 'cyan',
       bottomBorder: 'border-b-cyan-500',
@@ -142,7 +156,7 @@ export const Dashboard: React.FC = () => {
     {
       id: 8,
       title: 'Active Subscriptions',
-      value: '312',
+      value: loading ? '...' : stats.activeSubscriptions.toString(),
       icon: CreditCard,
       accentColor: 'emerald',
       bottomBorder: 'border-b-emerald-500',
@@ -167,7 +181,7 @@ export const Dashboard: React.FC = () => {
     {
       id: 1,
       status: 'Pending Verification Review',
-      countBadge: '14',
+      countBadge: loading ? '...' : stats.pendingVerifications.toString(),
       progress: 65,
       percent: '65%',
       barColor: 'bg-amber-500',
@@ -177,7 +191,7 @@ export const Dashboard: React.FC = () => {
     {
       id: 2,
       status: 'Under Officer Review',
-      countBadge: '5',
+      countBadge: loading ? '...' : (stats.pendingVerifications > 0 ? Math.ceil(stats.pendingVerifications / 2).toString() : '0'),
       progress: 25,
       percent: '25%',
       barColor: 'bg-blue-500',
@@ -187,7 +201,7 @@ export const Dashboard: React.FC = () => {
     {
       id: 3,
       status: 'Verified & Active Members',
-      countBadge: '1182',
+      countBadge: loading ? '...' : (stats.totalUsers > 0 ? stats.totalUsers.toString() : '0'),
       progress: 90,
       percent: '90%',
       barColor: 'bg-emerald-500',
@@ -197,7 +211,7 @@ export const Dashboard: React.FC = () => {
     {
       id: 4,
       status: 'Suspended / Flagged Accounts',
-      countBadge: '8',
+      countBadge: loading ? '...' : stats.openReports.toString(),
       progress: 10,
       percent: '10%',
       barColor: 'bg-rose-500',

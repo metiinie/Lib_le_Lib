@@ -109,8 +109,8 @@ export const SubscriptionDesk: React.FC = () => {
                   setOffset(0);
                 }}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold capitalize whitespace-nowrap transition-all ${statusFilter === s
-                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
+                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
                   }`}
               >
                 {s.replace('_', ' ')}
@@ -128,8 +128,8 @@ export const SubscriptionDesk: React.FC = () => {
                   setOffset(0);
                 }}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold capitalize whitespace-nowrap transition-all ${planFilter === p
-                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
+                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
                   }`}
               >
                 {p}
@@ -153,7 +153,7 @@ export const SubscriptionDesk: React.FC = () => {
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl border-b-4 border-b-emerald-500 flex items-center justify-between">
           <div className="space-y-1">
             <p className="text-xs font-bold text-slate-400 tracking-wide">Active Subscriptions</p>
-            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">142</p>
+            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">{loading ? '...' : items.filter(s => s.status === 'active').length}</p>
           </div>
           <div className="w-11 h-11 rounded-xl border border-emerald-500/30 text-emerald-400 bg-emerald-500/10 flex items-center justify-center shadow-sm">
             <CheckCircle2 className="w-5 h-5" />
@@ -163,7 +163,7 @@ export const SubscriptionDesk: React.FC = () => {
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl border-b-4 border-b-indigo-500 flex items-center justify-between">
           <div className="space-y-1">
             <p className="text-xs font-bold text-slate-400 tracking-wide">Est. Monthly Revenue</p>
-            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">$4,260</p>
+            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">{loading ? '...' : `$${(items.filter(s => s.status === 'active').length * 29).toLocaleString()}`}</p>
           </div>
           <div className="w-11 h-11 rounded-xl border border-indigo-500/30 text-indigo-400 bg-indigo-500/10 flex items-center justify-center shadow-sm">
             <DollarSign className="w-5 h-5" />
@@ -172,8 +172,8 @@ export const SubscriptionDesk: React.FC = () => {
 
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl border-b-4 border-b-rose-400 flex items-center justify-between">
           <div className="space-y-1">
-            <p className="text-xs font-bold text-slate-400 tracking-wide">Cancellation Churn</p>
-            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">1.4%</p>
+            <p className="text-xs font-bold text-slate-400 tracking-wide">Cancellation Rate</p>
+            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">{loading ? '...' : (items.length > 0 ? `${((items.filter(s => s.status === 'canceled').length / items.length) * 100).toFixed(1)}%` : '0%')}</p>
           </div>
           <div className="w-11 h-11 rounded-xl border border-rose-400/30 text-rose-400 bg-rose-500/10 flex items-center justify-center shadow-sm">
             <TrendingUp className="w-5 h-5" />
@@ -183,7 +183,7 @@ export const SubscriptionDesk: React.FC = () => {
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl border-b-4 border-b-amber-500 flex items-center justify-between">
           <div className="space-y-1">
             <p className="text-xs font-bold text-slate-400 tracking-wide">Past Due Payments</p>
-            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">3</p>
+            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">{loading ? '...' : items.filter(s => s.status === 'past_due' || s.status === 'expired').length}</p>
           </div>
           <div className="w-11 h-11 rounded-xl border border-amber-500/30 text-amber-400 bg-amber-500/10 flex items-center justify-center shadow-sm">
             <AlertCircle className="w-5 h-5" />

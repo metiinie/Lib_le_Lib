@@ -112,7 +112,7 @@ export const ResourceManagement: React.FC = () => {
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl border-b-4 border-b-indigo-500 flex items-center justify-between">
           <div className="space-y-1">
             <p className="text-xs font-bold text-slate-400 tracking-wide">Published Articles</p>
-            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">{resources.length || '24'}</p>
+            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">{loading ? '...' : resources.length}</p>
           </div>
           <div className="w-11 h-11 rounded-xl border border-indigo-500/30 text-indigo-400 bg-indigo-500/10 flex items-center justify-center shadow-sm">
             <BookOpen className="w-5 h-5" />
@@ -122,7 +122,7 @@ export const ResourceManagement: React.FC = () => {
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl border-b-4 border-b-emerald-500 flex items-center justify-between">
           <div className="space-y-1">
             <p className="text-xs font-bold text-slate-400 tracking-wide">Treatment Guides</p>
-            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">8</p>
+            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">{loading ? '...' : resources.filter(r => r.category?.includes('treatment')).length}</p>
           </div>
           <div className="w-11 h-11 rounded-xl border border-emerald-500/30 text-emerald-400 bg-emerald-500/10 flex items-center justify-center shadow-sm">
             <ShieldCheck className="w-5 h-5" />
@@ -132,7 +132,7 @@ export const ResourceManagement: React.FC = () => {
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl border-b-4 border-b-cyan-500 flex items-center justify-between">
           <div className="space-y-1">
             <p className="text-xs font-bold text-slate-400 tracking-wide">U=U Articles</p>
-            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">6</p>
+            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">{loading ? '...' : resources.filter(r => r.category?.includes('u_equals_u')).length}</p>
           </div>
           <div className="w-11 h-11 rounded-xl border border-cyan-500/30 text-cyan-400 bg-cyan-500/10 flex items-center justify-center shadow-sm">
             <HeartHandshake className="w-5 h-5" />
@@ -142,7 +142,7 @@ export const ResourceManagement: React.FC = () => {
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl border-b-4 border-b-amber-500 flex items-center justify-between">
           <div className="space-y-1">
             <p className="text-xs font-bold text-slate-400 tracking-wide">Emergency Hotlines</p>
-            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">10</p>
+            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">{loading ? '...' : resources.filter(r => r.category?.includes('hotline')).length}</p>
           </div>
           <div className="w-11 h-11 rounded-xl border border-amber-500/30 text-amber-400 bg-amber-500/10 flex items-center justify-center shadow-sm">
             <PhoneCall className="w-5 h-5" />

@@ -138,7 +138,7 @@ export const ModerationQueue: React.FC = () => {
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl border-b-4 border-b-amber-500 flex items-center justify-between">
           <div className="space-y-1">
             <p className="text-xs font-bold text-slate-400 tracking-wide">Open Safety Reports</p>
-            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">{reports.filter(r => r.status === 'open').length || '7'}</p>
+            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">{loading ? '...' : reports.filter(r => r.status === 'open' || r.status === 'investigating').length}</p>
           </div>
           <div className="w-11 h-11 rounded-xl border border-amber-500/30 text-amber-400 bg-amber-500/10 flex items-center justify-center shadow-sm">
             <Flag className="w-5 h-5" />
@@ -148,7 +148,7 @@ export const ModerationQueue: React.FC = () => {
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl border-b-4 border-b-rose-400 flex items-center justify-between">
           <div className="space-y-1">
             <p className="text-xs font-bold text-slate-400 tracking-wide">Critical Escalations</p>
-            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">{reports.filter(r => r.severity === 'critical').length || '2'}</p>
+            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">{loading ? '...' : reports.filter(r => r.severity === 'critical').length}</p>
           </div>
           <div className="w-11 h-11 rounded-xl border border-rose-400/30 text-rose-400 bg-rose-500/10 flex items-center justify-center shadow-sm">
             <AlertTriangle className="w-5 h-5" />
@@ -157,8 +157,8 @@ export const ModerationQueue: React.FC = () => {
 
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl border-b-4 border-b-emerald-500 flex items-center justify-between">
           <div className="space-y-1">
-            <p className="text-xs font-bold text-slate-400 tracking-wide">Resolved Today</p>
-            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">19</p>
+            <p className="text-xs font-bold text-slate-400 tracking-wide">Resolved Reports</p>
+            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">{loading ? '...' : reports.filter(r => r.status === 'resolved' || r.status === 'dismissed').length}</p>
           </div>
           <div className="w-11 h-11 rounded-xl border border-emerald-500/30 text-emerald-400 bg-emerald-500/10 flex items-center justify-center shadow-sm">
             <CheckCircle2 className="w-5 h-5" />
@@ -167,8 +167,8 @@ export const ModerationQueue: React.FC = () => {
 
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl border-b-4 border-b-blue-500 flex items-center justify-between">
           <div className="space-y-1">
-            <p className="text-xs font-bold text-slate-400 tracking-wide">Avg Triage Response</p>
-            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">8.5m</p>
+            <p className="text-xs font-bold text-slate-400 tracking-wide">Triage SLA Target</p>
+            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">&lt; 5m</p>
           </div>
           <div className="w-11 h-11 rounded-xl border border-blue-500/30 text-blue-400 bg-blue-500/10 flex items-center justify-center shadow-sm">
             <Clock className="w-5 h-5" />

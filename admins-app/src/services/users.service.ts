@@ -10,6 +10,13 @@ export interface AdminStats {
     health_professional: number;
     admin: number;
   };
+  pendingVerifications?: number;
+  openReports?: number;
+  criticalReports?: number;
+  openQAThreads?: number;
+  activeSubscriptions?: number;
+  pendingSuccessStories?: number;
+  publishedResources?: number;
 }
 
 export const usersService = {

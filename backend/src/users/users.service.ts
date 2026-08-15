@@ -3,13 +3,19 @@ import {
   UnauthorizedException,
   NotFoundException,
 } from '@nestjs/common';
-import { DataSource } from 'typeorm';
+import { DataSource, In } from 'typeorm';
 import { UsersRepository } from './repositories/users.repository';
 import { DevicesRepository } from './repositories/devices.repository';
 import { AuditLogsService } from '../moderation/audit-logs.service';
 import { RegisterDeviceDto } from './dto/register-device.dto';
 import { UpdateUserRoleDto } from './dto/update-user-role.dto';
 import { User, UserRole } from './entities/user.entity';
+import { VerificationRecord } from '../verification/entities/verification-record.entity';
+import { Report } from '../moderation/entities/report.entity';
+import { QAThread } from '../qa/entities/qa-thread.entity';
+import { Subscription } from '../subscriptions/entities/subscription.entity';
+import { SuccessStory } from '../success-stories/entities/success-story.entity';
+import { Resource } from '../resources/entities/resource.entity';
 
 @Injectable()
 export class UsersService {
@@ -18,7 +24,7 @@ export class UsersService {
     private readonly devicesRepository: DevicesRepository,
     private readonly auditLogsService: AuditLogsService,
     private readonly dataSource: DataSource,
-  ) {}
+  ) { }
 
   async getMe(userId: string) {
     const profile = await this.usersRepository.findById(userId);
@@ -58,6 +64,13 @@ export class UsersService {
       moderatorCount,
       healthProfessionalCount,
       adminCount,
+      pendingVerifications,
+      openReports,
+      criticalReports,
+      openQAThreads,
+      activeSubscriptions,
+      pendingSuccessStories,
+      publishedResources,
     ] = await Promise.all([
       this.usersRepository.countTotal(),
       this.usersRepository.countByRole('member'),
@@ -65,6 +78,13 @@ export class UsersService {
       this.usersRepository.countByRole('moderator'),
       this.usersRepository.countByRole('health_professional'),
       this.usersRepository.countByRole('admin'),
+      this.dataSource.getRepository(VerificationRecord).count({ where: { status: In(['submitted', 'in_review']) } }),
+      this.dataSource.getRepository(Report).count({ where: { status: 'open' } }),
+      this.dataSource.getRepository(Report).count({ where: { severity: 'critical' } }),
+      this.dataSource.getRepository(QAThread).count({ where: { status: 'open' } }),
+      this.dataSource.getRepository(Subscription).count({ where: { status: 'active' } }),
+      this.dataSource.getRepository(SuccessStory).count({ where: { published: false } }),
+      this.dataSource.getRepository(Resource).count({ where: { published: true } }),
     ]);
 
     return {
@@ -76,6 +96,13 @@ export class UsersService {
         health_professional: healthProfessionalCount,
         admin: adminCount,
       },
+      pendingVerifications,
+      openReports,
+      criticalReports,
+      openQAThreads,
+      activeSubscriptions,
+      pendingSuccessStories,
+      publishedResources,
     };
   }
 

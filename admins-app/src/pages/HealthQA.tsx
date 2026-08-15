@@ -139,7 +139,7 @@ export const HealthQA: React.FC = () => {
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl border-b-4 border-b-emerald-500 flex items-center justify-between">
           <div className="space-y-1">
             <p className="text-xs font-bold text-slate-400 tracking-wide">Open Pending Questions</p>
-            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">{threads.filter(t => t.status === 'open').length || '11'}</p>
+            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">{loading ? '...' : threads.filter(t => t.status === 'open').length}</p>
           </div>
           <div className="w-11 h-11 rounded-xl border border-emerald-500/30 text-emerald-400 bg-emerald-500/10 flex items-center justify-center shadow-sm">
             <HelpCircle className="w-5 h-5" />
@@ -148,8 +148,8 @@ export const HealthQA: React.FC = () => {
 
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl border-b-4 border-b-cyan-500 flex items-center justify-between">
           <div className="space-y-1">
-            <p className="text-xs font-bold text-slate-400 tracking-wide">Answered Today</p>
-            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">28</p>
+            <p className="text-xs font-bold text-slate-400 tracking-wide">Answered / Resolved</p>
+            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">{loading ? '...' : threads.filter(t => t.isAnswered).length}</p>
           </div>
           <div className="w-11 h-11 rounded-xl border border-cyan-500/30 text-cyan-400 bg-cyan-500/10 flex items-center justify-center shadow-sm">
             <CheckCircle2 className="w-5 h-5" />
@@ -158,8 +158,8 @@ export const HealthQA: React.FC = () => {
 
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl border-b-4 border-b-amber-500 flex items-center justify-between">
           <div className="space-y-1">
-            <p className="text-xs font-bold text-slate-400 tracking-wide">Active Medical Officers</p>
-            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">5</p>
+            <p className="text-xs font-bold text-slate-400 tracking-wide">Assigned to Professional</p>
+            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">{loading ? '...' : threads.filter(t => !!t.healthProfessionalId).length}</p>
           </div>
           <div className="w-11 h-11 rounded-xl border border-amber-500/30 text-amber-400 bg-amber-500/10 flex items-center justify-center shadow-sm">
             <Stethoscope className="w-5 h-5" />
@@ -168,8 +168,8 @@ export const HealthQA: React.FC = () => {
 
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl border-b-4 border-b-blue-500 flex items-center justify-between">
           <div className="space-y-1">
-            <p className="text-xs font-bold text-slate-400 tracking-wide">Avg Medical SLA</p>
-            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">1.2h</p>
+            <p className="text-xs font-bold text-slate-400 tracking-wide">Medical SLA Target</p>
+            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">&lt; 1h</p>
           </div>
           <div className="w-11 h-11 rounded-xl border border-blue-500/30 text-blue-400 bg-blue-500/10 flex items-center justify-center shadow-sm">
             <Clock className="w-5 h-5" />

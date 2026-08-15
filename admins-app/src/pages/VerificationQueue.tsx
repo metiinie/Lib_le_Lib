@@ -172,8 +172,8 @@ export const VerificationQueue: React.FC = () => {
                 key={s}
                 onClick={() => setStatusFilter(s)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold capitalize whitespace-nowrap transition-all ${statusFilter === s
-                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
+                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
                   }`}
               >
                 {s === 'submitted' ? 'Pending Queue' : s === 'all' ? 'All Submissions' : `${s}`}
@@ -196,8 +196,8 @@ export const VerificationQueue: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl border-b-4 border-b-cyan-500 flex items-center justify-between">
           <div className="space-y-1">
-            <p className="text-xs font-bold text-slate-400 tracking-wide">Pending Verifications</p>
-            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">{items.filter(i => ['submitted', 'in_review'].includes(i.status)).length || '14'}</p>
+            <p className="text-xs font-bold text-slate-400 tracking-wide">Pending Verification Queue</p>
+            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">{loading ? '...' : items.filter(i => ['submitted', 'in_review'].includes(i.status)).length}</p>
           </div>
           <div className="w-11 h-11 rounded-xl border border-cyan-500/30 text-cyan-400 bg-cyan-500/10 flex items-center justify-center shadow-sm">
             <ShieldCheck className="w-5 h-5" />
@@ -207,7 +207,7 @@ export const VerificationQueue: React.FC = () => {
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl border-b-4 border-b-emerald-500 flex items-center justify-between">
           <div className="space-y-1">
             <p className="text-xs font-bold text-slate-400 tracking-wide">Approved ID Submissions</p>
-            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">42</p>
+            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">{loading ? '...' : items.filter(i => i.status === 'approved').length}</p>
           </div>
           <div className="w-11 h-11 rounded-xl border border-emerald-500/30 text-emerald-400 bg-emerald-500/10 flex items-center justify-center shadow-sm">
             <CheckCircle2 className="w-5 h-5" />
@@ -217,7 +217,7 @@ export const VerificationQueue: React.FC = () => {
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl border-b-4 border-b-rose-400 flex items-center justify-between">
           <div className="space-y-1">
             <p className="text-xs font-bold text-slate-400 tracking-wide">Rejected Submissions</p>
-            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">3</p>
+            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">{loading ? '...' : items.filter(i => i.status === 'rejected').length}</p>
           </div>
           <div className="w-11 h-11 rounded-xl border border-rose-400/30 text-rose-400 bg-rose-500/10 flex items-center justify-center shadow-sm">
             <XCircle className="w-5 h-5" />
@@ -226,8 +226,8 @@ export const VerificationQueue: React.FC = () => {
 
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl border-b-4 border-b-blue-500 flex items-center justify-between">
           <div className="space-y-1">
-            <p className="text-xs font-bold text-slate-400 tracking-wide">Avg Review Turnaround</p>
-            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">14m</p>
+            <p className="text-xs font-bold text-slate-400 tracking-wide">Review SLA Target</p>
+            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">&lt; 15m</p>
           </div>
           <div className="w-11 h-11 rounded-xl border border-blue-500/30 text-blue-400 bg-blue-500/10 flex items-center justify-center shadow-sm">
             <Clock className="w-5 h-5" />
@@ -428,8 +428,8 @@ export const VerificationQueue: React.FC = () => {
                             setZoomLevel(1);
                           }}
                           className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${activeImageIndex === idx
-                              ? 'bg-indigo-600 text-white border-indigo-500'
-                              : 'bg-slate-900 text-slate-400 border-slate-800'
+                            ? 'bg-indigo-600 text-white border-indigo-500'
+                            : 'bg-slate-900 text-slate-400 border-slate-800'
                             }`}
                         >
                           {img.label}
