@@ -39,7 +39,7 @@ export class ReportsRepository {
       .leftJoinAndSelect('report.reported', 'reported')
       .leftJoinAndSelect('reported.profile', 'reportedProfile')
       .leftJoinAndSelect('report.assignedTo', 'assignedTo')
-      .orderBy('report.created_at', 'DESC')
+      .orderBy('report.createdAt', 'DESC')
       .take(limit)
       .skip(offset);
 
