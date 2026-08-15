@@ -52,7 +52,7 @@ export class SuccessStoriesRepository {
 
   async findById(id: string): Promise<SuccessStory | null> {
     return this.repo.findOne({ where: { id } });
-  },
+  }
 
   async saveStory(story: SuccessStory): Promise<SuccessStory> {
     return this.repo.save(story);
