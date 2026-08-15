@@ -11,9 +11,9 @@ import { RegisterDeviceDto } from './dto/register-device.dto';
 import { UpdateUserRoleDto } from './dto/update-user-role.dto';
 import { User, UserRole } from './entities/user.entity';
 import { VerificationRecord } from '../verification/entities/verification-record.entity';
-import { Report } from '../moderation/entities/report.entity';
-import { QAThread } from '../qa/entities/qa-thread.entity';
-import { Subscription } from '../subscriptions/entities/subscription.entity';
+import { Report, ReportStatus, ReportSeverity } from '../moderation/entities/report.entity';
+import { QaThread, QaThreadStatus } from '../qa/entities/qa-thread.entity';
+import { Subscription, SubscriptionStatus } from '../subscriptions/entities/subscription.entity';
 import { SuccessStory } from '../success-stories/entities/success-story.entity';
 import { Resource } from '../resources/entities/resource.entity';
 
@@ -79,10 +79,10 @@ export class UsersService {
       this.usersRepository.countByRole('health_professional'),
       this.usersRepository.countByRole('admin'),
       this.dataSource.getRepository(VerificationRecord).count({ where: { status: In(['submitted', 'in_review']) } }),
-      this.dataSource.getRepository(Report).count({ where: { status: 'open' } }),
-      this.dataSource.getRepository(Report).count({ where: { severity: 'critical' } }),
-      this.dataSource.getRepository(QAThread).count({ where: { status: 'open' } }),
-      this.dataSource.getRepository(Subscription).count({ where: { status: 'active' } }),
+      this.dataSource.getRepository(Report).count({ where: { status: ReportStatus.OPEN } }),
+      this.dataSource.getRepository(Report).count({ where: { severity: ReportSeverity.CRITICAL } }),
+      this.dataSource.getRepository(QaThread).count({ where: { status: QaThreadStatus.OPEN } }),
+      this.dataSource.getRepository(Subscription).count({ where: { status: SubscriptionStatus.ACTIVE } }),
       this.dataSource.getRepository(SuccessStory).count({ where: { published: false } }),
       this.dataSource.getRepository(Resource).count({ where: { published: true } }),
     ]);
