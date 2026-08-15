@@ -149,7 +149,7 @@ export const HealthQA: React.FC = () => {
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl border-b-4 border-b-cyan-500 flex items-center justify-between">
           <div className="space-y-1">
             <p className="text-xs font-bold text-slate-400 tracking-wide">Answered / Resolved</p>
-            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">{loading ? '...' : threads.filter(t => t.isAnswered).length}</p>
+            <p className="text-3xl font-extrabold text-slate-100 tracking-tight">{loading ? '...' : threads.filter(t => t.status === 'answered' || t.status === 'closed').length}</p>
           </div>
           <div className="w-11 h-11 rounded-xl border border-cyan-500/30 text-cyan-400 bg-cyan-500/10 flex items-center justify-center shadow-sm">
             <CheckCircle2 className="w-5 h-5" />
