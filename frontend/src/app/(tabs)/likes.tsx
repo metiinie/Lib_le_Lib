@@ -10,7 +10,7 @@ export default function LikesScreen() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'received' | 'sent'>('received');
   const { isPremium } = useSubscription();
-  
+
   const { data: activeProfiles, isLoading, isError, refetch, passProfile, likeBack, withdrawLike } = useLikes(activeTab);
 
   const handlePass = async (targetId: string, nickname: string) => {
@@ -40,8 +40,8 @@ export default function LikesScreen() {
       `Are you sure you want to withdraw your like for ${nickname}?`,
       [
         { text: "Cancel", style: "cancel" },
-        { 
-          text: "Withdraw", 
+        {
+          text: "Withdraw",
           style: "destructive",
           onPress: async () => {
             try {
@@ -98,7 +98,7 @@ export default function LikesScreen() {
           revealGranted={!isReceivedFree} // Silhouette blur if free tier
           photoUrl={primaryPhoto?.url}
         />
-        
+
         {/* Sent Like Details (Timestamp & Status) */}
         {activeTab === 'sent' && (
           <View className="absolute top-2 left-2 right-2 flex-row justify-between">
@@ -156,7 +156,7 @@ export default function LikesScreen() {
         <Text className="text-slate-500 text-center text-base leading-relaxed">
           {isError
             ? 'Failed to load profiles. Please try again later.'
-            : activeTab === 'received' 
+            : activeTab === 'received'
               ? 'When someone likes your profile, they\'ll appear here.'
               : 'Start exploring and like profiles to see them here.'}
         </Text>
@@ -168,16 +168,16 @@ export default function LikesScreen() {
     <View className="flex-1 bg-white">
       <View className="px-4 pt-4 pb-4 border-b border-slate-100">
         <Text className="text-2xl font-bold text-slate-900 mb-4">Likes</Text>
-        
+
         <View className="flex-row bg-slate-100 rounded-xl p-1">
-          <TouchableOpacity 
+          <TouchableOpacity
             className="flex-1 py-2 rounded-lg items-center justify-center"
             style={activeTab === 'received' ? { backgroundColor: 'white', shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 2, elevation: 1 } : undefined}
             onPress={() => setActiveTab('received')}
           >
             <Text className={activeTab === 'received' ? 'font-semibold text-slate-900' : 'font-semibold text-slate-500'}>Received ❤️</Text>
           </TouchableOpacity>
-          <TouchableOpacity 
+          <TouchableOpacity
             className="flex-1 py-2 rounded-lg items-center justify-center"
             style={activeTab === 'sent' ? { backgroundColor: 'white', shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 2, elevation: 1 } : undefined}
             onPress={() => setActiveTab('sent')}
@@ -199,13 +199,13 @@ export default function LikesScreen() {
         </View>
       )}
 
-      {isLoading && !activeProfiles?.length ? (
+      {isLoading && (!activeProfiles || (activeProfiles as LikeProfile[]).length === 0) ? (
         <View className="flex-1 justify-center items-center">
           <ActivityIndicator size="large" color="#1B4D5C" />
         </View>
       ) : (
         <FlatList
-          data={activeProfiles}
+          data={(activeProfiles as LikeProfile[]) || []}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
           numColumns={2}
