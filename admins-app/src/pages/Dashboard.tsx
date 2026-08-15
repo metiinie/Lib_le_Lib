@@ -54,13 +54,13 @@ export const Dashboard: React.FC = () => {
   const fetchStats = async () => {
     setRefreshing(true);
     try {
-      const data = await usersService.getDashboardStats();
+      const data = await usersService.getAdminStats();
       setStats({
         totalUsers: data.totalUsers || 0,
-        verificationOfficers: data.roleCounts?.verification_officer || 0,
-        moderators: data.roleCounts?.moderator || 0,
-        healthProfessionals: data.roleCounts?.health_professional || 0,
-        admins: data.roleCounts?.admin || 0,
+        verificationOfficers: data.roles?.verification_officer || 0,
+        moderators: data.roles?.moderator || 0,
+        healthProfessionals: data.roles?.health_professional || 0,
+        admins: data.roles?.admin || 0,
       });
     } catch (error) {
       console.error('Failed to load dashboard metrics:', error);
@@ -283,8 +283,8 @@ export const Dashboard: React.FC = () => {
                   key={card.id}
                   onClick={() => setActiveCardId(card.id)}
                   className={`border border-slate-800/90 rounded-2xl p-5 shadow-xl transition-all duration-200 cursor-pointer flex items-center justify-between border-b-4 ${card.bottomBorder} ${isActive || card.activeFilled
-                      ? 'bg-emerald-950/20 border-emerald-500/40'
-                      : 'bg-slate-900 hover:bg-slate-800/50'
+                    ? 'bg-emerald-950/20 border-emerald-500/40'
+                    : 'bg-slate-900 hover:bg-slate-800/50'
                     }`}
                 >
                   <div className="space-y-1">
