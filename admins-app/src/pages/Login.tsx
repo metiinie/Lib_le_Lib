@@ -52,6 +52,10 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
       if (!res.user) {
         throw new Error('Failed to retrieve user profile data.');
       }
+      if (res.user.role === 'member') {
+        authService.logout();
+        throw new Error('Access Denied: Regular member accounts cannot access the Staff & Admin Portal.');
+      }
       onLoginSuccess(res.user, res.accessToken);
     } catch (err: any) {
       const errMsg =

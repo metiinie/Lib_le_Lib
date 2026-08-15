@@ -47,6 +47,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     authService
       .getMe()
       .then((data) => {
+        if (data.role === 'member') {
+          logout();
+          return;
+        }
         setUser(data);
         sessionStorage.setItem('admin_user', JSON.stringify(data));
       })
