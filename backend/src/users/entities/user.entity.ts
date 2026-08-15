@@ -43,6 +43,12 @@ export class User {
   @Column({ type: 'text', unique: true, nullable: true })
   email: string | null;
 
+  @Column({ name: 'apple_id', type: 'text', unique: true, nullable: true })
+  appleId: string | null;
+
+  @Column({ name: 'google_id', type: 'text', unique: true, nullable: true })
+  googleId: string | null;
+
   @Column({ name: 'password_hash', type: 'text', nullable: true })
   passwordHash: string | null;
 

@@ -28,6 +28,14 @@ export class UsersRepository {
     return this.repo.findOne({ where: { email } });
   }
 
+  async findByAppleId(appleId: string): Promise<User | null> {
+    return this.repo.findOne({ where: { appleId } });
+  }
+
+  async findByGoogleId(googleId: string): Promise<User | null> {
+    return this.repo.findOne({ where: { googleId } });
+  }
+
   /**
    * Finds a user by phone or email destination.
    * Used during OTP verification to locate or create the user.

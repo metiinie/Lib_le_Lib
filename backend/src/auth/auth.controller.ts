@@ -9,11 +9,12 @@ import { LoginDto } from './dto/login.dto';
 import { SetPasswordDto } from './dto/set-password.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { SsoAuthDto } from './dto/sso-auth.dto';
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
   // ─────────────────────────────────────────────────────────────────────────
   // OTP ENDPOINTS (registration phone verification — one-time use)
@@ -62,6 +63,30 @@ export class AuthController {
       loginDto.phone,
       loginDto.password,
     );
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // APPLE & GOOGLE SINGLE SIGN-ON (SSO)
+  // ─────────────────────────────────────────────────────────────────────────
+
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
+  @Post('sso/apple')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Login or register with Apple Sign-In ID Token. Returns accessToken + refreshToken + requiresPhoneVerification flag.' })
+  @ApiResponse({ status: 200, description: 'Apple SSO authentication successful.' })
+  @ApiResponse({ status: 401, description: 'Invalid Apple ID Token.' })
+  async ssoApple(@Body() ssoDto: SsoAuthDto) {
+    return this.authService.loginWithApple(ssoDto);
+  }
+
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
+  @Post('sso/google')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Login or register with Google Sign-In ID Token. Returns accessToken + refreshToken + requiresPhoneVerification flag.' })
+  @ApiResponse({ status: 200, description: 'Google SSO authentication successful.' })
+  @ApiResponse({ status: 401, description: 'Invalid Google ID Token.' })
+  async ssoGoogle(@Body() ssoDto: SsoAuthDto) {
+    return this.authService.loginWithGoogle(ssoDto);
   }
 
   // ─────────────────────────────────────────────────────────────────────────

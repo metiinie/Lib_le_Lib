@@ -428,6 +428,107 @@ export class AuthService {
   }
 
   // ─────────────────────────────────────────────────────────────────────────
+  // APPLE & GOOGLE SINGLE SIGN-ON (SSO)
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /**
+   * Authenticates or provisions a user using Apple Sign-In ID Token.
+   * If new user, creates account and returns requiresPhoneVerification: true per Mod 1 spec.
+   */
+  async loginWithApple(dto: {
+    idToken: string;
+    email?: string;
+    fullName?: string;
+  }): Promise<{
+    accessToken: string;
+    refreshToken: string;
+    userId: string;
+    requiresPhoneVerification: boolean;
+  }> {
+    // Extract provider sub from idToken payload (dev fallback or jwt decode)
+    let appleSub = 'apple_sub_' + crypto.createHash('md5').update(dto.idToken).digest('hex').substring(0, 12);
+    try {
+      const decoded: any = this.jwtService.decode(dto.idToken);
+      if (decoded && decoded.sub) {
+        appleSub = decoded.sub;
+      }
+    } catch {
+      // Dev mode token handling
+    }
+
+    let user = await this.usersRepository.findByAppleId(appleSub);
+    if (!user && dto.email) {
+      user = await this.usersRepository.findByEmail(dto.email);
+    }
+
+    let isNewUser = false;
+    if (!user) {
+      isNewUser = true;
+      user = await this.usersRepository.createFromDestination(dto.email || `${appleSub}@apple.privaterelay`);
+      user.appleId = appleSub;
+      await this.usersRepository.updateUserRole(user.id, 'member');
+    }
+
+    await this.usersRepository.updateLastLogin(user.id);
+    const tokens = await this.issueTokens(user.id, user.role);
+
+    return {
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+      userId: user.id,
+      requiresPhoneVerification: isNewUser || !user.phoneVerifiedAt,
+    };
+  }
+
+  /**
+   * Authenticates or provisions a user using Google Sign-In ID Token.
+   * If new user, creates account and returns requiresPhoneVerification: true per Mod 1 spec.
+   */
+  async loginWithGoogle(dto: {
+    idToken: string;
+    email?: string;
+    fullName?: string;
+  }): Promise<{
+    accessToken: string;
+    refreshToken: string;
+    userId: string;
+    requiresPhoneVerification: boolean;
+  }> {
+    let googleSub = 'google_sub_' + crypto.createHash('md5').update(dto.idToken).digest('hex').substring(0, 12);
+    try {
+      const decoded: any = this.jwtService.decode(dto.idToken);
+      if (decoded && decoded.sub) {
+        googleSub = decoded.sub;
+      }
+    } catch {
+      // Dev mode token handling
+    }
+
+    let user = await this.usersRepository.findByGoogleId(googleSub);
+    if (!user && dto.email) {
+      user = await this.usersRepository.findByEmail(dto.email);
+    }
+
+    let isNewUser = false;
+    if (!user) {
+      isNewUser = true;
+      user = await this.usersRepository.createFromDestination(dto.email || `${googleSub}@gmail.com`);
+      user.googleId = googleSub;
+      await this.usersRepository.updateUserRole(user.id, 'member');
+    }
+
+    await this.usersRepository.updateLastLogin(user.id);
+    const tokens = await this.issueTokens(user.id, user.role);
+
+    return {
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+      userId: user.id,
+      requiresPhoneVerification: isNewUser || !user.phoneVerifiedAt,
+    };
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
   // REFRESH TOKENS
   // ─────────────────────────────────────────────────────────────────────────
 

@@ -17,6 +17,7 @@ export interface User {
   createdAt: string;
   updatedAt: string;
   profile?: {
+    fullName?: string;
     nickname?: string;
     displayName?: string;
     dateOfBirth?: string;

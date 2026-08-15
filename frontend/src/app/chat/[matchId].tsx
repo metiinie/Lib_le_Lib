@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { MessageBubble, MessageProps } from '@/components/chat/MessageBubble';
+import { AttachmentMenu } from '@/components/chat/AttachmentMenu';
+import { VoiceRecorder } from '@/components/chat/VoiceRecorder';
 import { cryptoService } from '@/services/crypto.service';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
@@ -17,12 +19,12 @@ export default function ChatScreen() {
   const [messages, setMessages] = useState<MessageProps[]>([]);
   const [loading, setLoading] = useState(true);
   const [input, setInput] = useState('');
-  
+
   const [showAttachmentMenu, setShowAttachmentMenu] = useState(false);
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [recordingDuration, setRecordingDuration] = useState(0);
-  const recordingIntervalRef = React.useRef<NodeJS.Timeout | null>(null);
+  const recordingIntervalRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
 
   const isDiscreetMode = usePreferencesStore(state => state.isDiscreetMode);
 
@@ -34,8 +36,6 @@ export default function ChatScreen() {
     if (!token) return '';
     try {
       const payload = token.split('.')[1];
-      // RN doesn't always have atob globally depending on Hermes config, but
-      // crypto.service uses it. Just to be safe, use basic parsing.
       const decoded = JSON.parse(atob(payload));
       return decoded.sub || decoded.id;
     } catch (e) {
@@ -48,7 +48,7 @@ export default function ChatScreen() {
       if (!isPoll) setLoading(true);
       const res = await api.get(`/matches/${matchId}/messages?limit=100&offset=0`);
       const myId = getMyId();
-      
+
       const formattedMessages: MessageProps[] = res.data.data.map((msg: any) => ({
         id: msg.id,
         senderId: msg.senderId,
@@ -63,7 +63,6 @@ export default function ChatScreen() {
       setMessages(formattedMessages);
       setLoading(false);
 
-      // If NOT in discreet mode, mark unread received messages as read
       if (!isDiscreetMode) {
         const unreadReceived = formattedMessages.filter(m => !m.isMe && !m.readAt);
         unreadReceived.forEach(async (m) => {
@@ -76,7 +75,6 @@ export default function ChatScreen() {
       }
     } catch (err: any) {
       if (err.isAxiosError && err.message === 'Network Error') {
-        // Suppress network error spam during background polling
         if (!isPoll) console.warn('Failed to fetch messages (Network Error)');
       } else {
         console.warn('Failed to fetch messages', err?.message || err);
@@ -98,17 +96,14 @@ export default function ChatScreen() {
     setInput('');
 
     try {
-      // ENCRYPT BEFORE NETWORK
       const ciphertext = await cryptoService.encryptMessage(plaintext, RECIPIENT_KEY);
-      
-      // Post to real backend
-      // Backend expects ciphertext and nonce to be base64 strings
+
       const res = await api.post(`/matches/${matchId}/messages`, {
         messageType: 'text',
         ciphertext: btoa(ciphertext),
         nonce: btoa('dummy_nonce'),
       });
-      
+
       const newMessage: MessageProps = {
         id: res.data.id,
         senderId: getMyId(),
@@ -118,7 +113,6 @@ export default function ChatScreen() {
         sentAt: res.data.sentAt,
       };
 
-      // Optimistic UI update
       setMessages(prev => [newMessage, ...prev]);
     } catch (err: any) {
       console.warn('Failed to send message', err?.message || err);
@@ -188,6 +182,7 @@ export default function ChatScreen() {
   };
 
   const startRecording = async () => {
+    setShowAttachmentMenu(false);
     try {
       const permission = await Audio.requestPermissionsAsync();
       if (permission.status === 'granted') {
@@ -195,15 +190,15 @@ export default function ChatScreen() {
           allowsRecordingIOS: true,
           playsInSilentModeIOS: true,
         });
-        
+
         const { recording } = await Audio.Recording.createAsync(
           Audio.RecordingOptionsPresets.HIGH_QUALITY
         );
-        
+
         setRecording(recording);
         setIsRecording(true);
         setRecordingDuration(0);
-        
+
         recordingIntervalRef.current = setInterval(() => {
           setRecordingDuration(prev => prev + 1);
         }, 1000);
@@ -217,18 +212,17 @@ export default function ChatScreen() {
 
   const stopRecordingAndSend = async () => {
     if (!recording) return;
-    
+
     setIsRecording(false);
     if (recordingIntervalRef.current) clearInterval(recordingIntervalRef.current);
-    
+
     try {
       await recording.stopAndUnloadAsync();
       const uri = recording.getURI();
       setRecording(null);
-      
-      if (recordingDuration < 1) return; // Too short to send
-      
-      // Send logic for voice
+
+      if (recordingDuration < 1) return;
+
       const newMessage: MessageProps = {
         id: Math.random().toString(),
         senderId: getMyId(),
@@ -236,6 +230,7 @@ export default function ChatScreen() {
         ciphertext: '🎤 Voice message',
         type: 'voice',
         duration: recordingDuration,
+        audioUrl: uri || undefined,
         sentAt: new Date().toISOString(),
       };
       setMessages(prev => [newMessage, ...prev]);
@@ -248,7 +243,7 @@ export default function ChatScreen() {
     if (!recording) return;
     setIsRecording(false);
     if (recordingIntervalRef.current) clearInterval(recordingIntervalRef.current);
-    
+
     try {
       await recording.stopAndUnloadAsync();
       setRecording(null);
@@ -257,18 +252,12 @@ export default function ChatScreen() {
     }
   };
 
-  const formatDuration = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-  };
-
   if (loading) {
     return <View className="flex-1 justify-center"><ActivityIndicator color="#1B4D5C" /></View>;
   }
 
   return (
-    <KeyboardAvoidingView 
+    <KeyboardAvoidingView
       className="flex-1 bg-white"
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={90}
@@ -277,7 +266,7 @@ export default function ChatScreen() {
         <TouchableOpacity onPress={() => router.back()} className="p-2 -ml-2">
           <Ionicons name="chevron-back" size={24} color="#0F1E24" />
         </TouchableOpacity>
-        <Text className="text-lg font-bold">Chat</Text>
+        <Text className="text-lg font-bold text-slate-900">Chat</Text>
         <View className="flex-row items-center">
           <TouchableOpacity onPress={() => router.push(`/video-call/${matchId}`)} className="p-2">
             <Ionicons name="videocam-outline" size={24} color="#1B4D5C" />
@@ -290,42 +279,34 @@ export default function ChatScreen() {
         className="flex-1 px-4"
         data={messages}
         keyExtractor={item => item.id}
-        inverted // Puts new messages at the bottom
+        inverted
         renderItem={({ item }) => <MessageBubble message={item} />}
         contentContainerStyle={{ paddingTop: 16, paddingBottom: 16 }}
         getItemLayout={(data, index) => (
-          { length: 80, offset: 80 * index, index } // Optimization for lists
+          { length: 80, offset: 80 * index, index }
         )}
       />
 
-      {/* Input Area */}
-      {showAttachmentMenu && (
-        <View className="absolute bottom-24 left-4 bg-white rounded-2xl shadow-lg border border-slate-100 p-2 z-50 flex-row">
-          <TouchableOpacity className="items-center p-3" onPress={pickImage}>
-            <View className="w-12 h-12 rounded-full bg-blue-100 items-center justify-center mb-1">
-              <Ionicons name="images" size={24} color="#2A6B80" />
-            </View>
-            <Text className="text-xs text-slate-700">Gallery</Text>
-          </TouchableOpacity>
-          <TouchableOpacity className="items-center p-3" onPress={takePhoto}>
-            <View className="w-12 h-12 rounded-full bg-blue-100 items-center justify-center mb-1">
-              <Ionicons name="camera" size={24} color="#2A6B80" />
-            </View>
-            <Text className="text-xs text-slate-700">Camera</Text>
-          </TouchableOpacity>
-        </View>
-      )}
+      {/* Modular Attachment Popup Menu */}
+      <AttachmentMenu
+        visible={showAttachmentMenu}
+        onClose={() => setShowAttachmentMenu(false)}
+        onPickGallery={pickImage}
+        onTakePhoto={takePhoto}
+        onStartVoice={startRecording}
+      />
 
+      {/* Input Area */}
       <View className="px-4 py-3 border-t border-slate-100 flex-row items-center bg-white pb-8">
         {!isRecording ? (
           <>
-            <TouchableOpacity 
+            <TouchableOpacity
               className="mr-3 p-2 min-w-[48px] min-h-[48px] items-center justify-center"
               onPress={() => setShowAttachmentMenu(!showAttachmentMenu)}
             >
               <Ionicons name={showAttachmentMenu ? "close-circle" : "add-circle-outline"} size={28} color="#4A7A8A" />
             </TouchableOpacity>
-            
+
             <TextInput
               className="flex-1 bg-slate-100 rounded-full px-4 py-2.5 text-base text-slate-900 min-h-[48px]"
               placeholder="Type a message..."
@@ -337,14 +318,14 @@ export default function ChatScreen() {
             />
 
             {input.trim() ? (
-              <TouchableOpacity 
-                className="ml-3 min-w-[48px] min-h-[48px] rounded-full items-center justify-center bg-blue-600"
+              <TouchableOpacity
+                className="ml-3 min-w-[48px] min-h-[48px] rounded-full items-center justify-center bg-blue-600 shadow-sm"
                 onPress={sendMessage}
               >
-                <Ionicons name="send" size={18} color="#ffffff" className="ml-1" />
+                <Ionicons name="send" size={18} color="#ffffff" className="ml-0.5" />
               </TouchableOpacity>
             ) : (
-              <TouchableOpacity 
+              <TouchableOpacity
                 className="ml-3 min-w-[48px] min-h-[48px] rounded-full items-center justify-center bg-slate-100"
                 onPressIn={startRecording}
                 onPressOut={stopRecordingAndSend}
@@ -354,16 +335,13 @@ export default function ChatScreen() {
             )}
           </>
         ) : (
-          <View className="flex-1 flex-row items-center justify-between bg-slate-100 rounded-full min-h-[48px] px-4 py-2">
-            <View className="flex-row items-center">
-              <View className="w-2 h-2 rounded-full bg-red-500 animate-pulse mr-2" />
-              <Text className="text-slate-900 font-medium">{formatDuration(recordingDuration)}</Text>
-            </View>
-            <TouchableOpacity onPress={cancelRecording} className="flex-row items-center">
-              <Ionicons name="chevron-back" size={20} color="#64748B" />
-              <Text className="text-slate-500 ml-1">Slide to cancel</Text>
-            </TouchableOpacity>
-          </View>
+          /* Modular Voice Recording Bar */
+          <VoiceRecorder
+            isRecording={isRecording}
+            recordingDuration={recordingDuration}
+            onCancel={cancelRecording}
+            onSend={stopRecordingAndSend}
+          />
         )}
       </View>
     </KeyboardAvoidingView>
