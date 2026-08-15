@@ -84,6 +84,7 @@ export const profileSchema = z.object({
     .array(z.enum(['marriage', 'serious_relationship', 'friendship']))
     .min(1, 'Select at least one relationship goal'),
   lookingFor: z.array(z.enum(['men', 'women', 'everyone'])).default(['everyone']),
+  photosVisibleToVerified: z.boolean().optional(),
   virusType: z.string().optional(),
   bio: z.string().max(500).optional(),
 });
