@@ -12,24 +12,35 @@ import { QuizOption } from '../src/compatibility-quiz/entities/quiz-option.entit
 async function bootstrap() {
   const app = await NestFactory.createApplicationContext(AppModule, { logger: ['error', 'warn'] });
   const dataSource = app.get(DataSource);
-  
+
   console.log('🌱 Starting database seed...');
-  
-  // 1. Seed Ethiopian Regions
-  console.log('Seeding regions...');
+
+  // 1. Seed Ethiopian & Eritrean Regions
+  console.log('Seeding Ethiopian and Eritrean regions...');
   const regionsRepo = dataSource.getRepository(Region);
-  const ethiopianRegions = [
-    { countryCode: 'ET', name: 'Addis Ababa' },
-    { countryCode: 'ET', name: 'Oromia' },
-    { countryCode: 'ET', name: 'Amhara' },
-    { countryCode: 'ET', name: 'Tigray' },
-    { countryCode: 'ET', name: 'Sidama' },
-    { countryCode: 'ET', name: 'Somali' },
+  const regionsList = [
+    { countryCode: 'ET', name: 'Addis Ababa (Capital)' },
+    { countryCode: 'ET', name: 'Oromia (Adama, Jimma, Bishoftu)' },
+    { countryCode: 'ET', name: 'Amhara (Bahir Dar, Gondar, Dessie)' },
+    { countryCode: 'ET', name: 'Tigray (Mekelle, Adigrat)' },
+    { countryCode: 'ET', name: 'Sidama (Hawassa)' },
+    { countryCode: 'ET', name: 'Somali (Jijiga, Gode)' },
     { countryCode: 'ET', name: 'Dire Dawa' },
+    { countryCode: 'ET', name: 'Afar (Semera, Asaita)' },
+    { countryCode: 'ET', name: 'Benishangul-Gumuz (Asosa)' },
+    { countryCode: 'ET', name: 'Gambela (Gambela City)' },
+    { countryCode: 'ET', name: 'Harari (Harar)' },
+    { countryCode: 'ET', name: 'SNNPR (Arba Minch, Wolaita Sodo)' },
+    { countryCode: 'ET', name: 'SWEPR (Bonga, Mizan Teferi)' },
+    { countryCode: 'ER', name: 'Maekel / Central (Asmara)' },
+    { countryCode: 'ER', name: 'Anseba (Keren)' },
+    { countryCode: 'ER', name: 'Gash-Barka (Barentu, Tessenei)' },
+    { countryCode: 'ER', name: 'Debub / Southern (Mendefera, Dekemhare)' },
+    { countryCode: 'ER', name: 'Northern Red Sea (Massawa)' },
+    { countryCode: 'ER', name: 'Southern Red Sea (Assab)' },
   ];
-  
-  
-  for (const r of ethiopianRegions) {
+
+  for (const r of regionsList) {
     const exists = await regionsRepo.findOneBy({ name: r.name, countryCode: r.countryCode });
     if (!exists) {
       await regionsRepo.save(r);
@@ -40,20 +51,20 @@ async function bootstrap() {
   console.log('Seeding interest tags...');
   const tagsRepo = dataSource.getRepository(InterestTag);
   const commonTags = [
-    'Coffee', 'Hiking', 'Music', 'Reading', 'Travel', 'Movies', 
+    'Coffee', 'Hiking', 'Music', 'Reading', 'Travel', 'Movies',
     'Technology', 'Art', 'Sports', 'Cooking'
   ];
-  
+
   for (const tagName of commonTags) {
     const exists = await tagsRepo.findOneBy({ name: tagName });
     if (!exists) {
       await tagsRepo.save({ name: tagName });
     }
   }
-  
+
   const savedTags = await tagsRepo.find();
   const savedRegions = await regionsRepo.find();
-  
+
   if (savedRegions.length === 0) {
     throw new Error('No regions found to attach to profiles.');
   }
@@ -62,7 +73,7 @@ async function bootstrap() {
   console.log('Seeding compatibility quiz questions...');
   const questionsRepo = dataSource.getRepository(QuizQuestion);
   const optionsRepo = dataSource.getRepository(QuizOption);
-  
+
   const quizData = [
     {
       questionText: 'How important is regular communication to you?',
@@ -93,7 +104,7 @@ async function bootstrap() {
         orderIndex: q.orderIndex,
         active: true
       });
-      
+
       for (let i = 0; i < q.options.length; i++) {
         await optionsRepo.save({
           question: savedQ,

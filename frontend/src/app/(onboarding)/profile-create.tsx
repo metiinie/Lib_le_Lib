@@ -8,6 +8,15 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { profileSchema, ProfileDto, parseAndNormalizeDate } from '@/lib/zod-schemas';
 import { profileService } from '@/services/profile.service';
 import { Picker } from '@react-native-picker/picker';
+import { DateOfBirthPicker } from '@/components/common/DateOfBirthPicker';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { profileSchema, ProfileDto, parseAndNormalizeDate } from '@/lib/zod-schemas';
+import { profileService } from '@/services/profile.service';
+import { Picker } from '@react-native-picker/picker';
 
 const RELATIONS_OPTIONS = [
   { label: 'Marriage', value: 'marriage' },
@@ -157,12 +166,7 @@ export default function ProfileCreateScreen() {
             control={control}
             name="dateOfBirth"
             render={({ field: { onChange, value } }) => (
-              <TextInput
-                className="bg-slate-50 border border-slate-200 p-4 rounded-xl text-slate-900"
-                placeholder="YYYY-MM-DD"
-                value={value}
-                onChangeText={onChange}
-              />
+              <DateOfBirthPicker value={value} onChange={onChange} />
             )}
           />
           {errors.dateOfBirth && <Text className="text-red-500 mt-1">{errors.dateOfBirth.message}</Text>}

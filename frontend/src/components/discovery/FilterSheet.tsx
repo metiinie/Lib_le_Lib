@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Slider from '@react-native-community/slider';
+import { profileService } from '@/services/profile.service';
 
 interface FilterSheetProps {
   visible: boolean;
@@ -15,9 +16,55 @@ export function FilterSheet({ visible, onClose, filters, setFilters }: FilterShe
     minAge: 18,
     maxAge: 55,
     gender: 'all',
+    regionId: '',
     relationshipGoals: [] as string[],
     ...filters,
   });
+
+  const [regions, setRegions] = useState<{ id: string; name: string; countryCode?: string }[]>([]);
+  const [loadingRegions, setLoadingRegions] = useState(false);
+  const [isRegionSelectorOpen, setIsRegionSelectorOpen] = useState(false);
+
+  useEffect(() => {
+    if (visible) {
+      fetchRegions();
+    }
+  }, [visible]);
+
+  const fetchRegions = async () => {
+    setLoadingRegions(true);
+    try {
+      const data = await profileService.getRegions();
+      setRegions(data);
+    } catch (err) {
+      console.warn('Failed to fetch regions, using fallback list', err);
+      // Comprehensive fallback list for Ethiopia and Eritrea
+      const fallback = [
+        { id: '1', name: 'Addis Ababa (Capital)', countryCode: 'ET' },
+        { id: '2', name: 'Oromia (Adama, Jimma, Bishoftu)', countryCode: 'ET' },
+        { id: '3', name: 'Amhara (Bahir Dar, Gondar, Dessie)', countryCode: 'ET' },
+        { id: '4', name: 'Tigray (Mekelle, Adigrat)', countryCode: 'ET' },
+        { id: '5', name: 'Sidama (Hawassa)', countryCode: 'ET' },
+        { id: '6', name: 'Somali (Jijiga, Gode)', countryCode: 'ET' },
+        { id: '7', name: 'Dire Dawa', countryCode: 'ET' },
+        { id: '8', name: 'Afar (Semera, Asaita)', countryCode: 'ET' },
+        { id: '9', name: 'Benishangul-Gumuz (Asosa)', countryCode: 'ET' },
+        { id: '10', name: 'Gambela (Gambela City)', countryCode: 'ET' },
+        { id: '11', name: 'Harari (Harar)', countryCode: 'ET' },
+        { id: '12', name: 'SNNPR (Arba Minch, Wolaita Sodo)', countryCode: 'ET' },
+        { id: '13', name: 'SWEPR (Bonga, Mizan Teferi)', countryCode: 'ET' },
+        { id: '14', name: 'Maekel / Central (Asmara)', countryCode: 'ER' },
+        { id: '15', name: 'Anseba (Keren)', countryCode: 'ER' },
+        { id: '16', name: 'Gash-Barka (Barentu, Tessenei)', countryCode: 'ER' },
+        { id: '17', name: 'Debub / Southern (Mendefera, Dekemhare)', countryCode: 'ER' },
+        { id: '18', name: 'Northern Red Sea (Massawa)', countryCode: 'ER' },
+        { id: '19', name: 'Southern Red Sea (Assab)', countryCode: 'ER' },
+      ];
+      setRegions(fallback);
+    } finally {
+      setLoadingRegions(false);
+    }
+  };
 
   if (!visible) return null;
 
@@ -27,7 +74,7 @@ export function FilterSheet({ visible, onClose, filters, setFilters }: FilterShe
   };
 
   const clearFilters = () => {
-    const defaultFilters = { minAge: 18, maxAge: 55, gender: 'all', relationshipGoals: [] };
+    const defaultFilters = { minAge: 18, maxAge: 55, gender: 'all', regionId: '', relationshipGoals: [] };
     setLocalFilters(defaultFilters);
     setFilters(defaultFilters);
     onClose();
@@ -47,6 +94,9 @@ export function FilterSheet({ visible, onClose, filters, setFilters }: FilterShe
     { label: 'Men', value: 'man' },
     { label: 'Women', value: 'woman' },
   ];
+
+  const selectedRegionName =
+    regions.find((r) => r.id === localFilters.regionId)?.name || 'All Regions';
 
   return (
     <View style={StyleSheet.absoluteFillObject} className="z-50 justify-end">
@@ -133,12 +183,72 @@ export function FilterSheet({ visible, onClose, filters, setFilters }: FilterShe
             })}
           </View>
 
-          {/* Region */}
-          <Text className="text-lg font-bold text-[#0F1E24] mb-3">Region</Text>
-          <TouchableOpacity className="bg-[#F5F7F8] border border-slate-200 p-4 rounded-2xl mb-8 flex-row justify-between items-center">
-            <Text className="text-[#0F1E24] font-medium">All Regions</Text>
-            <Ionicons name="chevron-forward" size={20} color="#4A7A8A" />
+          {/* Region Filter */}
+          <Text className="text-lg font-bold text-[#0F1E24] mb-3">Region & Cities</Text>
+          <TouchableOpacity
+            onPress={() => setIsRegionSelectorOpen(!isRegionSelectorOpen)}
+            className="bg-[#F5F7F8] border border-slate-200 p-4 rounded-2xl mb-4 flex-row justify-between items-center"
+          >
+            <View className="flex-row items-center flex-1 mr-2">
+              <Ionicons name="location-outline" size={20} color="#1B4D5C" style={{ marginRight: 8 }} />
+              <Text className="text-[#0F1E24] font-semibold text-base" numberOfLines={1}>
+                {selectedRegionName}
+              </Text>
+            </View>
+            <Ionicons
+              name={isRegionSelectorOpen ? 'chevron-up' : 'chevron-down'}
+              size={20}
+              color="#4A7A8A"
+            />
           </TouchableOpacity>
+
+          {/* Expanded Region List */}
+          {isRegionSelectorOpen && (
+            <View className="bg-[#F5F7F8] border border-slate-200 rounded-2xl p-2 mb-8 max-h-60">
+              <ScrollView nestedScrollEnabled showsVerticalScrollIndicator={true}>
+                <TouchableOpacity
+                  onPress={() => {
+                    setLocalFilters({ ...localFilters, regionId: '' });
+                    setIsRegionSelectorOpen(false);
+                  }}
+                  className={`p-3 rounded-xl mb-1 flex-row items-center justify-between ${!localFilters.regionId ? 'bg-white border border-[#D6DFE2]' : ''
+                    }`}
+                >
+                  <Text className={!localFilters.regionId ? 'font-bold text-[#1B4D5C]' : 'text-[#4A7A8A]'}>
+                    All Regions
+                  </Text>
+                  {!localFilters.regionId && <Ionicons name="checkmark" size={18} color="#1B4D5C" />}
+                </TouchableOpacity>
+
+                {loadingRegions ? (
+                  <View className="py-4 items-center">
+                    <ActivityIndicator size="small" color="#1B4D5C" />
+                  </View>
+                ) : (
+                  regions.map((reg) => {
+                    const isSelected = localFilters.regionId === reg.id;
+                    const flag = reg.countryCode === 'ER' ? '🇪🇷' : '🇪🇹';
+                    return (
+                      <TouchableOpacity
+                        key={reg.id}
+                        onPress={() => {
+                          setLocalFilters({ ...localFilters, regionId: reg.id });
+                          setIsRegionSelectorOpen(false);
+                        }}
+                        className={`p-3 rounded-xl mb-1 flex-row items-center justify-between ${isSelected ? 'bg-white border border-[#D6DFE2]' : ''
+                          }`}
+                      >
+                        <Text className={`flex-1 text-sm ${isSelected ? 'font-bold text-[#1B4D5C]' : 'text-[#0F1E24]'}`}>
+                          {flag} {reg.name}
+                        </Text>
+                        {isSelected && <Ionicons name="checkmark" size={18} color="#1B4D5C" />}
+                      </TouchableOpacity>
+                    );
+                  })
+                )}
+              </ScrollView>
+            </View>
+          )}
         </ScrollView>
 
         {/* Apply CTA */}

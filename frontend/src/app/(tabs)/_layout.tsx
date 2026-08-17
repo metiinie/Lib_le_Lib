@@ -10,7 +10,7 @@ export default function TabsLayout() {
       <PendingVerificationBanner />
       <Tabs
         screenOptions={{
-          headerShown: true,
+          headerShown: false,
           headerStyle: { backgroundColor: '#F5F7F8' },
           headerTitleStyle: { color: '#0F1E24', fontWeight: '700' },
           tabBarActiveTintColor: '#1B4D5C',

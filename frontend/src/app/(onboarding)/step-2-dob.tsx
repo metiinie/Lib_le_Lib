@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -9,6 +9,7 @@ import { z } from 'zod';
 import { Ionicons } from '@expo/vector-icons';
 import { useDraftProfileStore } from '@/state/draftProfile.store';
 import { parseAndNormalizeDate, is18OrOlder } from '@/lib/zod-schemas';
+import { DateOfBirthPicker } from '@/components/common/DateOfBirthPicker';
 
 const schema = z.object({
   dateOfBirth: z.string().refine((val) => {
@@ -81,18 +82,7 @@ export default function Step2DobScreen() {
             control={control}
             name="dateOfBirth"
             render={({ field: { onChange, value } }) => (
-              <View className="flex-row items-center bg-slate-50 border border-slate-200 p-4 rounded-xl">
-                <Ionicons name="calendar" size={20} color="#4A7A8A" style={{ marginRight: 12 }} />
-                <TextInput
-                  className="flex-1 text-slate-900 text-lg font-medium"
-                  placeholder="YYYY-MM-DD (e.g. 1998-05-15)"
-                  placeholderTextColor="#94A3B8"
-                  value={value}
-                  onChangeText={onChange}
-                  autoFocus
-                  keyboardType="numbers-and-punctuation"
-                />
-              </View>
+              <DateOfBirthPicker value={value} onChange={onChange} />
             )}
           />
           {errors.dateOfBirth && <Text className="text-red-500 mt-2 font-medium">{errors.dateOfBirth.message as string}</Text>}
