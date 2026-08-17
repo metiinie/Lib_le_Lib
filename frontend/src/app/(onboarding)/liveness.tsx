@@ -29,7 +29,7 @@ export default function LivenessScreen() {
 
   const takePicture = async () => {
     if (!cameraRef.current || isUploading) return;
-    
+
     setIsUploading(true);
     try {
       const photo = await cameraRef.current.takePictureAsync({
@@ -39,8 +39,8 @@ export default function LivenessScreen() {
       if (!photo) throw new Error('Capture failed');
 
       // Request short-lived signed URL
-      const uploadUrl = await photoService.getUploadUrl('selfie');
-      
+      const { uploadUrl } = await photoService.getUploadUrl('selfie');
+
       // Upload directly to object storage
       await photoService.uploadToSignedUrl(uploadUrl, photo.uri, 'image/jpeg');
 
@@ -55,12 +55,12 @@ export default function LivenessScreen() {
 
   return (
     <View className="flex-1 bg-black">
-      <CameraView 
-        ref={cameraRef} 
-        style={StyleSheet.absoluteFill} 
+      <CameraView
+        ref={cameraRef}
+        style={StyleSheet.absoluteFill}
         facing="front"
       />
-      
+
       <View className="absolute inset-x-0 top-16 px-6">
         <Text className="text-3xl font-bold text-white text-center shadow-lg">Liveness Check</Text>
         <Text className="text-white/90 text-center mt-2 font-medium">
@@ -69,7 +69,7 @@ export default function LivenessScreen() {
       </View>
 
       <View className="absolute inset-x-0 bottom-12 items-center">
-        <TouchableOpacity 
+        <TouchableOpacity
           className={`w-20 h-20 rounded-full border-4 border-white bg-white/30 items-center justify-center ${isUploading ? 'opacity-50' : ''}`}
           onPress={takePicture}
           disabled={isUploading}

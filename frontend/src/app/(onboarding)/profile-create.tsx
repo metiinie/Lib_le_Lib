@@ -39,6 +39,7 @@ export default function ProfileCreateScreen() {
       dateOfBirth: '',
       gender: 'man',
       relationshipGoals: [],
+      lookingFor: ['everyone'],
       bio: '',
     },
   });
@@ -121,7 +122,7 @@ export default function ProfileCreateScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: '#ffffff' }}>
-      <KeyboardAwareScrollView 
+      <KeyboardAwareScrollView
         className="flex-1 bg-white px-6 pt-16"
         contentContainerStyle={{ paddingBottom: 40 }}
         keyboardShouldPersistTaps="handled"
@@ -131,150 +132,147 @@ export default function ProfileCreateScreen() {
       >
         <Text className="text-3xl font-bold text-slate-900 mb-8">Create your profile</Text>
 
-      {/* Nickname */}
-      <View className="mb-6">
-        <Text className="text-slate-700 font-semibold mb-2">Nickname</Text>
-        <Controller
-          control={control}
-          name="nickname"
-          render={({ field: { onChange, value } }) => (
-            <TextInput
-              className="bg-slate-50 border border-slate-200 p-4 rounded-xl text-slate-900"
-              placeholder="How should we call you?"
-              value={value}
-              onChangeText={onChange}
-            />
-          )}
-        />
-        {errors.nickname && <Text className="text-red-500 mt-1">{errors.nickname.message}</Text>}
-      </View>
+        {/* Nickname */}
+        <View className="mb-6">
+          <Text className="text-slate-700 font-semibold mb-2">Nickname</Text>
+          <Controller
+            control={control}
+            name="nickname"
+            render={({ field: { onChange, value } }) => (
+              <TextInput
+                className="bg-slate-50 border border-slate-200 p-4 rounded-xl text-slate-900"
+                placeholder="How should we call you?"
+                value={value}
+                onChangeText={onChange}
+              />
+            )}
+          />
+          {errors.nickname && <Text className="text-red-500 mt-1">{errors.nickname.message}</Text>}
+        </View>
 
-      {/* DOB */}
-      <View className="mb-6">
-        <Text className="text-slate-700 font-semibold mb-2">Date of Birth</Text>
-        <Controller
-          control={control}
-          name="dateOfBirth"
-          render={({ field: { onChange, value } }) => (
-            <TextInput
-              className="bg-slate-50 border border-slate-200 p-4 rounded-xl text-slate-900"
-              placeholder="YYYY-MM-DD"
-              value={value}
-              onChangeText={onChange}
-            />
-          )}
-        />
-        {errors.dateOfBirth && <Text className="text-red-500 mt-1">{errors.dateOfBirth.message}</Text>}
-        <Text className="text-slate-500 text-xs mt-1">You must be at least 18 years old.</Text>
-      </View>
+        {/* DOB */}
+        <View className="mb-6">
+          <Text className="text-slate-700 font-semibold mb-2">Date of Birth</Text>
+          <Controller
+            control={control}
+            name="dateOfBirth"
+            render={({ field: { onChange, value } }) => (
+              <TextInput
+                className="bg-slate-50 border border-slate-200 p-4 rounded-xl text-slate-900"
+                placeholder="YYYY-MM-DD"
+                value={value}
+                onChangeText={onChange}
+              />
+            )}
+          />
+          {errors.dateOfBirth && <Text className="text-red-500 mt-1">{errors.dateOfBirth.message}</Text>}
+          <Text className="text-slate-500 text-xs mt-1">You must be at least 18 years old.</Text>
+        </View>
 
-      {/* Gender */}
-      <View className="mb-6">
-        <Text className="text-slate-700 font-semibold mb-2">Gender</Text>
-        <Controller
-          control={control}
-          name="gender"
-          render={({ field: { onChange, value } }) => (
-            <View className="bg-slate-50 border border-slate-200 rounded-xl overflow-hidden">
-              <Picker selectedValue={value} onValueChange={onChange}>
-                <Picker.Item label="Man" value="man" />
-                <Picker.Item label="Woman" value="woman" />
-                <Picker.Item label="Other" value="other" />
-              </Picker>
-            </View>
-          )}
-        />
-        {errors.gender && <Text className="text-red-500 mt-1">{errors.gender.message}</Text>}
-      </View>
-
-      {/* Region */}
-      <View className="mb-6">
-        <Text className="text-slate-700 font-semibold mb-2">Region</Text>
-        <Controller
-          control={control}
-          name="regionId"
-          render={({ field: { onChange, value } }) => (
-            <View className="bg-slate-50 border border-slate-200 rounded-xl overflow-hidden">
-              {isLoadingRegions ? (
-                <View className="p-4 items-center">
-                  <ActivityIndicator size="small" color="#1B4D5C" />
-                </View>
-              ) : (
+        {/* Gender */}
+        <View className="mb-6">
+          <Text className="text-slate-700 font-semibold mb-2">Gender</Text>
+          <Controller
+            control={control}
+            name="gender"
+            render={({ field: { onChange, value } }) => (
+              <View className="bg-slate-50 border border-slate-200 rounded-xl overflow-hidden">
                 <Picker selectedValue={value} onValueChange={onChange}>
-                  {regions.length > 0 ? (
-                    regions.map((reg) => (
-                      <Picker.Item key={reg.id} label={reg.name} value={reg.id} />
-                    ))
-                  ) : (
-                    <Picker.Item label="Select Region" value="" />
-                  )}
+                  <Picker.Item label="Man" value="man" />
+                  <Picker.Item label="Woman" value="woman" />
                 </Picker>
-              )}
-            </View>
-          )}
-        />
-        {errors.regionId && <Text className="text-red-500 mt-1">{errors.regionId.message}</Text>}
-      </View>
+              </View>
+            )}
+          />
+          {errors.gender && <Text className="text-red-500 mt-1">{errors.gender.message}</Text>}
+        </View>
 
-      {/* Relationship Goals */}
-      <View className="mb-6">
-        <Text className="text-slate-700 font-semibold mb-2">Relationship Goals</Text>
-        <View className="flex-row flex-wrap gap-2">
-          {RELATIONS_OPTIONS.map((item) => {
-            const isSelected = selectedGoals.includes(item.value);
-            return (
-              <TouchableOpacity
-                key={item.value}
-                onPress={() => toggleGoal(item.value)}
-                className={`px-4 py-3 rounded-xl border ${
-                  isSelected
+        {/* Region */}
+        <View className="mb-6">
+          <Text className="text-slate-700 font-semibold mb-2">Region</Text>
+          <Controller
+            control={control}
+            name="regionId"
+            render={({ field: { onChange, value } }) => (
+              <View className="bg-slate-50 border border-slate-200 rounded-xl overflow-hidden">
+                {isLoadingRegions ? (
+                  <View className="p-4 items-center">
+                    <ActivityIndicator size="small" color="#1B4D5C" />
+                  </View>
+                ) : (
+                  <Picker selectedValue={value} onValueChange={onChange}>
+                    {regions.length > 0 ? (
+                      regions.map((reg) => (
+                        <Picker.Item key={reg.id} label={reg.name} value={reg.id} />
+                      ))
+                    ) : (
+                      <Picker.Item label="Select Region" value="" />
+                    )}
+                  </Picker>
+                )}
+              </View>
+            )}
+          />
+          {errors.regionId && <Text className="text-red-500 mt-1">{errors.regionId.message}</Text>}
+        </View>
+
+        {/* Relationship Goals */}
+        <View className="mb-6">
+          <Text className="text-slate-700 font-semibold mb-2">Relationship Goals</Text>
+          <View className="flex-row flex-wrap gap-2">
+            {RELATIONS_OPTIONS.map((item) => {
+              const isSelected = selectedGoals.includes(item.value);
+              return (
+                <TouchableOpacity
+                  key={item.value}
+                  onPress={() => toggleGoal(item.value)}
+                  className={`px-4 py-3 rounded-xl border ${isSelected
                     ? 'bg-blue-600 border-blue-600'
                     : 'bg-slate-50 border-slate-200'
-                }`}
-              >
-                <Text
-                  className={`font-semibold ${
-                    isSelected ? 'text-white' : 'text-slate-700'
-                  }`}
+                    }`}
                 >
-                  {item.label}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-        {errors.relationshipGoals && (
-          <Text className="text-red-500 mt-1">{errors.relationshipGoals.message}</Text>
-        )}
-      </View>
-
-      {/* Bio */}
-      <View className="mb-6">
-        <Text className="text-slate-700 font-semibold mb-2">Bio</Text>
-        <Controller
-          control={control}
-          name="bio"
-          render={({ field: { onChange, value } }) => (
-            <TextInput
-              className="bg-slate-50 border border-slate-200 p-4 rounded-xl text-slate-900 h-24"
-              placeholder="Tell us a bit about yourself"
-              multiline
-              textAlignVertical="top"
-              value={value}
-              onChangeText={onChange}
-            />
+                  <Text
+                    className={`font-semibold ${isSelected ? 'text-white' : 'text-slate-700'
+                      }`}
+                  >
+                    {item.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+          {errors.relationshipGoals && (
+            <Text className="text-red-500 mt-1">{errors.relationshipGoals.message}</Text>
           )}
-        />
-        {errors.bio && <Text className="text-red-500 mt-1">{errors.bio.message}</Text>}
-      </View>
+        </View>
+
+        {/* Bio */}
+        <View className="mb-6">
+          <Text className="text-slate-700 font-semibold mb-2">Bio</Text>
+          <Controller
+            control={control}
+            name="bio"
+            render={({ field: { onChange, value } }) => (
+              <TextInput
+                className="bg-slate-50 border border-slate-200 p-4 rounded-xl text-slate-900 h-24"
+                placeholder="Tell us a bit about yourself"
+                multiline
+                textAlignVertical="top"
+                value={value}
+                onChangeText={onChange}
+              />
+            )}
+          />
+          {errors.bio && <Text className="text-red-500 mt-1">{errors.bio.message}</Text>}
+        </View>
 
       </KeyboardAwareScrollView>
 
       {/* Sticky Bottom Button */}
-      <View 
-        style={{ 
-          paddingHorizontal: 24, 
-          paddingTop: 16, 
+      <View
+        style={{
+          paddingHorizontal: 24,
+          paddingTop: 16,
           paddingBottom: Math.max(insets.bottom, 24),
           backgroundColor: '#ffffff',
           borderTopWidth: 1,

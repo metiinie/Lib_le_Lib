@@ -80,7 +80,7 @@ export default function RootLayout() {
       setTimeout(() => {
         router.replace('/(auth)/welcome');
       }, 0);
-    } else if (isAuthenticated && (inAuthGroup || segments.length === 0)) {
+    } else if (isAuthenticated && (inAuthGroup || (segments as any).length === 0)) {
       let isCancelled = false;
 
       const resolveRoute = async () => {
@@ -123,10 +123,8 @@ export default function RootLayout() {
           const { status } = await verificationService.checkStatus();
           if (isCancelled) return;
 
-          if (status === 'approved') {
+          if (status === 'approved' || status === 'submitted' || status === 'in_review') {
             router.replace('/(tabs)/discover');
-          } else if (status === 'submitted' || status === 'in_review') {
-            router.replace('/(onboarding)/pending');
           } else if (status === 'rejected') {
             router.replace('/(onboarding)/rejected');
           } else {

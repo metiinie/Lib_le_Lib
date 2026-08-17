@@ -9,6 +9,8 @@ import { useSubscription } from '@/hooks/useSubscription';
 import { FilterSheet } from '@/components/discovery/FilterSheet';
 import { SwipeCard } from '@/components/discovery/SwipeCard';
 
+import { verificationService } from '@/services/verification.service';
+
 const { height } = Dimensions.get('window');
 
 export default function DiscoverScreen() {
@@ -16,20 +18,38 @@ export default function DiscoverScreen() {
   const insets = useSafeAreaInsets();
   const [filters, setFilters] = useState({});
   const [isFilterVisible, setFilterVisible] = useState(false);
-  
+
   const { data: profiles, isLoading, isError, refetch } = useDiscovery(filters);
   const { isPremium, dmCredits } = useSubscription();
 
+  const checkPendingVerification = async (): Promise<boolean> => {
+    try {
+      const { status } = await verificationService.checkStatus();
+      if (status === 'submitted' || status === 'in_review') {
+        Alert.alert(
+          'Verification Pending',
+          'Your document is currently under review by our admin team. You can view profiles and educational content. Swiping and messaging will unlock automatically once approved!',
+          [{ text: 'Got it' }]
+        );
+        return true;
+      }
+    } catch (err) {
+      console.warn('Failed to check verification status', err);
+    }
+    return false;
+  };
+
   const handleLike = async (profileId: string) => {
+    if (await checkPendingVerification()) return;
     try {
       await discoveryService.likeProfile(profileId);
-      // In a real app we'd optimistically remove the item from the list or advance to next
     } catch (err) {
       console.error(err);
     }
   };
 
   const handlePass = async (profileId: string) => {
+    if (await checkPendingVerification()) return;
     try {
       await discoveryService.passProfile(profileId);
     } catch (err) {
@@ -38,13 +58,14 @@ export default function DiscoverScreen() {
   };
 
   const handleDM = async (profileId: string) => {
+    if (await checkPendingVerification()) return;
     if (!isPremium) {
       Alert.alert(
         'Premium Required',
         'Upgrade to Premium to send direct messages without matching first.',
         [
           { text: 'Cancel', style: 'cancel' },
-          { text: 'Upgrade', style: 'default', onPress: () => router.push('/(tabs)') }
+          { text: 'Upgrade', style: 'default', onPress: () => router.push('/(tabs)/profile') }
         ]
       );
       return;
@@ -56,9 +77,6 @@ export default function DiscoverScreen() {
     }
 
     try {
-      // In a real flow, this would open a composer or navigation to a DM request screen
-      // where they type the first message, and THEN we call API. 
-      // For now, we simulate this flow.
       router.push(`/chat/${profileId}?type=request`);
     } catch (err: any) {
       console.error(err);
@@ -114,15 +132,15 @@ export default function DiscoverScreen() {
       )}
 
       {/* Floating Header */}
-      <View 
+      <View
         className="absolute top-0 left-0 right-0 flex-row justify-between items-center px-4"
         style={{ paddingTop: Math.max(insets.top, 16), paddingBottom: 16 }}
         pointerEvents="box-none"
       >
-        <Text className="text-3xl font-bold text-white shadow-sm" style={{ textShadowColor: 'rgba(0,0,0,0.5)', textShadowOffset: {width: 0, height: 1}, textShadowRadius: 2 }}>
+        <Text className="text-3xl font-bold text-white shadow-sm" style={{ textShadowColor: 'rgba(0,0,0,0.5)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2 }}>
           Discover
         </Text>
-        <TouchableOpacity 
+        <TouchableOpacity
           className="bg-black/30 px-4 py-2 rounded-full min-h-[48px] min-w-[48px] justify-center items-center border border-white/20 backdrop-blur-md"
           accessibilityRole="button"
           accessibilityLabel="Filter profiles"
@@ -132,11 +150,11 @@ export default function DiscoverScreen() {
         </TouchableOpacity>
       </View>
 
-      <FilterSheet 
-        visible={isFilterVisible} 
-        onClose={() => setFilterVisible(false)} 
-        filters={filters} 
-        setFilters={setFilters} 
+      <FilterSheet
+        visible={isFilterVisible}
+        onClose={() => setFilterVisible(false)}
+        filters={filters}
+        setFilters={setFilters}
       />
     </View>
   );

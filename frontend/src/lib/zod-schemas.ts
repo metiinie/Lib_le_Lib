@@ -78,12 +78,12 @@ export const profileSchema = z.object({
   }, {
     message: 'You must be at least 18 years old to use this app.',
   }),
-  gender: z.enum(['man', 'woman', 'other']),
+  gender: z.enum(['man', 'woman']),
   regionId: z.string().optional(),
   relationshipGoals: z
     .array(z.enum(['marriage', 'serious_relationship', 'friendship']))
     .min(1, 'Select at least one relationship goal'),
-  lookingFor: z.array(z.enum(['men', 'women', 'everyone'])).default(['everyone']),
+  lookingFor: z.array(z.enum(['men', 'women', 'everyone'])),
   photosVisibleToVerified: z.boolean().optional(),
   virusType: z.string().optional(),
   bio: z.string().max(500).optional(),

@@ -31,14 +31,14 @@ export default function Step6VirusTypeScreen() {
     },
   });
 
-  const onSubmit = (data: { virusType: 'hiv_1' | 'hiv_2' | 'unknown' | 'prefer_not_to_say' }) => {
+  const onSubmit = (data: { virusType: string }) => {
     updateDraft(data);
     router.push('/(onboarding)/step-8-bio');
   };
 
   return (
     <View style={{ flex: 1, backgroundColor: '#ffffff' }}>
-      <KeyboardAwareScrollView 
+      <KeyboardAwareScrollView
         className="flex-1 bg-white px-6 pt-16"
         contentContainerStyle={{ paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
@@ -56,9 +56,8 @@ export default function Step6VirusTypeScreen() {
                   <TouchableOpacity
                     key={opt.value}
                     onPress={() => onChange(opt.value)}
-                    className={`p-4 rounded-xl border ${
-                      value === opt.value ? 'bg-[#1B4D5C] border-[#1B4D5C]' : 'bg-slate-50 border-slate-200'
-                    }`}
+                    className={`p-4 rounded-xl border ${value === opt.value ? 'bg-[#1B4D5C] border-[#1B4D5C]' : 'bg-slate-50 border-slate-200'
+                      }`}
                   >
                     <Text className={`font-semibold text-lg ${value === opt.value ? 'text-white' : 'text-slate-700'}`}>
                       {opt.label}
@@ -72,11 +71,11 @@ export default function Step6VirusTypeScreen() {
         </View>
       </KeyboardAwareScrollView>
 
-      <View 
-        style={{ 
+      <View
+        style={{
           flexDirection: 'row',
-          paddingHorizontal: 24, 
-          paddingTop: 16, 
+          paddingHorizontal: 24,
+          paddingTop: 16,
           paddingBottom: Math.max(insets.bottom, 24),
           backgroundColor: '#ffffff',
           borderTopWidth: 1,

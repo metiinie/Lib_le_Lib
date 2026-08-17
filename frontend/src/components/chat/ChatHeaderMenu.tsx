@@ -25,7 +25,7 @@ export function ChatHeaderMenu({ matchId }: Props) {
 
   const handleReport = () => {
     setMenuVisible(false);
-    router.push(`/modals/report-${matchId}`);
+    router.push(`/modals/report-${matchId}` as any);
   };
 
   const handleMeetupSafety = () => {
@@ -40,9 +40,9 @@ export function ChatHeaderMenu({ matchId }: Props) {
       </TouchableOpacity>
 
       <Modal visible={menuVisible} transparent animationType="fade">
-        <TouchableOpacity 
+        <TouchableOpacity
           className="flex-1 bg-black/30 justify-start items-end pt-16 pr-4"
-          activeOpacity={1} 
+          activeOpacity={1}
           onPress={() => setMenuVisible(false)}
         >
           <View className="bg-white rounded-xl shadow-lg w-56 overflow-hidden">
