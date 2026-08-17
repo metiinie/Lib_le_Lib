@@ -21,7 +21,7 @@ export const SwipeCard: React.FC<SwipeCardProps> = ({ profile, onLike, onPass, o
   const primaryPhoto = profile.photos?.[0];
 
   return (
-    <View className="w-full flex-1 bg-slate-900 relative">
+    <View className="w-full flex-1 bg-[#F5F7F8] relative">
       <TouchableOpacity
         activeOpacity={0.95}
         style={{ flex: 1 }}

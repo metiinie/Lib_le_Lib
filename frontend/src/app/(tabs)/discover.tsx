@@ -104,58 +104,60 @@ export default function DiscoverScreen() {
   const currentProfile = profiles && profiles.length > currentIndex ? profiles[currentIndex] : null;
 
   return (
-    <View className="flex-1 bg-black relative">
+    <View className="flex-1 bg-[#F5F7F8] relative">
       {isCheckingVerification || isLoading ? (
-        <View className="flex-1 justify-center items-center bg-slate-950">
-          <ActivityIndicator size="large" color="#4A9B7F" />
-          <Text className="text-slate-400 mt-4 text-sm">Loading discovery feed...</Text>
+        <View className="flex-1 justify-center items-center bg-[#F5F7F8]">
+          <ActivityIndicator size="large" color="#1B4D5C" />
+          <Text className="text-[#6B9BAA] mt-4 text-sm font-medium">Loading discovery feed...</Text>
         </View>
       ) : isPendingVerification ? (
-        /* Clear pending verification screen instead of generic error */
-        <View className="flex-1 bg-slate-950 items-center justify-center p-6">
-          <View className="w-20 h-20 rounded-full bg-amber-500/20 items-center justify-center mb-6 border border-amber-500/30">
-            <Ionicons name="time-outline" size={40} color="#D97706" />
+        /* Clear pending verification screen in light theme */
+        <View className="flex-1 bg-[#F5F7F8] items-center justify-center p-6">
+          <View className="w-20 h-20 rounded-full bg-amber-100 items-center justify-center mb-6 border border-amber-200">
+            <Ionicons name="time-outline" size={40} color="#D4784F" />
           </View>
 
-          <Text className="text-2xl font-bold text-white text-center mb-3">
+          <Text className="text-2xl font-bold text-[#0F1E24] text-center mb-3">
             Verification Under Review
           </Text>
 
-          <Text className="text-slate-300 text-center text-base leading-relaxed mb-6">
+          <Text className="text-[#4A7A8A] text-center text-base leading-relaxed mb-6">
             Please wait until admins approve your account to start matching with other members!
           </Text>
 
-          <View className="bg-slate-900 border border-slate-800 p-4 rounded-2xl w-full max-w-sm mb-6">
-            <Text className="text-amber-400 font-semibold text-sm mb-2">💡 While waiting for admin approval:</Text>
-            <Text className="text-slate-300 text-xs leading-5 mb-1">• View and edit your profile details & photos</Text>
-            <Text className="text-slate-300 text-xs leading-5">• Explore app settings & educational resources</Text>
+          <View className="bg-white border border-slate-200 p-5 rounded-2xl w-full max-w-sm mb-6 shadow-sm">
+            <Text className="text-[#D4784F] font-bold text-sm mb-2">💡 While waiting for admin approval:</Text>
+            <Text className="text-[#4A7A8A] text-xs leading-5 mb-1">• View and edit your profile details & photos</Text>
+            <Text className="text-[#4A7A8A] text-xs leading-5">• Explore app settings & educational resources</Text>
           </View>
 
           <TouchableOpacity
             onPress={handleRefresh}
-            className="bg-[#1B4D5C] px-6 py-3.5 rounded-xl flex-row items-center"
+            className="bg-[#1B4D5C] px-6 py-3.5 rounded-full flex-row items-center shadow-sm"
           >
             <Ionicons name="refresh-outline" size={18} color="#ffffff" style={{ marginRight: 8 }} />
             <Text className="text-white font-bold text-base">Check Approval Status</Text>
           </TouchableOpacity>
         </View>
       ) : isError ? (
-        <View className="flex-1 justify-center items-center p-6 bg-slate-950">
+        <View className="flex-1 justify-center items-center p-6 bg-[#F5F7F8]">
           <Ionicons name="alert-circle-outline" size={48} color="#B84C4C" style={{ marginBottom: 16 }} />
-          <Text className="text-white text-center font-bold text-xl mb-2">Unable to Load Profiles</Text>
-          <Text className="text-slate-400 text-center text-sm mb-6">Please check your network connection and try again.</Text>
-          <TouchableOpacity onPress={handleRefresh} className="bg-[#1B4D5C] px-6 py-3 rounded-xl">
+          <Text className="text-[#0F1E24] text-center font-bold text-xl mb-2">Unable to Load Profiles</Text>
+          <Text className="text-[#4A7A8A] text-center text-sm mb-6">Please check your network connection and try again.</Text>
+          <TouchableOpacity onPress={handleRefresh} className="bg-[#1B4D5C] px-6 py-3 rounded-full shadow-sm">
             <Text className="text-white font-semibold">Try Again</Text>
           </TouchableOpacity>
         </View>
       ) : !currentProfile ? (
-        <View className="flex-1 justify-center items-center p-6 bg-slate-950">
-          <View className="w-16 h-16 rounded-full bg-teal-500/20 items-center justify-center mb-4 border border-teal-500/30">
-            <Ionicons name="sparkles" size={32} color="#4A9B7F" />
+        <View className="flex-1 justify-center items-center p-6 bg-[#F5F7F8]">
+          <View className="w-20 h-20 rounded-full bg-[#EBF3F5] items-center justify-center mb-6 border border-[#D6DFE2]">
+            <Ionicons name="sparkles" size={36} color="#1B4D5C" />
           </View>
-          <Text className="text-white font-bold text-2xl text-center mb-2">You're All Caught Up!</Text>
-          <Text className="text-slate-400 text-center text-base mb-6">There are no more profiles to discover right now. Check back soon!</Text>
-          <TouchableOpacity onPress={handleRefresh} className="bg-[#1B4D5C] px-6 py-3.5 rounded-xl flex-row items-center">
+          <Text className="text-[#0F1E24] font-extrabold text-2xl text-center mb-2">You're All Caught Up!</Text>
+          <Text className="text-[#4A7A8A] text-center text-base mb-6 leading-relaxed px-4">
+            There are no more new profiles to discover right now based on your preferences.
+          </Text>
+          <TouchableOpacity onPress={handleRefresh} className="bg-[#1B4D5C] px-6 py-3.5 rounded-full flex-row items-center shadow-sm">
             <Ionicons name="refresh-outline" size={18} color="#ffffff" style={{ marginRight: 8 }} />
             <Text className="text-white font-bold text-base">Refresh Profiles</Text>
           </TouchableOpacity>
@@ -177,16 +179,16 @@ export default function DiscoverScreen() {
         style={{ paddingTop: Math.max(insets.top, 16), paddingBottom: 16 }}
         pointerEvents="box-none"
       >
-        <Text className="text-3xl font-bold text-white shadow-sm" style={{ textShadowColor: 'rgba(0,0,0,0.5)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 2 }}>
+        <Text className="text-3xl font-bold text-[#0F1E24] shadow-sm">
           Discover
         </Text>
         <TouchableOpacity
-          className="bg-black/30 px-4 py-2 rounded-full min-h-[48px] min-w-[48px] justify-center items-center border border-white/20 backdrop-blur-md"
+          className="bg-white px-4 py-2 rounded-full min-h-[44px] min-w-[44px] justify-center items-center border border-[#D6DFE2] shadow-sm"
           accessibilityRole="button"
           accessibilityLabel="Filter profiles"
           onPress={() => setFilterVisible(true)}
         >
-          <Ionicons name="options" size={20} color="#ffffff" />
+          <Ionicons name="options" size={20} color="#1B4D5C" />
         </TouchableOpacity>
       </View>
 
