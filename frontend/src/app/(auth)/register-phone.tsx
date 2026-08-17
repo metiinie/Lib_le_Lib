@@ -71,7 +71,7 @@ export default function RegisterPhoneScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -83,7 +83,7 @@ export default function RegisterPhoneScreen() {
             onPress={() => router.back()}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
-            <Ionicons name="arrow-back" size={24} color="#EFF4F5" />
+            <Ionicons name="arrow-back" size={24} color="#0F1E24" />
           </TouchableOpacity>
 
           {/* Step dots */}
@@ -201,7 +201,7 @@ export default function RegisterPhoneScreen() {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: '#0F1E24',
+    backgroundColor: '#F5F7F8',
     paddingHorizontal: 24,
   },
   header: {
@@ -219,10 +219,10 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#1B3D48',
+    backgroundColor: '#D6DFE2',
   },
   dotActive: {
-    backgroundColor: '#4A9B7F',
+    backgroundColor: '#1B4D5C',
     width: 24,
   },
   content: {
@@ -240,12 +240,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: '800',
-    color: '#EFF4F5',
+    color: '#0F1E24',
     marginBottom: 10,
   },
   subtitle: {
     fontSize: 15,
-    color: '#6B9BAA',
+    color: '#4A7A8A',
     lineHeight: 22,
     marginBottom: 20,
   },
@@ -254,15 +254,13 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   appleBtn: {
-    backgroundColor: '#000000',
+    backgroundColor: '#0F1E24',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 14,
     borderRadius: 50,
     gap: 10,
-    borderWidth: 1,
-    borderColor: '#222',
   },
   appleBtnText: {
     color: '#FFFFFF',
@@ -277,6 +275,8 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 50,
     gap: 10,
+    borderWidth: 1,
+    borderColor: '#D6DFE2',
   },
   googleG: {
     fontSize: 16,
@@ -297,10 +297,10 @@ const styles = StyleSheet.create({
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: '#1B3D48',
+    backgroundColor: '#D6DFE2',
   },
   dividerText: {
-    color: '#4A7A8A',
+    color: '#6B9BAA',
     fontSize: 13,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -308,21 +308,21 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#9BB5BE',
+    color: '#1B4D5C',
     marginBottom: 8,
     letterSpacing: 0.5,
     textTransform: 'uppercase',
   },
   inputWrapper: {
-    backgroundColor: '#162A33',
+    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#1B3D48',
+    borderColor: '#D6DFE2',
     borderRadius: 14,
     paddingHorizontal: 16,
     paddingVertical: 14,
   },
   input: {
-    color: '#EFF4F5',
+    color: '#0F1E24',
     fontSize: 18,
     letterSpacing: 1,
   },
@@ -330,15 +330,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: '#2A1A18',
+    backgroundColor: '#FDF2F2',
     borderRadius: 10,
     padding: 12,
     marginTop: 12,
     borderWidth: 1,
-    borderColor: '#3D1E1A',
+    borderColor: '#F8D7DA',
   },
   errorText: {
-    color: '#E07B6A',
+    color: '#B84C4C',
     fontSize: 14,
     flex: 1,
   },
@@ -348,8 +348,8 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   loginLink: {
-    color: '#4A9B7F',
-    fontWeight: '600',
+    color: '#1B4D5C',
+    fontWeight: '700',
   },
   footer: {
     paddingBottom: 32,
@@ -364,15 +364,15 @@ const styles = StyleSheet.create({
     gap: 8,
     shadowColor: '#1B4D5C',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
+    shadowOpacity: 0.3,
     shadowRadius: 10,
-    elevation: 5,
+    elevation: 4,
   },
   continueBtnDisabled: {
     opacity: 0.6,
   },
   continueBtnText: {
-    color: '#EFF4F5',
+    color: '#FFFFFF',
     fontSize: 17,
     fontWeight: '700',
   },

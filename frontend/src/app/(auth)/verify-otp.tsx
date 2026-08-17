@@ -121,7 +121,7 @@ export default function VerifyOtpScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
 
       {/* Header */}
       <View style={styles.header}>
@@ -130,7 +130,7 @@ export default function VerifyOtpScreen() {
           onPress={() => router.back()}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
-          <Ionicons name="arrow-back" size={24} color="#EFF4F5" />
+          <Ionicons name="arrow-back" size={24} color="#0F1E24" />
         </TouchableOpacity>
 
         {/* Step dots */}
@@ -164,7 +164,7 @@ export default function VerifyOtpScreen() {
             value={code}
             onChangeText={handleCodeChange}
             placeholder="• • • • • •"
-            placeholderTextColor="#4A7A8A"
+            placeholderTextColor="#6B9BAA"
             keyboardType="number-pad"
             maxLength={6}
             autoFocus
@@ -183,7 +183,7 @@ export default function VerifyOtpScreen() {
         {/* Error */}
         {!!error && (
           <View style={styles.errorBox}>
-            <Ionicons name="alert-circle-outline" size={16} color="#E07B6A" />
+            <Ionicons name="alert-circle-outline" size={16} color="#B84C4C" />
             <Text style={styles.errorText}>{error}</Text>
           </View>
         )}
@@ -200,7 +200,7 @@ export default function VerifyOtpScreen() {
               disabled={resending}
             >
               {resending ? (
-                <ActivityIndicator size="small" color="#4A9B7F" />
+                <ActivityIndicator size="small" color="#1B4D5C" />
               ) : (
                 <Text style={styles.resendLink}>Resend code</Text>
               )}
@@ -222,11 +222,11 @@ export default function VerifyOtpScreen() {
           disabled={loading || code.length !== 6 || attemptsLeft === 0}
         >
           {loading ? (
-            <ActivityIndicator color="#EFF4F5" />
+            <ActivityIndicator color="#FFFFFF" />
           ) : (
             <>
               <Text style={styles.verifyBtnText}>Verify</Text>
-              <Ionicons name="arrow-forward" size={18} color="#EFF4F5" />
+              <Ionicons name="arrow-forward" size={18} color="#FFFFFF" />
             </>
           )}
         </TouchableOpacity>
@@ -238,7 +238,7 @@ export default function VerifyOtpScreen() {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: '#0F1E24',
+    backgroundColor: '#F5F7F8',
     paddingHorizontal: 24,
   },
   header: {
@@ -256,14 +256,14 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#1B3D48',
+    backgroundColor: '#D6DFE2',
   },
   dotActive: {
-    backgroundColor: '#4A9B7F',
+    backgroundColor: '#1B4D5C',
     width: 24,
   },
   dotDone: {
-    backgroundColor: '#2A6B80',
+    backgroundColor: '#6B9BAA',
     width: 8,
   },
   content: {
@@ -281,38 +281,38 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: '800',
-    color: '#EFF4F5',
+    color: '#0F1E24',
     marginBottom: 10,
   },
   subtitle: {
     fontSize: 15,
-    color: '#6B9BAA',
+    color: '#4A7A8A',
     lineHeight: 22,
     marginBottom: 36,
   },
   phoneHighlight: {
-    color: '#4A9B7F',
-    fontWeight: '600',
+    color: '#1B4D5C',
+    fontWeight: '700',
   },
   label: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#9BB5BE',
+    color: '#1B4D5C',
     marginBottom: 8,
     letterSpacing: 0.5,
     textTransform: 'uppercase',
   },
   inputWrapper: {
-    backgroundColor: '#162A33',
+    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#1B3D48',
+    borderColor: '#D6DFE2',
     borderRadius: 14,
     paddingHorizontal: 16,
     paddingVertical: 14,
     alignItems: 'center',
   },
   input: {
-    color: '#EFF4F5',
+    color: '#0F1E24',
     fontSize: 28,
     fontWeight: '700',
     letterSpacing: 12,
@@ -329,15 +329,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: '#2A1A18',
+    backgroundColor: '#FDF2F2',
     borderRadius: 10,
     padding: 12,
     marginTop: 12,
     borderWidth: 1,
-    borderColor: '#3D1E1A',
+    borderColor: '#F8D7DA',
   },
   errorText: {
-    color: '#E07B6A',
+    color: '#B84C4C',
     fontSize: 14,
     flex: 1,
   },
@@ -351,14 +351,14 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   resendCountdown: {
-    color: '#4A7A8A',
+    color: '#6B9BAA',
     fontSize: 14,
     fontWeight: '500',
   },
   resendLink: {
-    color: '#4A9B7F',
+    color: '#1B4D5C',
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   footer: {
     paddingBottom: 32,
@@ -373,15 +373,15 @@ const styles = StyleSheet.create({
     gap: 8,
     shadowColor: '#1B4D5C',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
+    shadowOpacity: 0.3,
     shadowRadius: 10,
-    elevation: 5,
+    elevation: 4,
   },
   verifyBtnDisabled: {
     opacity: 0.45,
   },
   verifyBtnText: {
-    color: '#EFF4F5',
+    color: '#FFFFFF',
     fontSize: 17,
     fontWeight: '700',
   },

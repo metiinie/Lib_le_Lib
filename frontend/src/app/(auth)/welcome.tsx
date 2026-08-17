@@ -18,7 +18,7 @@ import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 export default function WelcomeScreen() {
   return (
     <SafeAreaView style={styles.safe}>
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
 
       {/* Brand section — top half */}
       <Animated.View
@@ -64,7 +64,7 @@ export default function WelcomeScreen() {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: '#0F1E24',
+    backgroundColor: '#F5F7F8',
     paddingHorizontal: 24,
   },
   brandSection: {
@@ -76,20 +76,20 @@ const styles = StyleSheet.create({
   logo: {
     fontSize: 38,
     fontWeight: '800',
-    color: '#EFF4F5',
+    color: '#0F1E24',
     letterSpacing: -0.5,
     textAlign: 'center',
   },
   tagline: {
     fontSize: 18,
-    color: '#4A9B7F',
-    fontWeight: '500',
+    color: '#1B4D5C',
+    fontWeight: '600',
     textAlign: 'center',
     marginTop: 4,
   },
   subTagline: {
     fontSize: 15,
-    color: '#6B9BAA',
+    color: '#4A7A8A',
     textAlign: 'center',
     lineHeight: 22,
     marginTop: 8,
@@ -103,15 +103,14 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: 50,
     alignItems: 'center',
-    // Subtle shadow for depth
     shadowColor: '#1B4D5C',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.5,
-    shadowRadius: 12,
-    elevation: 6,
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 4,
   },
   registerBtnText: {
-    color: '#EFF4F5',
+    color: '#FFFFFF',
     fontSize: 17,
     fontWeight: '700',
     letterSpacing: 0.3,
@@ -119,14 +118,15 @@ const styles = StyleSheet.create({
   loginBtn: {
     borderWidth: 1.5,
     borderColor: '#1B4D5C',
+    backgroundColor: '#FFFFFF',
     paddingVertical: 15,
     borderRadius: 50,
     alignItems: 'center',
   },
   loginBtnText: {
-    color: '#4A9B7F',
+    color: '#1B4D5C',
     fontSize: 17,
-    fontWeight: '600',
+    fontWeight: '700',
     letterSpacing: 0.3,
   },
 });

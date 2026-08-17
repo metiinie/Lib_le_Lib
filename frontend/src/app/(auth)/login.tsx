@@ -33,7 +33,7 @@ export default function LoginScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
 
       {/* Header with back button */}
       <View style={styles.header}>
@@ -42,7 +42,7 @@ export default function LoginScreen() {
           onPress={() => router.back()}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
-          <Ionicons name="arrow-back" size={24} color="#EFF4F5" />
+          <Ionicons name="arrow-back" size={24} color="#0F1E24" />
         </TouchableOpacity>
       </View>
 
@@ -93,7 +93,7 @@ export default function LoginScreen() {
             activeOpacity={0.85}
             onPress={() => router.push('/(auth)/login-phone')}
           >
-            <Ionicons name="call-outline" size={20} color="#EFF4F5" />
+            <Ionicons name="call-outline" size={20} color="#FFFFFF" />
             <Text style={styles.phoneBtnText}>Continue with Phone</Text>
           </TouchableOpacity>
         </View>
@@ -116,7 +116,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: '#0F1E24',
+    backgroundColor: '#F5F7F8',
     paddingHorizontal: 24,
   },
   header: {
@@ -130,27 +130,25 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: '800',
-    color: '#EFF4F5',
+    color: '#0F1E24',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 15,
-    color: '#6B9BAA',
+    color: '#4A7A8A',
     marginBottom: 40,
   },
   buttonsContainer: {
     gap: 14,
   },
   appleBtn: {
-    backgroundColor: '#000000',
+    backgroundColor: '#0F1E24',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 16,
     borderRadius: 50,
     gap: 10,
-    borderWidth: 1,
-    borderColor: '#222',
   },
   appleBtnText: {
     color: '#FFFFFF',
@@ -165,6 +163,8 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: 50,
     gap: 10,
+    borderWidth: 1,
+    borderColor: '#D6DFE2',
   },
   googleG: {
     fontSize: 16,
@@ -185,10 +185,10 @@ const styles = StyleSheet.create({
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: '#1B3D48',
+    backgroundColor: '#D6DFE2',
   },
   dividerText: {
-    color: '#4A7A8A',
+    color: '#6B9BAA',
     fontSize: 14,
   },
   phoneBtn: {
@@ -201,12 +201,12 @@ const styles = StyleSheet.create({
     gap: 10,
     shadowColor: '#1B4D5C',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
+    shadowOpacity: 0.3,
     shadowRadius: 10,
-    elevation: 5,
+    elevation: 4,
   },
   phoneBtnText: {
-    color: '#EFF4F5',
+    color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
   },
@@ -216,12 +216,12 @@ const styles = StyleSheet.create({
     marginTop: 40,
   },
   registerRowText: {
-    color: '#6B9BAA',
+    color: '#4A7A8A',
     fontSize: 14,
   },
   registerLink: {
-    color: '#4A9B7F',
+    color: '#1B4D5C',
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '700',
   },
 });

@@ -11,11 +11,14 @@ export default function TabsLayout() {
       <Tabs
         screenOptions={{
           headerShown: true,
-          tabBarActiveTintColor: '#C4623A',
-          tabBarInactiveTintColor: '#4A7A8A',
+          headerStyle: { backgroundColor: '#F5F7F8' },
+          headerTitleStyle: { color: '#0F1E24', fontWeight: '700' },
+          tabBarActiveTintColor: '#1B4D5C',
+          tabBarInactiveTintColor: '#6B9BAA',
           tabBarStyle: {
+            backgroundColor: '#FFFFFF',
             borderTopWidth: 1,
-            borderTopColor: '#1B3D48',
+            borderTopColor: '#E2E8F0',
           },
         }}
       >
@@ -33,7 +36,7 @@ export default function TabsLayout() {
           options={{
             title: 'Likes',
             tabBarBadge: '', // Renders a red dot for new likes
-            tabBarBadgeStyle: { minWidth: 10, maxHeight: 10, borderRadius: 5, backgroundColor: '#C4623A' },
+            tabBarBadgeStyle: { minWidth: 10, maxHeight: 10, borderRadius: 5, backgroundColor: '#1B4D5C' },
             tabBarIcon: ({ color, size }) => (
               <Ionicons name="star-outline" size={size} color={color} />
             ),

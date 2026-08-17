@@ -71,7 +71,7 @@ export default function LoginPhoneScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -83,7 +83,7 @@ export default function LoginPhoneScreen() {
             onPress={() => router.back()}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
-            <Ionicons name="arrow-back" size={24} color="#EFF4F5" />
+            <Ionicons name="arrow-back" size={24} color="#0F1E24" />
           </TouchableOpacity>
         </View>
 
@@ -104,7 +104,7 @@ export default function LoginPhoneScreen() {
                 value={phone}
                 onChangeText={setPhone}
                 placeholder="+251 9__ ___ ____"
-                placeholderTextColor="#4A7A8A"
+                placeholderTextColor="#6B9BAA"
                 keyboardType="phone-pad"
                 autoCorrect={false}
                 autoComplete="tel"
@@ -121,7 +121,7 @@ export default function LoginPhoneScreen() {
                 value={password}
                 onChangeText={setPassword}
                 placeholder="••••••••"
-                placeholderTextColor="#4A7A8A"
+                placeholderTextColor="#6B9BAA"
                 secureTextEntry={!showPassword}
                 autoCorrect={false}
                 autoComplete="current-password"
@@ -153,7 +153,7 @@ export default function LoginPhoneScreen() {
             {/* Error */}
             {!!error && (
               <View style={styles.errorBox}>
-                <Ionicons name="alert-circle-outline" size={16} color="#E07B6A" />
+                <Ionicons name="alert-circle-outline" size={16} color="#B84C4C" />
                 <Text style={styles.errorText}>{error}</Text>
               </View>
             )}
@@ -167,7 +167,7 @@ export default function LoginPhoneScreen() {
               disabled={loading}
             >
               {loading ? (
-                <ActivityIndicator color="#EFF4F5" />
+                <ActivityIndicator color="#FFFFFF" />
               ) : (
                 <Text style={styles.loginBtnText}>Login</Text>
               )}
@@ -193,7 +193,7 @@ export default function LoginPhoneScreen() {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: '#0F1E24',
+    backgroundColor: '#F5F7F8',
     paddingHorizontal: 24,
   },
   header: {
@@ -207,18 +207,18 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: '800',
-    color: '#EFF4F5',
+    color: '#0F1E24',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 15,
-    color: '#6B9BAA',
+    color: '#4A7A8A',
     marginBottom: 36,
   },
   label: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#9BB5BE',
+    color: '#1B4D5C',
     marginBottom: 8,
     letterSpacing: 0.5,
     textTransform: 'uppercase',
@@ -226,16 +226,16 @@ const styles = StyleSheet.create({
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#162A33',
+    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#1B3D48',
+    borderColor: '#D6DFE2',
     borderRadius: 14,
     paddingHorizontal: 16,
     paddingVertical: 14,
   },
   input: {
     flex: 1,
-    color: '#EFF4F5',
+    color: '#0F1E24',
     fontSize: 16,
   },
   forgotRow: {
@@ -244,24 +244,24 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   forgotText: {
-    color: '#4A9B7F',
+    color: '#1B4D5C',
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   errorBox: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: '#2A1A18',
+    backgroundColor: '#FDF2F2',
     borderRadius: 10,
     padding: 12,
     marginTop: 8,
     marginBottom: 4,
     borderWidth: 1,
-    borderColor: '#3D1E1A',
+    borderColor: '#F8D7DA',
   },
   errorText: {
-    color: '#E07B6A',
+    color: '#B84C4C',
     fontSize: 14,
     flex: 1,
   },
@@ -273,15 +273,15 @@ const styles = StyleSheet.create({
     marginTop: 24,
     shadowColor: '#1B4D5C',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
+    shadowOpacity: 0.3,
     shadowRadius: 10,
-    elevation: 5,
+    elevation: 4,
   },
   loginBtnDisabled: {
     opacity: 0.6,
   },
   loginBtnText: {
-    color: '#EFF4F5',
+    color: '#FFFFFF',
     fontSize: 17,
     fontWeight: '700',
   },
@@ -291,12 +291,12 @@ const styles = StyleSheet.create({
     marginTop: 32,
   },
   registerRowText: {
-    color: '#6B9BAA',
+    color: '#4A7A8A',
     fontSize: 14,
   },
   registerLink: {
-    color: '#4A9B7F',
+    color: '#1B4D5C',
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '700',
   },
 });

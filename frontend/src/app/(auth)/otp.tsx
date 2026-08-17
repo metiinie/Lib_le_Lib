@@ -124,13 +124,13 @@ export default function OtpScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white dark:bg-black">
+    <SafeAreaView className="flex-1 bg-[#F5F7F8]">
       <View className="flex-1 px-6 justify-center">
         <View className="mb-8">
-          <Text className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
+          <Text className="text-3xl font-bold text-[#0F1E24] mb-2">
             {step === 1 ? 'Enter your details' : 'Enter the code'}
           </Text>
-          <Text className="text-base text-slate-500 dark:text-slate-400">
+          <Text className="text-base text-[#4A7A8A]">
             {step === 1
               ? 'We will send you a one-time password to verify your account.'
               : `We sent a 6-digit code to ${identifier}.`}
@@ -140,9 +140,9 @@ export default function OtpScreen() {
         {step === 1 ? (
           <View>
             <TextInput
-              className="w-full bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white px-4 py-4 rounded-xl text-lg mb-6"
+              className="w-full bg-white border border-[#D6DFE2] text-[#0F1E24] px-4 py-4 rounded-xl text-lg mb-6"
               placeholder="Phone number or email"
-              placeholderTextColor="#4A7A8A"
+              placeholderTextColor="#6B9BAA"
               value={identifier}
               onChangeText={setIdentifier}
               keyboardType="email-address"
@@ -152,7 +152,7 @@ export default function OtpScreen() {
             <TouchableOpacity
               onPress={() => handleRequestOtp()}
               disabled={isLoading || timeLeft > 0}
-              className={`w-full py-4 rounded-full flex-row justify-center items-center ${isLoading || timeLeft > 0 ? 'bg-blue-400' : 'bg-blue-600 active:bg-blue-700'}`}
+              className={`w-full py-4 rounded-full flex-row justify-center items-center ${isLoading || timeLeft > 0 ? 'bg-[#1B4D5C]/50' : 'bg-[#1B4D5C]'}`}
             >
               {isLoading ? (
                 <ActivityIndicator color="#fff" />
@@ -166,9 +166,9 @@ export default function OtpScreen() {
         ) : (
           <View>
             <TextInput
-              className="w-full bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white px-4 py-4 rounded-xl text-lg text-center tracking-widest mb-6"
+              className="w-full bg-white border border-[#D6DFE2] text-[#0F1E24] px-4 py-4 rounded-xl text-lg text-center tracking-widest mb-6"
               placeholder="000000"
-              placeholderTextColor="#4A7A8A"
+              placeholderTextColor="#6B9BAA"
               value={code}
               onChangeText={setCode}
               keyboardType="number-pad"
@@ -178,7 +178,7 @@ export default function OtpScreen() {
             <TouchableOpacity
               onPress={handleVerifyOtp}
               disabled={isLoading}
-              className="w-full bg-blue-600 active:bg-blue-700 py-4 rounded-full flex-row justify-center items-center"
+              className="w-full bg-[#1B4D5C] py-4 rounded-full flex-row justify-center items-center"
             >
               {isLoading ? (
                 <ActivityIndicator color="#fff" />
@@ -192,7 +192,7 @@ export default function OtpScreen() {
               className="mt-6 p-2"
               disabled={isLoading || timeLeft > 0}
             >
-              <Text className={`text-center font-semibold ${timeLeft > 0 ? 'text-slate-400' : 'text-blue-600'}`}>
+              <Text className={`text-center font-semibold ${timeLeft > 0 ? 'text-[#6B9BAA]' : 'text-[#1B4D5C]'}`}>
                 {timeLeft > 0 ? `Resend code in ${timeLeft}s` : 'Resend code'}
               </Text>
             </TouchableOpacity>
@@ -202,7 +202,7 @@ export default function OtpScreen() {
               className="mt-4 p-2"
               disabled={isLoading}
             >
-              <Text className="text-slate-500 text-center font-semibold">
+              <Text className="text-[#4A7A8A] text-center font-semibold">
                 Change phone or email
               </Text>
             </TouchableOpacity>

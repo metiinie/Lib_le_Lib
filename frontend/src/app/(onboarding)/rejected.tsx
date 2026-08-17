@@ -30,7 +30,7 @@ export default function RejectedScreen() {
       </Text>
 
       <TouchableOpacity
-        className="bg-slate-900 p-4 rounded-xl items-center mt-auto mb-12"
+        className="bg-[#1B4D5C] p-4 rounded-full items-center mt-auto mb-12 shadow-sm"
         onPress={() => router.replace('/(onboarding)/doc-upload')}
       >
         <Text className="text-white font-bold text-lg">Resubmit Documentation</Text>
