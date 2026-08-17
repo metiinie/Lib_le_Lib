@@ -4,14 +4,14 @@ import { DiscoveryFiltersDto } from '../dto/discovery-filters.dto';
 
 @Injectable()
 export class DiscoveryRepository {
-  constructor(private readonly dataSource: DataSource) {}
+  constructor(private readonly dataSource: DataSource) { }
 
   async findDiscoverablePaged(
     userId: string,
     viewerRegionId: string | null,
     viewerGoals: string[] | null,
     viewerGender: string,
-    viewerLookingFor: string,
+    viewerLookingFor: string[] | string,
     excludedIds: string[],
     filters: DiscoveryFiltersDto,
   ): Promise<any[]> {
@@ -48,7 +48,7 @@ export class DiscoveryRepository {
       .addSelect('CASE WHEN inc_sw.id IS NOT NULL THEN 1 ELSE 0 END', 'incomingLike')
       // Priority 3: Region match
       .addSelect(
-        viewerRegionId ? 'CASE WHEN p.region_id = :viewerRegionId THEN 1 ELSE 0 END' : '0', 
+        viewerRegionId ? 'CASE WHEN p.region_id = :viewerRegionId THEN 1 ELSE 0 END' : '0',
         'sameRegion'
       )
       .setParameter('viewerRegionId', viewerRegionId)
@@ -58,18 +58,23 @@ export class DiscoveryRepository {
       qb.andWhere('p.user_id NOT IN (:...excludedIds)', { excludedIds });
     }
 
-    // Bidirectional Looking For filter
-    if (viewerLookingFor === 'men') {
+    // Parse looking_for array
+    const lookingForArr = Array.isArray(viewerLookingFor)
+      ? viewerLookingFor
+      : (typeof viewerLookingFor === 'string' ? viewerLookingFor.replace(/[{}]/g, '').split(',').map(s => s.trim()).filter(Boolean) : ['everyone']);
+
+    // 1. Filter candidates based on what the VIEWER is looking for
+    if (lookingForArr.includes('men') && !lookingForArr.includes('women') && !lookingForArr.includes('everyone')) {
       qb.andWhere('p.gender = :reqGender', { reqGender: 'man' });
-    } else if (viewerLookingFor === 'women') {
+    } else if (lookingForArr.includes('women') && !lookingForArr.includes('men') && !lookingForArr.includes('everyone')) {
       qb.andWhere('p.gender = :reqGender', { reqGender: 'woman' });
     }
 
-    // They must be looking for the viewer
+    // 2. Filter candidates based on whether THEY are looking for the VIEWER's gender
     if (viewerGender === 'man') {
-      qb.andWhere("(p.looking_for = 'men' OR p.looking_for = 'both')");
+      qb.andWhere("('men' = ANY(p.looking_for) OR 'everyone' = ANY(p.looking_for))");
     } else if (viewerGender === 'woman') {
-      qb.andWhere("(p.looking_for = 'women' OR p.looking_for = 'both')");
+      qb.andWhere("('women' = ANY(p.looking_for) OR 'everyone' = ANY(p.looking_for))");
     }
 
     if (filters.minAge) {
@@ -98,7 +103,7 @@ export class DiscoveryRepository {
 
     if (filters.relationshipGoals && filters.relationshipGoals.length > 0) {
       qb.andWhere(
-        'p.relationship_goals && ARRAY[:...relationshipGoals]::relationship_goal[]',
+        'p.relationship_goals && ARRAY[:...relationshipGoals]::text[]',
         {
           relationshipGoals: filters.relationshipGoals,
         },

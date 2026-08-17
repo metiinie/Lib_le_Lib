@@ -21,10 +21,10 @@ export const SwipeCard: React.FC<SwipeCardProps> = ({ profile, onLike, onPass, o
   const primaryPhoto = profile.photos?.[0];
 
   return (
-    <View style={{ width, height }} className="bg-slate-900 relative">
-      <TouchableOpacity 
-        activeOpacity={0.95} 
-        style={{ flex: 1 }} 
+    <View className="w-full flex-1 bg-slate-900 relative">
+      <TouchableOpacity
+        activeOpacity={0.95}
+        style={{ flex: 1 }}
         onPress={() => router.push(`/profiles/${profile.id}`)}
       >
         <BlurredPhoto
@@ -32,7 +32,7 @@ export const SwipeCard: React.FC<SwipeCardProps> = ({ profile, onLike, onPass, o
           revealGranted={true}
           photoUrl={primaryPhoto?.url}
         />
-        
+
         {/* Bottom Gradient overlay */}
         <LinearGradient
           colors={['transparent', 'rgba(15,30,36,0.6)', 'rgba(15,30,36,0.95)']}
@@ -46,7 +46,7 @@ export const SwipeCard: React.FC<SwipeCardProps> = ({ profile, onLike, onPass, o
             {/* Verified Badge */}
             <Ionicons name="checkmark-circle" size={24} color="#4A9B7F" />
           </View>
-          
+
           <Text className="text-white/90 text-lg mb-4 font-medium shadow-sm">
             <Ionicons name="location" size={16} color="#4A7A8A" /> {profile.region}
           </Text>

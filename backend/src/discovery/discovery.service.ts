@@ -16,7 +16,7 @@ export class DiscoveryService {
     private readonly matchesRepo: MatchesRepository,
     private readonly discoveryRepo: DiscoveryRepository,
     private readonly dataSource: DataSource,
-  ) {}
+  ) { }
 
   async getDiscoveryFeed(
     userId: string,
@@ -38,8 +38,19 @@ export class DiscoveryService {
     const viewerProfile = await this.dataSource
       .query('SELECT gender, looking_for, region_id FROM profiles WHERE user_id = $1', [userId]);
 
-    const viewerGender = viewerProfile[0]?.gender || 'other';
-    const viewerLookingFor = viewerProfile[0]?.looking_for || 'both';
+    const viewerGender = viewerProfile[0]?.gender || 'man';
+    const rawLookingFor = viewerProfile[0]?.looking_for;
+    let viewerLookingFor: string[] = ['everyone'];
+
+    if (Array.isArray(rawLookingFor)) {
+      viewerLookingFor = rawLookingFor;
+    } else if (typeof rawLookingFor === 'string' && rawLookingFor.length > 0) {
+      viewerLookingFor = rawLookingFor.replace(/[{}]/g, '').split(',').map((s) => s.trim()).filter(Boolean);
+    }
+    if (viewerLookingFor.length === 0) {
+      viewerLookingFor = ['everyone'];
+    }
+
     const viewerRegionId = viewerProfile[0]?.region_id || null;
 
     // 2. Fetch the paged and filtered results using the repository
