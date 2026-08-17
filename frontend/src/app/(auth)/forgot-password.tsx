@@ -15,6 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { authService } from '@/services/auth.service';
+import { normalizePhoneNumber } from '@/utils/phone';
 
 /**
  * Forgot Password screen.
@@ -34,16 +35,16 @@ export default function ForgotPasswordScreen() {
 
   const handleSubmit = async () => {
     setError('');
-    const trimmed = phone.trim();
+    const normalized = normalizePhoneNumber(phone);
 
-    if (!trimmed) {
+    if (!normalized) {
       setError('Please enter your phone number.');
       return;
     }
 
     setLoading(true);
     try {
-      await authService.forgotPassword(trimmed);
+      await authService.forgotPassword(normalized);
       setSent(true);
     } catch {
       setError('Something went wrong. Please try again.');

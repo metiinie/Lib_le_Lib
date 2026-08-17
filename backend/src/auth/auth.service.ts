@@ -13,6 +13,7 @@ import * as bcrypt from 'bcrypt';
 import { OtpCodesRepository } from './repositories/otp-codes.repository';
 import { UsersRepository } from '../users/repositories/users.repository';
 import { AuditLogsRepository } from '../verification/repositories/audit-logs.repository';
+import { normalizePhoneNumber } from '../common/utils/phone.util';
 
 /** OTP validity window in minutes — extended to 10 min per Mod 1 spec. */
 const OTP_EXPIRY_MINUTES = 10;
@@ -62,6 +63,7 @@ export class AuthService {
     destination: string,
     isSignUp: boolean,
   ): Promise<{ message: string }> {
+    destination = normalizePhoneNumber(destination);
     let user = await this.usersRepository.findByDestination(destination);
     if (isSignUp && user) {
       throw new ConflictException({
@@ -145,6 +147,7 @@ export class AuthService {
     userId: string;
     isRegistration: boolean;
   }> {
+    destination = normalizePhoneNumber(destination);
     let userExists = await this.usersRepository.findByDestination(destination);
     if (isSignUp && userExists) {
       throw new ConflictException({
@@ -273,6 +276,7 @@ export class AuthService {
     phone: string,
     password: string,
   ): Promise<{ accessToken: string; refreshToken: string; userId: string }> {
+    phone = normalizePhoneNumber(phone);
     const user = await this.usersRepository.findByPhone(phone);
 
     if (!user) {
@@ -331,6 +335,7 @@ export class AuthService {
     phone: string,
     password: string,
   ): Promise<{ accessToken: string; refreshToken: string; userId: string }> {
+    phone = normalizePhoneNumber(phone);
     const user = await this.usersRepository.findByPhone(phone);
 
     if (!user) {
@@ -367,6 +372,7 @@ export class AuthService {
    * (prevents phone enumeration attacks).
    */
   async forgotPassword(phone: string): Promise<{ message: string }> {
+    phone = normalizePhoneNumber(phone);
     const user = await this.usersRepository.findByPhone(phone);
 
     if (user) {

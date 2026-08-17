@@ -16,6 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { authService } from '@/services/auth.service';
+import { normalizePhoneNumber, isValidPhoneNumber } from '@/utils/phone';
 
 /**
  * Register — Step 1: Enter phone number.
@@ -38,23 +39,22 @@ export default function RegisterPhoneScreen() {
 
   const handleContinue = async () => {
     setError('');
-    const trimmed = phone.trim();
+    const normalized = normalizePhoneNumber(phone);
 
-    if (!trimmed) {
+    if (!normalized) {
       setError('Please enter your phone number.');
       return;
     }
-    // Basic E.164 format validation — must start with + and have 7–15 digits
-    if (!/^\+\d{7,15}$/.test(trimmed)) {
-      setError('Please enter a valid phone number starting with + (e.g. +251911...)');
+    if (!isValidPhoneNumber(normalized)) {
+      setError('Please enter a valid phone number (e.g. 0911... or +251911...)');
       return;
     }
 
     setLoading(true);
     try {
-      await authService.requestOtp(trimmed, true);
+      await authService.requestOtp(normalized, true);
       // Pass phone as a search param — verify-otp.tsx reads it with useLocalSearchParams
-      router.push({ pathname: '/(auth)/verify-otp', params: { phone: trimmed } });
+      router.push({ pathname: '/(auth)/verify-otp', params: { phone: normalized } });
     } catch (err: any) {
       const code = err?.response?.data?.error?.code;
       if (code === 'USER_ALREADY_EXISTS') {
@@ -144,7 +144,7 @@ export default function RegisterPhoneScreen() {
               style={styles.input}
               value={phone}
               onChangeText={setPhone}
-              placeholder="+251 9__ ___ ____"
+              placeholder="0911... or +251 9__ ___ ____"
               placeholderTextColor="#4A7A8A"
               keyboardType="phone-pad"
               autoFocus

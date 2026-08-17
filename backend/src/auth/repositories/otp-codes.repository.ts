@@ -13,7 +13,7 @@ export class OtpCodesRepository {
   constructor(
     @InjectRepository(OtpCode)
     private readonly repo: Repository<OtpCode>,
-  ) {}
+  ) { }
 
   async create(data: Partial<OtpCode>): Promise<OtpCode> {
     const otp = this.repo.create(data);
@@ -74,7 +74,7 @@ export class OtpCodesRepository {
     return this.repo
       .createQueryBuilder('otp')
       .where('otp.destination = :destination', { destination })
-      .andWhere('otp.created_at >= :since', { since })
+      .andWhere('otp.createdAt >= :since', { since })
       .getCount();
   }
 }

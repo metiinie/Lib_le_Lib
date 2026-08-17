@@ -17,6 +17,7 @@ import { useState } from 'react';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { authService } from '@/services/auth.service';
 import { useAuth } from '@/hooks/useAuth';
+import { normalizePhoneNumber } from '@/utils/phone';
 
 /**
  * Login with Phone screen — phone number + password.
@@ -36,8 +37,9 @@ export default function LoginPhoneScreen() {
 
   const handleLogin = async () => {
     setError('');
+    const normalized = normalizePhoneNumber(phone);
 
-    if (!phone.trim()) {
+    if (!normalized) {
       setError('Please enter your phone number.');
       return;
     }
@@ -48,7 +50,7 @@ export default function LoginPhoneScreen() {
 
     setLoading(true);
     try {
-      const data = await authService.login(phone.trim(), password);
+      const data = await authService.login(normalized, password);
       signInWithTokens(data.accessToken, data.refreshToken);
       // Route guard in _layout.tsx takes over from here
     } catch (err: any) {
