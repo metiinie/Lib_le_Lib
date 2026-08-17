@@ -43,4 +43,6 @@ async function bootstrap() {
 
   await app.listen(process.env.PORT ?? 3000, '0.0.0.0');
 }
+// Trigger NestJS hot reload to load latest database schema
 bootstrap();
+

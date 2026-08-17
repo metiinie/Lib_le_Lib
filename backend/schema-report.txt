@@ -1,0 +1,3 @@
+Entity 'Profile' (Table 'public.profiles') Column 'full_name'
+Entity 'User' (Table 'public.users') Column 'apple_id'
+Entity 'User' (Table 'public.users') Column 'google_id'
