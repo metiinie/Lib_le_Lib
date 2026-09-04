@@ -25,3 +25,16 @@
   --color-muted-teal: #7BA3B0;
   --color-deep-muted: #4A7A8A;
 }
+
+html,
+body,
+#root,
+#root>div {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  background-color: #F5F7F8;
+}

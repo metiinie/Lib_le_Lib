@@ -38,23 +38,23 @@ const secureStorage = {
     if (Platform.OS === 'web') {
       try {
         if (typeof window !== 'undefined') localStorage.setItem(name, value);
-      } catch {}
+      } catch { }
       return;
     }
     try {
       await SecureStore.setItemAsync(name, value);
-    } catch {}
+    } catch { }
   },
   removeItem: async (name: string): Promise<void> => {
     if (Platform.OS === 'web') {
       try {
         if (typeof window !== 'undefined') localStorage.removeItem(name);
-      } catch {}
+      } catch { }
       return;
     }
     try {
       await SecureStore.deleteItemAsync(name);
-    } catch {}
+    } catch { }
   },
 };
 
@@ -90,3 +90,9 @@ export const useAuthStore = create<AuthState>()(
     }
   )
 );
+
+// Guarantee hydration state is initialized immediately on Web
+if (Platform.OS === 'web') {
+  useAuthStore.setState({ _hasHydrated: true });
+}
+

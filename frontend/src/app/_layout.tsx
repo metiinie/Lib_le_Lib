@@ -50,7 +50,11 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
 import '../global.css';
 
-SplashScreen.preventAutoHideAsync();
+import { Platform } from 'react-native';
+
+if (Platform.OS !== 'web') {
+  SplashScreen.preventAutoHideAsync().catch(() => { });
+}
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -59,27 +63,21 @@ export default function RootLayout() {
   const navigationState = useRootNavigationState();
   const hasHydrated = useAuthStore((state) => state._hasHydrated);
 
-  // Keep splash screen visible until auth store has finished hydrating
-  // from SecureStore. Without this gate, `token` reads as null during
-  // hydration, triggering a premature redirect to auth, API 401s, and
-  // a redirect loop that freezes the app on slower devices.
   useEffect(() => {
     if (hasHydrated) {
-      SplashScreen.hideAsync();
+      if (Platform.OS !== 'web') {
+        SplashScreen.hideAsync().catch(() => { });
+      }
     }
   }, [hasHydrated]);
 
   useEffect(() => {
-    // Don't navigate until both hydration and the navigation tree are ready
     if (!hasHydrated) return;
-    if (!navigationState?.key) return;
 
     const inAuthGroup = segments[0] === '(auth)';
 
     if (!isAuthenticated && !inAuthGroup) {
-      setTimeout(() => {
-        router.replace('/(auth)/welcome');
-      }, 0);
+      router.replace('/(auth)/welcome');
     } else if (isAuthenticated && (inAuthGroup || (segments as any).length === 0)) {
       let isCancelled = false;
 
@@ -136,8 +134,10 @@ export default function RootLayout() {
           const errStatus = err?.response?.status;
           if (errStatus === 401 || errStatus === 403) {
             // Invalid or expired token — clear auth state
-            // The outer useEffect will react to isAuthenticated changing to false and handle the redirect safely.
             useAuthStore.getState().signOut();
+          } else {
+            // Fallback to discover tab so user is never stuck on a blank screen
+            router.replace('/(tabs)/discover');
           }
         }
       };
@@ -150,7 +150,7 @@ export default function RootLayout() {
   }, [isAuthenticated, segments, navigationState?.key, hasHydrated]);
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView style={{ flex: 1, height: '100%', width: '100%' }}>
       <QueryClientProvider client={queryClient}>
         <ThemeProvider value={colorScheme === 'dark' ? LibLeLibDark : LibLeLibLight}>
           <Stack screenOptions={{ headerShown: false }} />
