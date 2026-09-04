@@ -5,14 +5,14 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { Message } from './message.entity';
+import type { Message } from './message.entity';
 
 @Entity('message_attachments')
 export class MessageAttachment {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => Message, (message) => message.attachments, {
+  @ManyToOne('Message', (message: any) => message.attachments, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'message_id' })

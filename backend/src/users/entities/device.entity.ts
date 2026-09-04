@@ -7,7 +7,7 @@ import {
   JoinColumn,
   Index,
 } from 'typeorm';
-import { User } from './user.entity';
+import type { User } from './user.entity';
 
 /**
  * Registered devices for push notifications and E2E key exchange.
@@ -42,7 +42,7 @@ export class Device {
 
   // ── Relations ──
 
-  @ManyToOne(() => User, (user) => user.devices, { onDelete: 'CASCADE' })
+  @ManyToOne('User', (user: any) => user.devices, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
 }

@@ -7,14 +7,14 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { User } from '../../users/entities/user.entity';
+import type { User } from '../../users/entities/user.entity';
 
 @Entity('verification_records', { schema: 'verification' })
 export class VerificationRecord {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @ManyToOne('User', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
 
@@ -45,7 +45,7 @@ export class VerificationRecord {
   @Column({ name: 'decision_at', type: 'timestamptz', nullable: true })
   decisionAt: Date;
 
-  @ManyToOne(() => User)
+  @ManyToOne('User')
   @JoinColumn({ name: 'reviewer_id' })
   reviewer: User;
 

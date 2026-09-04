@@ -1,20 +1,11 @@
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 
-/**
- * Welcome screen — the app's first impression.
- *
- * Shows the brand identity, tagline, and two clear CTAs:
- *   Register → starts the registration wizard (phone → OTP → set-password → profile)
- *   Login    → goes to the login screen (Apple / Google / Phone options)
- *
- * Uses router.push (not replace) so the stack exists if the OS back gesture
- * is triggered, though in practice the route guard prevents reaching this
- * screen when authenticated.
- */
+const isWeb = Platform.OS === 'web';
+
 export default function WelcomeScreen() {
   return (
     <SafeAreaView style={styles.safe}>
@@ -22,7 +13,7 @@ export default function WelcomeScreen() {
 
       {/* Brand section — top half */}
       <Animated.View
-        entering={FadeInUp.delay(100).duration(700)}
+        entering={isWeb ? undefined : FadeInUp.delay(100).duration(700)}
         style={styles.brandSection}
       >
         <Text style={styles.logo}>Lib le Lib</Text>
@@ -34,7 +25,7 @@ export default function WelcomeScreen() {
 
       {/* CTA section — bottom */}
       <Animated.View
-        entering={FadeInDown.delay(300).duration(700)}
+        entering={isWeb ? undefined : FadeInDown.delay(300).duration(700)}
         style={styles.ctaSection}
       >
         {/* Register */}

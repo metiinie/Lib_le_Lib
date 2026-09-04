@@ -5,10 +5,12 @@ import {
   CreateDateColumn,
   ManyToOne,
   JoinColumn,
+  Index,
 } from 'typeorm';
-import { QaThread } from './qa-thread.entity';
-import { User } from '../../users/entities/user.entity';
+import type { QaThread } from './qa-thread.entity';
+import type { User } from '../../users/entities/user.entity';
 
+@Index(['threadId', 'sentAt'])
 @Entity('qa_messages')
 export class QaMessage {
   @PrimaryGeneratedColumn('uuid')
@@ -17,7 +19,7 @@ export class QaMessage {
   @Column({ name: 'thread_id', type: 'uuid' })
   threadId: string;
 
-  @ManyToOne(() => QaThread, (thread) => thread.messages, {
+  @ManyToOne('QaThread', (thread: any) => thread.messages, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'thread_id' })
@@ -26,7 +28,7 @@ export class QaMessage {
   @Column({ name: 'sender_id', type: 'uuid' })
   senderId: string;
 
-  @ManyToOne(() => User)
+  @ManyToOne('User')
   @JoinColumn({ name: 'sender_id' })
   sender: User;
 

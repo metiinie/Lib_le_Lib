@@ -91,7 +91,7 @@ export default function LoginPhoneScreen() {
           contentContainerStyle={styles.scroll}
           keyboardShouldPersistTaps="handled"
         >
-          <Animated.View entering={FadeInDown.duration(450)}>
+          <Animated.View entering={Platform.OS === 'web' ? undefined : FadeInDown.duration(450)}>
             <Text style={styles.title}>Login with Phone</Text>
             <Text style={styles.subtitle}>Enter your number and password</Text>
 

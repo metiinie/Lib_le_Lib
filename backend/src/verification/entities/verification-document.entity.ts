@@ -6,14 +6,14 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { VerificationRecord } from './verification-record.entity';
+import type { VerificationRecord } from './verification-record.entity';
 
 @Entity('documents', { schema: 'verification' })
 export class VerificationDocument {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => VerificationRecord, { onDelete: 'CASCADE' })
+  @ManyToOne('VerificationRecord', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'verification_record_id' })
   verificationRecord: VerificationRecord;
 

@@ -7,8 +7,8 @@ import {
   JoinColumn,
   OneToMany,
 } from 'typeorm';
-import { User } from '../../users/entities/user.entity';
-import { QaMessage } from './qa-message.entity';
+import type { User } from '../../users/entities/user.entity';
+import type { QaMessage } from './qa-message.entity';
 
 export enum QaThreadStatus {
   OPEN = 'open',
@@ -24,14 +24,14 @@ export class QaThread {
   @Column({ name: 'member_id', type: 'uuid' })
   memberId: string;
 
-  @ManyToOne(() => User)
+  @ManyToOne('User')
   @JoinColumn({ name: 'member_id' })
   member: User;
 
   @Column({ name: 'health_professional_id', type: 'uuid', nullable: true })
   healthProfessionalId: string;
 
-  @ManyToOne(() => User)
+  @ManyToOne('User')
   @JoinColumn({ name: 'health_professional_id' })
   healthProfessional: User;
 
@@ -48,6 +48,6 @@ export class QaThread {
   @Column({ name: 'closed_at', type: 'timestamptz', nullable: true })
   closedAt: Date;
 
-  @OneToMany(() => QaMessage, (message) => message.thread)
+  @OneToMany('QaMessage', (message: any) => message.thread)
   messages: QaMessage[];
 }

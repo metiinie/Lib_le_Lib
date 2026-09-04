@@ -11,17 +11,17 @@ import {
   OneToOne,
   OneToMany,
 } from 'typeorm';
-import { User } from '../../users/entities/user.entity';
-import { Region } from './region.entity';
-import { InterestTag } from './interest-tag.entity';
-import { Photo } from '../../photos/entities/photo.entity';
+import type { User } from '../../users/entities/user.entity';
+import type { Region } from './region.entity';
+import type { InterestTag } from './interest-tag.entity';
+import type { Photo } from '../../photos/entities/photo.entity';
 
 @Entity('profiles')
 export class Profile {
   @PrimaryColumn({ name: 'user_id', type: 'uuid' })
   userId: string;
 
-  @OneToOne(() => User, { onDelete: 'CASCADE' })
+  @OneToOne('User', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
 
@@ -37,7 +37,7 @@ export class Profile {
   @Column({ type: 'enum', enum: ['man', 'woman', 'other'] })
   gender: string;
 
-  @ManyToOne(() => Region)
+  @ManyToOne('Region')
   @JoinColumn({ name: 'region_id' })
   region: Region;
 
@@ -95,10 +95,10 @@ export class Profile {
   })
   photosVisibleToVerified: boolean;
 
-  @OneToMany(() => Photo, (photo) => photo.profile)
+  @OneToMany('Photo', (photo: any) => photo.profile)
   photos: Photo[];
 
-  @ManyToMany(() => InterestTag)
+  @ManyToMany('InterestTag')
   @JoinTable({
     name: 'profile_interest_tags',
     joinColumn: { name: 'profile_id', referencedColumnName: 'userId' },

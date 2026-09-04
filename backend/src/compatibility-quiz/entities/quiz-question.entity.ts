@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
-import { QuizOption } from './quiz-option.entity';
+import type { QuizOption } from './quiz-option.entity';
 
 @Entity('compatibility_quiz_questions')
 export class QuizQuestion {
@@ -23,6 +23,6 @@ export class QuizQuestion {
   @Column({ type: 'boolean', default: true })
   active: boolean;
 
-  @OneToMany(() => QuizOption, (option) => option.question)
+  @OneToMany('QuizOption', (option: any) => option.question)
   options: QuizOption[];
 }

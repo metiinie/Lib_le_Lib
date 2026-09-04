@@ -97,7 +97,7 @@ export default function RegisterPhoneScreen() {
         </View>
 
         <Animated.View
-          entering={FadeInDown.duration(450)}
+          entering={Platform.OS === 'web' ? undefined : FadeInDown.duration(450)}
           style={styles.content}
         >
           <Text style={styles.stepLabel}>Step 1 of 3</Text>

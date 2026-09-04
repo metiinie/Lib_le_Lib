@@ -20,7 +20,7 @@ interface AuthState {
 
 // Custom storage supporting both Native (SecureStore) and Web (localStorage)
 const secureStorage = {
-  getItem: async (name: string): Promise<string | null> => {
+  getItem: (name: string): string | null | Promise<string | null> => {
     if (Platform.OS === 'web') {
       try {
         return typeof window !== 'undefined' ? localStorage.getItem(name) : null;
@@ -29,12 +29,12 @@ const secureStorage = {
       }
     }
     try {
-      return await SecureStore.getItemAsync(name);
+      return SecureStore.getItemAsync(name);
     } catch {
       return null;
     }
   },
-  setItem: async (name: string, value: string): Promise<void> => {
+  setItem: (name: string, value: string): void | Promise<void> => {
     if (Platform.OS === 'web') {
       try {
         if (typeof window !== 'undefined') localStorage.setItem(name, value);
@@ -42,10 +42,10 @@ const secureStorage = {
       return;
     }
     try {
-      await SecureStore.setItemAsync(name, value);
+      return SecureStore.setItemAsync(name, value);
     } catch { }
   },
-  removeItem: async (name: string): Promise<void> => {
+  removeItem: (name: string): void | Promise<void> => {
     if (Platform.OS === 'web') {
       try {
         if (typeof window !== 'undefined') localStorage.removeItem(name);
@@ -53,7 +53,7 @@ const secureStorage = {
       return;
     }
     try {
-      await SecureStore.deleteItemAsync(name);
+      return SecureStore.deleteItemAsync(name);
     } catch { }
   },
 };
@@ -63,7 +63,7 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       token: null,
       refreshToken: null,
-      _hasHydrated: false,
+      _hasHydrated: Platform.OS === 'web',
 
       setToken: (token: string) => set({ token }),
 
@@ -82,17 +82,18 @@ export const useAuthStore = create<AuthState>()(
         token: state.token,
         refreshToken: state.refreshToken,
       }),
-      onRehydrateStorage: () => () => {
-        // Called after hydration finishes (success or fail).
-        // Gates the root layout before making any routing decisions.
+      onRehydrateStorage: () => (state, error) => {
         useAuthStore.setState({ _hasHydrated: true });
       },
     }
   )
 );
 
-// Guarantee hydration state is initialized immediately on Web
-if (Platform.OS === 'web') {
+// Guarantee hydration state is initialized
+if (useAuthStore.persist.hasHydrated()) {
   useAuthStore.setState({ _hasHydrated: true });
 }
+useAuthStore.persist.onFinishHydration(() => {
+  useAuthStore.setState({ _hasHydrated: true });
+});
 

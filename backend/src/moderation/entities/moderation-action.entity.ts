@@ -6,8 +6,8 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { User } from '../../users/entities/user.entity';
-import { Report } from './report.entity';
+import type { User } from '../../users/entities/user.entity';
+import type { Report } from './report.entity';
 
 export enum ModerationActionType {
   WARN = 'warn',
@@ -22,21 +22,21 @@ export class ModerationAction {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => Report)
+  @ManyToOne('Report')
   @JoinColumn({ name: 'report_id' })
   report: Report;
 
   @Column({ name: 'report_id', type: 'uuid', nullable: true })
   reportId: string;
 
-  @ManyToOne(() => User)
+  @ManyToOne('User')
   @JoinColumn({ name: 'target_user_id' })
   targetUser: User;
 
   @Column({ name: 'target_user_id', type: 'uuid' })
   targetUserId: string;
 
-  @ManyToOne(() => User)
+  @ManyToOne('User')
   @JoinColumn({ name: 'actor_id' })
   actor: User;
 

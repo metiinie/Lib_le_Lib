@@ -72,7 +72,7 @@ export default function RootLayout() {
   }, [hasHydrated]);
 
   useEffect(() => {
-    if (!hasHydrated) return;
+    if (!navigationState?.key || !hasHydrated) return;
 
     const inAuthGroup = segments[0] === '(auth)';
 

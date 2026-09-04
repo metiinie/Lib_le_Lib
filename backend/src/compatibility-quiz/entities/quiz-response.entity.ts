@@ -8,23 +8,23 @@ import {
   ManyToMany,
   JoinTable,
 } from 'typeorm';
-import { QuizQuestion } from './quiz-question.entity';
-import { QuizOption } from './quiz-option.entity';
-import { Profile } from '../../profiles/entities/profile.entity';
+import type { QuizQuestion } from './quiz-question.entity';
+import type { QuizOption } from './quiz-option.entity';
+import type { Profile } from '../../profiles/entities/profile.entity';
 
 @Entity('compatibility_quiz_responses')
 export class QuizResponse {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => Profile, { onDelete: 'CASCADE' })
+  @ManyToOne('Profile', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'profile_id' })
   profile: Profile;
 
   @Column({ name: 'profile_id', type: 'uuid' })
   profileId: string;
 
-  @ManyToOne(() => QuizQuestion, { onDelete: 'CASCADE' })
+  @ManyToOne('QuizQuestion', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'question_id' })
   question: QuizQuestion;
 
@@ -40,7 +40,7 @@ export class QuizResponse {
   @CreateDateColumn({ name: 'answered_at', type: 'timestamptz' })
   answeredAt: Date;
 
-  @ManyToMany(() => QuizOption)
+  @ManyToMany('QuizOption')
   @JoinTable({
     name: 'compatibility_quiz_response_options',
     joinColumn: { name: 'response_id', referencedColumnName: 'id' },

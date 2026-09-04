@@ -7,9 +7,9 @@ import {
   OneToMany,
   OneToOne,
 } from 'typeorm';
-import { OtpCode } from '../../auth/entities/otp-code.entity';
-import { Device } from '../../users/entities/device.entity';
-import { Profile } from '../../profiles/entities/profile.entity';
+import type { OtpCode } from '../../auth/entities/otp-code.entity';
+import type { Device } from '../../users/entities/device.entity';
+import type { Profile } from '../../profiles/entities/profile.entity';
 
 export type UserRole =
   | 'member'
@@ -91,14 +91,14 @@ export class User {
   // Inverse side of the Profile → User OneToOne relation.
   // Required so TypeORM can resolve `relations: ['user.profile']`
   // in the verification repository without throwing EntityPropertyNotFoundError.
-  @OneToOne(() => Profile, (profile) => profile.user)
+  @OneToOne('Profile', (profile: any) => profile.user)
   profile: Profile | null;
 
   // ── Relations ──
 
-  @OneToMany(() => OtpCode, (otp) => otp.user)
+  @OneToMany('OtpCode', (otp: any) => otp.user)
   otpCodes: OtpCode[];
 
-  @OneToMany(() => Device, (device) => device.user)
+  @OneToMany('Device', (device: any) => device.user)
   devices: Device[];
 }

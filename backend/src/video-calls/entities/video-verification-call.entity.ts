@@ -5,8 +5,8 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { Match } from '../../matches/entities/match.entity';
-import { User } from '../../users/entities/user.entity';
+import type { Match } from '../../matches/entities/match.entity';
+import type { User } from '../../users/entities/user.entity';
 
 export enum VideoCallStatus {
   SCHEDULED = 'scheduled',
@@ -19,14 +19,14 @@ export class VideoVerificationCall {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => Match, { onDelete: 'CASCADE' })
+  @ManyToOne('Match', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'match_id' })
   match: Match;
 
   @Column({ name: 'match_id', type: 'uuid' })
   matchId: string;
 
-  @ManyToOne(() => User)
+  @ManyToOne('User')
   @JoinColumn({ name: 'initiated_by' })
   initiatedBy: User;
 

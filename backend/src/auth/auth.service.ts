@@ -124,7 +124,12 @@ export class AuthService {
     await this.otpCodesRepository.create({ destination, codeHash, expiresAt });
 
     if (this.configService.get('NODE_ENV') !== 'production') {
-      this.logger.log(`[DEV] OTP for ${destination}: ${code}`);
+      console.log('\n================================================================================');
+      console.log('🔑 [DEV OTP VERIFICATION CODE]');
+      console.log(`Phone:   ${destination}`);
+      console.log(`Purpose: ${isSignUp ? 'registration' : 'login'}`);
+      console.log(`CODE:    ${code}`);
+      console.log('================================================================================\n');
     }
 
     return { message: 'OTP sent successfully.' };
@@ -385,7 +390,11 @@ export class AuthService {
       );
 
       if (this.configService.get('NODE_ENV') !== 'production') {
-        this.logger.log(`[DEV] Password reset token for ${phone}: ${resetToken}`);
+        console.log('\n================================================================================');
+        console.log('🔑 [DEV PASSWORD RESET TOKEN]');
+        console.log(`Phone:   ${phone}`);
+        console.log(`TOKEN:   ${resetToken}`);
+        console.log('================================================================================\n');
       }
       // In production: send SMS via Twilio with resetToken
     }

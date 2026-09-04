@@ -6,14 +6,14 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { Profile } from '../../profiles/entities/profile.entity';
+import type { Profile } from '../../profiles/entities/profile.entity';
 
 @Entity('photos')
 export class Photo {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => Profile, { onDelete: 'CASCADE' })
+  @ManyToOne('Profile', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'profile_id', referencedColumnName: 'userId' })
   profile: Profile;
 

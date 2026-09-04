@@ -25,8 +25,6 @@ export default function AuthLayout() {
       <Stack.Screen name="register-phone" />
       <Stack.Screen name="verify-otp" />
       <Stack.Screen name="set-password" />
-      {/* Legacy screen — kept to prevent deep-link crashes, unreachable normally */}
-      <Stack.Screen name="otp" />
     </Stack>
   );
 }

@@ -4,6 +4,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  Platform,
 } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -11,17 +12,8 @@ import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
-/**
- * Login screen — SSO option list.
- *
- * Presents three login paths:
- *   Apple Sign In    → UI stub (Alert "Coming soon")
- *   Google Sign In   → UI stub (Alert "Coming soon")
- *   Continue with Phone → login-phone.tsx
- *
- * Apple SSO is listed first per Apple App Store guidelines: any app offering
- * third-party login must include Sign in with Apple and list it prominently.
- */
+const isWeb = Platform.OS === 'web';
+
 export default function LoginScreen() {
   const handleApple = () => {
     Alert.alert('Coming Soon', 'Apple Sign In will be available in the next update.');
@@ -47,7 +39,7 @@ export default function LoginScreen() {
       </View>
 
       <Animated.View
-        entering={FadeInDown.duration(500)}
+        entering={isWeb ? undefined : FadeInDown.duration(500)}
         style={styles.content}
       >
         <Text style={styles.title}>Login</Text>

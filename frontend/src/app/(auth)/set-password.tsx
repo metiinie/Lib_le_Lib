@@ -126,7 +126,7 @@ export default function SetPasswordScreen() {
         </View>
 
         <Animated.View
-          entering={FadeInDown.duration(450)}
+          entering={Platform.OS === 'web' ? undefined : FadeInDown.duration(450)}
           style={styles.content}
         >
           <Text style={styles.stepLabel}>Step 3 of 3</Text>

@@ -6,29 +6,31 @@ import {
   ManyToOne,
   JoinColumn,
   OneToMany,
+  Index,
 } from 'typeorm';
-import { Match } from '../../matches/entities/match.entity';
-import { User } from '../../users/entities/user.entity';
-import { MessageAttachment } from './message-attachment.entity';
+import type { Match } from '../../matches/entities/match.entity';
+import type { User } from '../../users/entities/user.entity';
+import type { MessageAttachment } from './message-attachment.entity';
 
 export enum MessageType {
   TEXT = 'text',
   IMAGE = 'image',
 }
 
+@Index(['matchId', 'sentAt'])
 @Entity('messages')
 export class Message {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => Match, { onDelete: 'CASCADE' })
+  @ManyToOne('Match', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'match_id' })
   match: Match;
 
   @Column({ name: 'match_id', type: 'uuid' })
   matchId: string;
 
-  @ManyToOne(() => User)
+  @ManyToOne('User')
   @JoinColumn({ name: 'sender_id' })
   sender: User;
 
@@ -62,6 +64,6 @@ export class Message {
   @Column({ name: 'revoked_at', type: 'timestamptz', nullable: true })
   revokedAt: Date;
 
-  @OneToMany(() => MessageAttachment, (attachment) => attachment.message)
+  @OneToMany('MessageAttachment', (attachment: any) => attachment.message)
   attachments: MessageAttachment[];
 }

@@ -49,8 +49,8 @@ import { TelemetryInterceptor } from './telemetry/telemetry.interceptor';
     ScheduleModule.forRoot(),
     LoggerModule.forRoot({
       pinoHttp: {
-        autoLogging: process.env.NODE_ENV !== 'test',
-        level: process.env.NODE_ENV === 'test' ? 'silent' : 'info',
+        autoLogging: false,
+        level: 'error',
         redact: {
           paths: [
             'req.headers.authorization',
@@ -81,7 +81,7 @@ import { TelemetryInterceptor } from './telemetry/telemetry.interceptor';
         },
         transport:
           process.env.NODE_ENV !== 'production' &&
-          process.env.NODE_ENV !== 'test'
+            process.env.NODE_ENV !== 'test'
             ? { target: 'pino-pretty', options: { colorize: true } }
             : undefined,
       },
@@ -117,4 +117,4 @@ import { TelemetryInterceptor } from './telemetry/telemetry.interceptor';
     },
   ],
 })
-export class AppModule {}
+export class AppModule { }

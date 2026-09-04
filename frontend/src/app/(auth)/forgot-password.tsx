@@ -72,7 +72,7 @@ export default function ForgotPasswordScreen() {
         </View>
 
         <Animated.View
-          entering={FadeInDown.duration(450)}
+          entering={Platform.OS === 'web' ? undefined : FadeInDown.duration(450)}
           style={styles.content}
         >
           {!sent ? (

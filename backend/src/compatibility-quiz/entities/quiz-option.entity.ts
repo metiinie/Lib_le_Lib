@@ -5,14 +5,14 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { QuizQuestion } from './quiz-question.entity';
+import type { QuizQuestion } from './quiz-question.entity';
 
 @Entity('compatibility_quiz_options')
 export class QuizOption {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => QuizQuestion, (question) => question.options, {
+  @ManyToOne('QuizQuestion', (question: QuizQuestion) => question.options, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'question_id' })

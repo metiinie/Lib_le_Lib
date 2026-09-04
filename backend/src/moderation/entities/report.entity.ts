@@ -6,8 +6,8 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { User } from '../../users/entities/user.entity';
-import { Match } from '../../matches/entities/match.entity';
+import type { User } from '../../users/entities/user.entity';
+import type { Match } from '../../matches/entities/match.entity';
 
 export enum ReportCategory {
   HARASSMENT = 'harassment',
@@ -38,21 +38,21 @@ export class Report {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => User)
+  @ManyToOne('User')
   @JoinColumn({ name: 'reporter_id' })
   reporter: User;
 
   @Column({ name: 'reporter_id', type: 'uuid' })
   reporterId: string;
 
-  @ManyToOne(() => User)
+  @ManyToOne('User')
   @JoinColumn({ name: 'reported_id' })
   reported: User;
 
   @Column({ name: 'reported_id', type: 'uuid' })
   reportedId: string;
 
-  @ManyToOne(() => Match)
+  @ManyToOne('Match')
   @JoinColumn({ name: 'match_id' })
   match: Match;
 
@@ -84,7 +84,7 @@ export class Report {
   })
   severity: ReportSeverity;
 
-  @ManyToOne(() => User)
+  @ManyToOne('User')
   @JoinColumn({ name: 'assigned_to' })
   assignedTo: User;
 

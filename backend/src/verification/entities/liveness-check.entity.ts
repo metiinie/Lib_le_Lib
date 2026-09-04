@@ -6,15 +6,15 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { VerificationRecord } from './verification-record.entity';
-import { User } from '../../users/entities/user.entity';
+import type { VerificationRecord } from './verification-record.entity';
+import type { User } from '../../users/entities/user.entity';
 
 @Entity('liveness_checks', { schema: 'verification' })
 export class LivenessCheck {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => VerificationRecord, { onDelete: 'CASCADE' })
+  @ManyToOne('VerificationRecord', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'verification_record_id' })
   verificationRecord: VerificationRecord;
 
@@ -31,7 +31,7 @@ export class LivenessCheck {
   })
   result: string;
 
-  @ManyToOne(() => User)
+  @ManyToOne('User')
   @JoinColumn({ name: 'reviewed_by' })
   reviewer: User;
 

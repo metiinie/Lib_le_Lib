@@ -5,22 +5,25 @@ import {
   CreateDateColumn,
   ManyToOne,
   JoinColumn,
+  Index,
 } from 'typeorm';
-import { User } from '../../users/entities/user.entity';
+import type { User } from '../../users/entities/user.entity';
 
+@Index(['userAId', 'status'])
+@Index(['userBId', 'status'])
 @Entity('matches')
 export class Match {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @ManyToOne('User', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_a_id' })
   userA: User;
 
   @Column({ name: 'user_a_id', type: 'uuid' })
   userAId: string;
 
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @ManyToOne('User', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_b_id' })
   userB: User;
 
@@ -41,7 +44,7 @@ export class Match {
   @Column({ name: 'unmatched_at', type: 'timestamptz', nullable: true })
   unmatchedAt: Date;
 
-  @ManyToOne(() => User)
+  @ManyToOne('User')
   @JoinColumn({ name: 'unmatched_by' })
   unmatchedBy: User;
 

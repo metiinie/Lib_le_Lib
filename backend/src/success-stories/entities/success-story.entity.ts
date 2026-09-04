@@ -6,7 +6,7 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { User } from '../../users/entities/user.entity';
+import type { User } from '../../users/entities/user.entity';
 
 @Entity('success_stories')
 export class SuccessStory {
@@ -16,7 +16,7 @@ export class SuccessStory {
   @Column({ name: 'submitted_by_user_id', type: 'uuid', nullable: true })
   submittedByUserId: string;
 
-  @ManyToOne(() => User)
+  @ManyToOne('User')
   @JoinColumn({ name: 'submitted_by_user_id' })
   submittedBy: User;
 
@@ -29,7 +29,7 @@ export class SuccessStory {
   @Column({ name: 'approved_by', type: 'uuid', nullable: true })
   approvedByUserId: string;
 
-  @ManyToOne(() => User)
+  @ManyToOne('User')
   @JoinColumn({ name: 'approved_by' })
   approvedBy: User;
 

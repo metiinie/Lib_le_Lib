@@ -6,22 +6,22 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { Photo } from './photo.entity';
-import { User } from '../../users/entities/user.entity';
+import type { Photo } from './photo.entity';
+import type { User } from '../../users/entities/user.entity';
 
 @Entity('photo_reveal_grants')
 export class PhotoRevealGrant {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => Photo, { onDelete: 'CASCADE' })
+  @ManyToOne('Photo', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'photo_id' })
   photo: Photo;
 
   @Column({ name: 'photo_id', type: 'uuid' })
   photoId: string;
 
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @ManyToOne('User', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'granted_to_user_id' })
   grantedToUser: User;
 

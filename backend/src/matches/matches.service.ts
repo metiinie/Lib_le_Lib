@@ -23,7 +23,7 @@ export class MatchesService {
     private readonly blocksRepo: BlocksRepository,
     private readonly subscriptionsService: SubscriptionsService,
     private readonly dataSource: DataSource,
-  ) {}
+  ) { }
 
   /**
    * Validates that a match exists, is active, and the user belongs to it.
@@ -198,7 +198,7 @@ export class MatchesService {
     // 3. Create request
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7);
-    
+
     await this.dataSource.query(`
       INSERT INTO dm_requests (sender_id, recipient_id, first_message, expires_at)
       VALUES ($1, $2, $3, $4)
@@ -215,20 +215,20 @@ export class MatchesService {
         RETURNING sender_id
       `, [requestId, recipientId]);
 
-      if (result[0].length === 0) {
+      if (!result || result.length === 0) {
         throw new NotFoundException('DM request not found or already processed');
       }
 
-      const senderId = result[0][0].sender_id;
+      const senderId = result[0].sender_id;
 
       // Create mutual match
       const matchId = await this.matchesRepo.createMatch(manager, senderId, recipientId);
-      
+
       // We don't have direct access to MessageRepository here, but usually we would 
       // insert the first_message into the messages table here. For simplicity, we assume
       // the frontend fetches the first message from the match history or similar, 
       // or we can emit an event. Let's just create the match.
-      
+
       return { matchId };
     });
   }

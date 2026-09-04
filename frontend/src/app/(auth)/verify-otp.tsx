@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
+  Platform,
 } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -13,6 +14,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useState, useRef, useEffect } from 'react';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { authService } from '@/services/auth.service';
+
+const isWeb = Platform.OS === 'web';
 
 /**
  * Register — Step 2: OTP verification.
@@ -144,7 +147,7 @@ export default function VerifyOtpScreen() {
       </View>
 
       <Animated.View
-        entering={FadeInDown.duration(450)}
+        entering={isWeb ? undefined : FadeInDown.duration(450)}
         style={styles.content}
       >
         <Text style={styles.stepLabel}>Step 2 of 3</Text>

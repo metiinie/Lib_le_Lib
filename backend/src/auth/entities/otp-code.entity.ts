@@ -7,7 +7,7 @@ import {
   JoinColumn,
   Index,
 } from 'typeorm';
-import { User } from '../../users/entities/user.entity';
+import type { User } from '../../users/entities/user.entity';
 
 /**
  * OTP codes for phone/email verification.
@@ -45,7 +45,7 @@ export class OtpCode {
 
   // ── Relations ──
 
-  @ManyToOne(() => User, (user) => user.otpCodes, { onDelete: 'CASCADE' })
+  @ManyToOne('User', (user: any) => user.otpCodes, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
 }

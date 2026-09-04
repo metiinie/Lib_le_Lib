@@ -7,7 +7,7 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { User } from '../../users/entities/user.entity';
+import type { User } from '../../users/entities/user.entity';
 
 export enum ResourceCategory {
   TREATMENT_INFO = 'treatment_info',
@@ -52,7 +52,7 @@ export class Resource {
   @Column({ name: 'created_by', type: 'uuid', nullable: true })
   createdByUserId: string;
 
-  @ManyToOne(() => User)
+  @ManyToOne('User')
   @JoinColumn({ name: 'created_by' })
   createdBy: User;
 
