@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User, UserRole } from '../entities/user.entity';
+import { normalizePhoneNumber } from '../../common/utils/phone.util';
 
 /**
  * Repository for the `users` table.
@@ -21,11 +22,20 @@ export class UsersRepository {
   }
 
   async findByPhone(phone: string): Promise<User | null> {
-    return this.repo.findOne({ where: { phone } });
+    if (!phone) return null;
+    const normalized = normalizePhoneNumber(phone);
+    const conditions: Array<{ phone: string }> = [{ phone: normalized }, { phone }];
+
+    if (normalized.startsWith('+251')) {
+      const localForm = `0${normalized.substring(4)}`;
+      conditions.push({ phone: localForm });
+    }
+
+    return this.repo.findOne({ where: conditions });
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    return this.repo.findOne({ where: { email } });
+    return this.repo.findOne({ where: { email: email.trim().toLowerCase() } });
   }
 
   async findByAppleId(appleId: string): Promise<User | null> {
@@ -54,8 +64,9 @@ export class UsersRepository {
    */
   async createFromDestination(destination: string): Promise<User> {
     const isEmail = destination.includes('@');
+    const normalized = isEmail ? destination.trim().toLowerCase() : normalizePhoneNumber(destination);
     const user = this.repo.create({
-      phone: isEmail ? null : destination,
+      phone: isEmail ? null : normalized,
       email: isEmail ? destination : null,
     });
     return this.repo.save(user);

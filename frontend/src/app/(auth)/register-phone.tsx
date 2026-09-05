@@ -56,11 +56,18 @@ export default function RegisterPhoneScreen() {
       // Pass phone as a search param — verify-otp.tsx reads it with useLocalSearchParams
       router.push({ pathname: '/(auth)/verify-otp', params: { phone: normalized } });
     } catch (err: any) {
-      const code = err?.response?.data?.error?.code;
+      const serverError = err?.response?.data?.error;
+      const code = typeof serverError === 'object' ? serverError?.code : err?.response?.data?.code;
+      const message = typeof serverError === 'object' ? serverError?.message : (err?.response?.data?.message || err?.message);
+
       if (code === 'USER_ALREADY_EXISTS') {
         setError('This number is already registered. Please login instead.');
-      } else if (code === 'OTP_RATE_LIMITED') {
+      } else if (code === 'OTP_RATE_LIMITED' || code === 'TOO_MANY_REQUESTS' || err?.response?.status === 429) {
         setError('Too many requests. Please wait a moment and try again.');
+      } else if (!err?.response) {
+        setError('Network error. Unable to connect to server. Please check your connection.');
+      } else if (message && typeof message === 'string' && err?.response?.status < 500) {
+        setError(message);
       } else {
         setError('Could not send OTP. Please check your number and try again.');
       }

@@ -4,8 +4,18 @@ import { Platform } from 'react-native';
 import { useAuthStore } from '@/state/auth.store';
 
 function getBaseUrl(): string {
+  if (process.env.EXPO_PUBLIC_API_URL) {
+    return process.env.EXPO_PUBLIC_API_URL;
+  }
+
   if (Platform.OS === 'web') {
-    return process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000';
+    if (typeof window !== 'undefined' && window.location?.hostname) {
+      const hostname = window.location.hostname;
+      if (hostname && hostname !== '' && hostname !== '0.0.0.0') {
+        return `http://${hostname}:3000`;
+      }
+    }
+    return 'http://192.168.8.4:3000';
   }
 
   // Extract IP dynamically from Expo Metro bundler hostUri
@@ -20,10 +30,10 @@ function getBaseUrl(): string {
   }
 
   if (Platform.OS === 'android') {
-    return 'http://10.0.2.2:3000';
+    return 'http://192.168.8.4:3000';
   }
 
-  return process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000';
+  return 'http://192.168.8.4:3000';
 }
 
 export const API_URL = getBaseUrl();

@@ -75,78 +75,81 @@ export default function RootLayout() {
     if (!navigationState?.key || !hasHydrated) return;
 
     const inAuthGroup = segments[0] === '(auth)';
+    const animId = requestAnimationFrame(() => {
+      if (!isAuthenticated && !inAuthGroup) {
+        router.replace('/(auth)/welcome');
+      } else if (isAuthenticated && (inAuthGroup || (segments as any).length === 0)) {
+        let isCancelled = false;
 
-    if (!isAuthenticated && !inAuthGroup) {
-      router.replace('/(auth)/welcome');
-    } else if (isAuthenticated && (inAuthGroup || (segments as any).length === 0)) {
-      let isCancelled = false;
-
-      const resolveRoute = async () => {
-        try {
-          // 1. Fetch user identity, role, and status
-          const user = await userService.getMe();
-          if (isCancelled) return;
-
-          const isStaffRole = [
-            'verification_officer',
-            'moderator',
-            'health_professional',
-            'admin',
-          ].includes(user.role);
-
-          // Active members and staff roles skip onboarding
-          if (isStaffRole || user.status === 'active') {
-            router.replace('/(tabs)/discover');
-            return;
-          }
-
-          // 2. Pending member flow: check profile
-          let hasProfile = false;
+        const resolveRoute = async () => {
           try {
-            await profileService.getProfile();
-            hasProfile = true;
-          } catch (err: any) {
-            if (err?.response?.status === 404) {
+            // 1. Fetch user identity, role, and status
+            const user = await userService.getMe();
+            if (isCancelled) return;
+
+            const isStaffRole = [
+              'verification_officer',
+              'moderator',
+              'health_professional',
+              'admin',
+            ].includes(user.role);
+
+            // Active members and staff roles skip onboarding
+            if (isStaffRole || user.status === 'active') {
+              router.replace('/(tabs)/discover');
+              return;
+            }
+
+            // 2. Pending member flow: check profile
+            let hasProfile = false;
+            try {
+              await profileService.getProfile();
+              hasProfile = true;
+            } catch (err: any) {
+              if (err?.response?.status === 404) {
+                router.replace('/(onboarding)/step-1-nickname');
+                return;
+              }
+            }
+
+            if (!hasProfile) {
               router.replace('/(onboarding)/step-1-nickname');
               return;
             }
-          }
 
-          if (!hasProfile) {
-            router.replace('/(onboarding)/step-1-nickname');
-            return;
-          }
+            // 3. Check verification submission status
+            const { status } = await verificationService.checkStatus();
+            if (isCancelled) return;
 
-          // 3. Check verification submission status
-          const { status } = await verificationService.checkStatus();
-          if (isCancelled) return;
-
-          if (status === 'approved' || status === 'submitted' || status === 'in_review') {
-            router.replace('/(tabs)/discover');
-          } else if (status === 'rejected') {
-            router.replace('/(onboarding)/rejected');
-          } else {
-            router.replace('/(onboarding)/doc-upload');
+            if (status === 'approved' || status === 'submitted' || status === 'in_review') {
+              router.replace('/(tabs)/discover');
+            } else if (status === 'rejected') {
+              router.replace('/(onboarding)/rejected');
+            } else {
+              router.replace('/(onboarding)/doc-upload');
+            }
+          } catch (err: any) {
+            if (isCancelled) return;
+            console.warn('Route resolution error:', err?.message);
+            const errStatus = err?.response?.status;
+            if (errStatus === 401 || errStatus === 403) {
+              // Invalid or expired token — clear auth state
+              useAuthStore.getState().signOut();
+            } else {
+              // Fallback to discover tab so user is never stuck on a blank screen
+              router.replace('/(tabs)/discover');
+            }
           }
-        } catch (err: any) {
-          if (isCancelled) return;
-          console.warn('Route resolution error:', err?.message);
-          const errStatus = err?.response?.status;
-          if (errStatus === 401 || errStatus === 403) {
-            // Invalid or expired token — clear auth state
-            useAuthStore.getState().signOut();
-          } else {
-            // Fallback to discover tab so user is never stuck on a blank screen
-            router.replace('/(tabs)/discover');
-          }
-        }
-      };
+        };
 
-      resolveRoute();
-      return () => {
-        isCancelled = true;
-      };
-    }
+        resolveRoute();
+        return () => {
+          isCancelled = true;
+        };
+      }
+    });
+
+    return () => cancelAnimationFrame(animId);
   }, [isAuthenticated, segments, navigationState?.key, hasHydrated]);
 
   return (

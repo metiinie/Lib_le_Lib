@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -6,9 +6,22 @@ import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { Match, DmRequest } from '@/services/match.service';
 import { BlurredPhoto } from '@/components/photos/BlurredPhoto';
 import { useMatches } from '@/hooks/useMatches';
+import { verificationService } from '@/services/verification.service';
 
 export default function MatchesScreen() {
   const router = useRouter();
+  const [isPendingVerification, setIsPendingVerification] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+    verificationService.checkStatus().then(({ status }) => {
+      if (isMounted) {
+        setIsPendingVerification(status === 'submitted' || status === 'in_review');
+      }
+    }).catch(() => { });
+    return () => { isMounted = false; };
+  }, []);
+
   const { data: matches, isLoading, isError, refetch, unmatch, block, dmRequests, acceptDmRequest } = useMatches();
 
   // Reference for swipeable items to close them
@@ -59,7 +72,7 @@ export default function MatchesScreen() {
           <Text className="text-lg font-bold text-slate-900 mb-1">{item.nickname}</Text>
           <Text className="text-slate-800 font-medium italic" numberOfLines={1}>"{item.message}"</Text>
         </View>
-        <TouchableOpacity 
+        <TouchableOpacity
           className="bg-blue-600 px-4 py-2 rounded-full"
           onPress={() => acceptDmRequest(item.id)}
         >
@@ -75,7 +88,7 @@ export default function MatchesScreen() {
     const isDiscreetMode = false;
 
     return (
-      <Swipeable 
+      <Swipeable
         ref={ref => {
           if (ref) swipeableRefs.current.set(item.id, ref);
           else swipeableRefs.current.delete(item.id);
@@ -105,7 +118,7 @@ export default function MatchesScreen() {
               {item.lastMessageEncryptedPreview ? 'New message' : 'Tap to start chatting'}
             </Text>
           </View>
-          
+
           {/* Unread Indicator */}
           {isUnread && !isDiscreetMode && (
             <View className="w-3 h-3 rounded-full bg-blue-500 ml-2 shadow-sm" />
@@ -118,6 +131,32 @@ export default function MatchesScreen() {
   // Determine if there are new matches in the last 24h
   const newMatches = matches?.filter(m => m.createdAt && (Date.now() - new Date(m.createdAt).getTime() < 24 * 60 * 60 * 1000));
   const hasNewMatches = newMatches && newMatches.length > 0;
+
+  if (isPendingVerification) {
+    return (
+      <View className="flex-1 bg-[#F5F7F8] items-center justify-center p-6">
+        <View className="w-20 h-20 rounded-full bg-amber-100 items-center justify-center mb-6 border border-amber-200">
+          <Ionicons name="time-outline" size={40} color="#D4784F" />
+        </View>
+
+        <Text className="text-2xl font-bold text-[#0F1E24] text-center mb-3">
+          Verification Under Review
+        </Text>
+
+        <Text className="text-[#4A7A8A] text-center text-base leading-relaxed mb-6 px-4">
+          Matches and messaging unlock once your profile is verified by an admin. You can view and update your profile details in the meantime!
+        </Text>
+
+        <TouchableOpacity
+          onPress={() => router.push('/(tabs)/profile')}
+          className="bg-[#1B4D5C] px-6 py-3.5 rounded-full flex-row items-center shadow-sm"
+        >
+          <Ionicons name="person-outline" size={18} color="#ffffff" style={{ marginRight: 8 }} />
+          <Text className="text-white font-bold text-base">View & Edit Profile</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   return (
     <View className="flex-1 bg-white">

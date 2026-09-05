@@ -73,7 +73,10 @@ export default function VerifyOtpScreen() {
         params: { phone, tempToken: data.accessToken },
       });
     } catch (err: any) {
-      const code = err?.response?.data?.error?.code;
+      const serverError = err?.response?.data?.error;
+      const code = typeof serverError === 'object' ? serverError?.code : err?.response?.data?.code;
+      const message = typeof serverError === 'object' ? serverError?.message : (err?.response?.data?.message || err?.message);
+
       if (code === 'OTP_INVALID') {
         const left = attemptsLeft - 1;
         setAttemptsLeft(left);
@@ -86,6 +89,10 @@ export default function VerifyOtpScreen() {
         setError('This code has expired. Please request a new one.');
       } else if (code === 'OTP_MAX_ATTEMPTS') {
         setError('Maximum attempts reached. Please request a new code.');
+      } else if (!err?.response) {
+        setError('Network error. Unable to connect to server. Please check your connection.');
+      } else if (message && typeof message === 'string' && err?.response?.status < 500) {
+        setError(message);
       } else {
         setError('Verification failed. Please try again.');
       }
@@ -105,8 +112,16 @@ export default function VerifyOtpScreen() {
     try {
       await authService.requestOtp(phone, true);
       setResendCountdown(60);
-    } catch {
-      setError('Could not resend OTP. Please try again shortly.');
+    } catch (err: any) {
+      const serverError = err?.response?.data?.error;
+      const message = typeof serverError === 'object' ? serverError?.message : (err?.response?.data?.message || err?.message);
+      if (!err?.response) {
+        setError('Network error. Unable to connect to server. Please check your connection.');
+      } else if (message && typeof message === 'string' && err?.response?.status < 500) {
+        setError(message);
+      } else {
+        setError('Could not resend OTP. Please try again shortly.');
+      }
     } finally {
       setResending(false);
     }

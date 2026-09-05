@@ -19,8 +19,18 @@ export function normalizePhoneNumber(raw: string): string {
         return trimmed;
     }
 
-    // Strip spaces, dashes, parentheses
-    const cleaned = trimmed.replace(/[\s\-\(\)]/g, '');
+    // Strip spaces, dashes, parentheses, dots
+    const cleaned = trimmed.replace(/[\s\-\(\)\.]/g, '');
+
+    // +25109... or +25107... (with redundant 0 after country code)
+    if (/^\+2510[97]\d{8}$/.test(cleaned)) {
+        return `+251${cleaned.substring(5)}`;
+    }
+
+    // 25109... or 25107... (with 251 country code and redundant 0)
+    if (/^2510[97]\d{8}$/.test(cleaned)) {
+        return `+251${cleaned.substring(4)}`;
+    }
 
     if (cleaned.startsWith('+')) {
         return cleaned;

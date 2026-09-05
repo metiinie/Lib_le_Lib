@@ -1,15 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, RefreshControl, Alert, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurredPhoto } from '@/components/photos/BlurredPhoto';
 import { useLikes, LikeProfile } from '@/hooks/useLikes';
 import { useSubscription } from '@/hooks/useSubscription';
+import { verificationService } from '@/services/verification.service';
 
 export default function LikesScreen() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'received' | 'sent'>('received');
   const { isPremium } = useSubscription();
+  const [isPendingVerification, setIsPendingVerification] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+    verificationService.checkStatus().then(({ status }) => {
+      if (isMounted) {
+        setIsPendingVerification(status === 'submitted' || status === 'in_review');
+      }
+    }).catch(() => { });
+    return () => { isMounted = false; };
+  }, []);
 
   const { data: activeProfiles, isLoading, isError, refetch, passProfile, likeBack, withdrawLike } = useLikes(activeTab);
 
@@ -163,6 +175,32 @@ export default function LikesScreen() {
       </View>
     );
   };
+
+  if (isPendingVerification) {
+    return (
+      <View className="flex-1 bg-[#F5F7F8] items-center justify-center p-6">
+        <View className="w-20 h-20 rounded-full bg-amber-100 items-center justify-center mb-6 border border-amber-200">
+          <Ionicons name="time-outline" size={40} color="#D4784F" />
+        </View>
+
+        <Text className="text-2xl font-bold text-[#0F1E24] text-center mb-3">
+          Verification Under Review
+        </Text>
+
+        <Text className="text-[#4A7A8A] text-center text-base leading-relaxed mb-6 px-4">
+          Likes and matching unlock once your profile is verified by an admin. You can view and update your profile details in the meantime!
+        </Text>
+
+        <TouchableOpacity
+          onPress={() => router.push('/(tabs)/profile')}
+          className="bg-[#1B4D5C] px-6 py-3.5 rounded-full flex-row items-center shadow-sm"
+        >
+          <Ionicons name="person-outline" size={18} color="#ffffff" style={{ marginRight: 8 }} />
+          <Text className="text-white font-bold text-base">View & Edit Profile</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   return (
     <View className="flex-1 bg-white">

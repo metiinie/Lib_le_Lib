@@ -44,8 +44,8 @@ export default function LivenessScreen() {
       // Upload directly to object storage
       await photoService.uploadToSignedUrl(uploadUrl, photo.uri, 'image/jpeg');
 
-      // Transition to pending state
-      router.push('/(onboarding)/pending');
+      // Transition to profile view with pending banner active
+      router.replace('/(tabs)/profile');
     } catch (err) {
       Alert.alert('Upload Failed', 'Failed to submit selfie. Please try again.');
     } finally {

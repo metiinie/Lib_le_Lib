@@ -27,8 +27,13 @@ async function bootstrap() {
   // Global Exception Filter
   app.useGlobalFilters(new GlobalExceptionFilter());
 
-  // Enable CORS
-  app.enableCors();
+  // Enable CORS for local network and web origins
+  app.enableCors({
+    origin: true,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    credentials: true,
+    allowedHeaders: 'Content-Type,Accept,Authorization',
+  });
 
   // Swagger Documentation Setup
   const config = new DocumentBuilder()

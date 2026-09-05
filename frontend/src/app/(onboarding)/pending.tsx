@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { verificationService } from '@/services/verification.service';
 import { profileService } from '@/services/profile.service';
 import { photoService } from '@/services/photo.service';
 import { BlurredPhoto } from '@/components/photos/BlurredPhoto';
 import { useAuthStore } from '@/state/auth.store';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function PendingScreen() {
   const router = useRouter();
@@ -38,7 +39,7 @@ export default function PendingScreen() {
     const checkStatus = async () => {
       try {
         const { status } = await verificationService.checkStatus();
-        
+
         if (status === 'approved') {
           clearInterval(interval);
           router.replace('/(tabs)/discover');
@@ -59,14 +60,36 @@ export default function PendingScreen() {
 
   return (
     <ScrollView className="flex-1 bg-white">
-      <View className="px-6 pt-20 pb-12 items-center">
-        <ActivityIndicator size="large" color="#1B4D5C" className="mb-4" />
+      <View className="px-6 pt-16 pb-12 items-center">
+        <View className="w-16 h-16 rounded-full bg-amber-100 items-center justify-center mb-4">
+          <Ionicons name="time-outline" size={36} color="#D97706" />
+        </View>
+
         <Text className="text-2xl font-bold text-slate-900 mb-2 text-center">
-          Verification Pending
+          Verification Under Review
         </Text>
-        <Text className="text-slate-600 text-center mb-6 leading-relaxed">
+        <Text className="text-slate-600 text-center mb-6 leading-relaxed text-sm">
           Our team is reviewing your documentation. This usually takes less than 24 hours. You'll be notified as soon as you're approved.
         </Text>
+
+        {/* Action Buttons to Enter App & Edit Profile */}
+        <View className="w-full space-y-3 gap-3 mb-8">
+          <TouchableOpacity
+            className="bg-[#1B4D5C] py-4 rounded-xl items-center flex-row justify-center shadow-sm"
+            onPress={() => router.replace('/(tabs)/profile')}
+          >
+            <Ionicons name="person-outline" size={20} color="#ffffff" style={{ marginRight: 8 }} />
+            <Text className="text-white font-bold text-base">View & Edit My Profile</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            className="bg-slate-100 py-3.5 rounded-xl items-center flex-row justify-center border border-slate-200"
+            onPress={() => router.replace('/(tabs)/discover')}
+          >
+            <Ionicons name="home-outline" size={18} color="#475569" style={{ marginRight: 8 }} />
+            <Text className="text-slate-700 font-semibold text-base">Explore App</Text>
+          </TouchableOpacity>
+        </View>
 
         {/* Photo Privacy Information */}
         <View className="w-full bg-slate-50 p-5 rounded-2xl border border-slate-200">
@@ -93,7 +116,7 @@ export default function PendingScreen() {
                 </Text>
               </View>
             )}
-            
+
             {/* Status Overlay Badge */}
             <View className="absolute bottom-3 left-3 right-3 bg-black/70 p-3 rounded-lg">
               <Text className="text-white text-xs font-semibold text-center">
@@ -106,3 +129,4 @@ export default function PendingScreen() {
     </ScrollView>
   );
 }
+
