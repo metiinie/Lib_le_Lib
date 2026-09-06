@@ -4,26 +4,34 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
-import { verificationService } from '@/services/verification.service';
+import { photoService } from '@/services/photo.service';
+import { useVerificationStatus } from '@/hooks/useVerificationStatus';
 
 export default function ProfileHubScreen() {
   const router = useRouter();
   const { signOut } = useAuth();
 
   const { data: userProfile, isLoading, isError, refetch } = useProfile();
+  const { status: rawStatus } = useVerificationStatus();
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
 
-  const [verificationStatus, setVerificationStatus] = useState<'Approved' | 'Pending' | 'Rejected'>('Pending');
+  const verificationStatus = rawStatus === 'approved' ? 'Approved' :
+    (rawStatus === 'submitted' || rawStatus === 'in_review') ? 'Pending' : 'Rejected';
 
   useEffect(() => {
     let mounted = true;
-    verificationService.checkStatus().then(({ status }) => {
-      if (!mounted) return;
-      if (status === 'approved') setVerificationStatus('Approved');
-      else if (status === 'submitted' || status === 'in_review') setVerificationStatus('Pending');
-      else setVerificationStatus('Rejected');
-    }).catch(() => { });
+    if (userProfile?.photos && userProfile.photos.length > 0) {
+      const primary = userProfile.photos.find((p: any) => p.isPrimary) || userProfile.photos[0];
+      if (primary?.url) {
+        setPhotoUrl(primary.url);
+      } else if (primary?.id) {
+        photoService.getPhotoReadUrl(primary.id)
+          .then((url) => { if (mounted && url) setPhotoUrl(url); })
+          .catch(() => { });
+      }
+    }
     return () => { mounted = false; };
-  }, []);
+  }, [userProfile]);
 
   if (isLoading) {
     return (
@@ -44,7 +52,8 @@ export default function ProfileHubScreen() {
     );
   }
 
-  const primaryPhotoUrl = userProfile.photos?.find((p: any) => p.isPrimary)?.url
+  const primaryPhotoUrl = photoUrl
+    || userProfile.photos?.find((p: any) => p.isPrimary)?.url
     || userProfile.photos?.[0]?.url
     || 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=400&q=80';
 
@@ -58,7 +67,6 @@ export default function ProfileHubScreen() {
           text: "Delete Forever",
           style: "destructive",
           onPress: () => {
-            // Delete account logic
             console.log("Account deleted");
           }
         }
@@ -99,7 +107,10 @@ export default function ProfileHubScreen() {
         <View className="flex-row mt-6 space-x-3 gap-3 w-full">
           <TouchableOpacity
             className="flex-1 bg-slate-100 py-3 rounded-xl items-center"
-            onPress={() => router.push(`/profiles/${userProfile.id}`)}
+            onPress={() => {
+              const targetId = userProfile.id || (userProfile as any).userId;
+              if (targetId) router.push(`/profiles/${targetId}`);
+            }}
           >
             <Text className="text-slate-700 font-semibold">View as others</Text>
           </TouchableOpacity>

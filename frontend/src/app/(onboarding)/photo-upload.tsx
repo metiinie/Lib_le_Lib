@@ -13,7 +13,7 @@ export default function PhotoUploadScreen() {
   const pickImage = async () => {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: ['images'],
         allowsEditing: true,
         aspect: [3, 4],
         quality: 0.8,
@@ -89,9 +89,8 @@ export default function PhotoUploadScreen() {
       </View>
 
       <TouchableOpacity
-        className={`bg-blue-600 p-4 rounded-xl items-center mt-4 mb-16 ${
-          !photoUri || isUploading ? 'opacity-50' : ''
-        }`}
+        className={`bg-blue-600 p-4 rounded-xl items-center mt-4 mb-16 ${!photoUri || isUploading ? 'opacity-50' : ''
+          }`}
         onPress={handleSubmit}
         disabled={!photoUri || isUploading}
       >

@@ -17,7 +17,7 @@ export default function Step8PhotoScreen() {
   const pickImage = async () => {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: ['images'],
         allowsEditing: true,
         aspect: [3, 4],
         quality: 0.8,
@@ -127,9 +127,8 @@ export default function Step8PhotoScreen() {
           <Text className="text-slate-700 font-bold text-lg">Back</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          className={`bg-[#1B4D5C] p-4 rounded-xl items-center flex-1 ml-2 ${
-            !photoUri || isUploading ? 'opacity-50' : ''
-          }`}
+          className={`bg-[#1B4D5C] p-4 rounded-xl items-center flex-1 ml-2 ${!photoUri || isUploading ? 'opacity-50' : ''
+            }`}
           onPress={handleSubmit}
           disabled={!photoUri || isUploading}
         >

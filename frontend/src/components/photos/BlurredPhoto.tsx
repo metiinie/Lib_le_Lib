@@ -24,7 +24,7 @@ export const BlurredPhoto = ({
   const [currentUrl, setCurrentUrl] = useState<string | undefined>(undefined);
   const [imageFailed, setImageFailed] = useState(false);
   const blurOpacity = useSharedValue(1);
-  
+
   const isLowBandwidthMode = usePreferencesStore(state => state.isLowBandwidthMode);
 
   useEffect(() => {
@@ -42,8 +42,8 @@ export const BlurredPhoto = ({
     opacity: blurOpacity.value,
   }));
 
-  // Fallback URL for dev environment where S3 presigned URLs might be broken
-  const fallbackUrl = 'https://ui-avatars.com/api/?name=Verified+User&background=1B4D5C&color=fff&size=512';
+  // High quality photo fallback for dev environment where S3 presigned URLs might be broken/mocked
+  const fallbackUrl = 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=800&q=80';
 
   return (
     <View style={[{ width: width as any, height: height as any }, styles.container]}>
@@ -74,10 +74,10 @@ export const BlurredPhoto = ({
           style={StyleSheet.absoluteFill}
           contentFit="cover"
         />
-        
+
         {/* Overlay for reveal request prompt if applicable */}
         {!revealGranted && onRevealRequest && (
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.revealOverlay}
             onPress={onRevealRequest}
             activeOpacity={0.8}

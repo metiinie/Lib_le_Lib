@@ -1,32 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { verificationService } from '@/services/verification.service';
+import { useVerificationStatus } from '@/hooks/useVerificationStatus';
 
 export function PendingVerificationBanner() {
-    const [isPending, setIsPending] = useState(false);
+    const { isPendingVerification: isPending } = useVerificationStatus();
     const [showModal, setShowModal] = useState(false);
-
-    useEffect(() => {
-        let isMounted = true;
-        const checkStatus = async () => {
-            try {
-                const { status } = await verificationService.checkStatus();
-                if (isMounted) {
-                    setIsPending(status === 'submitted' || status === 'in_review');
-                }
-            } catch (err) {
-                console.warn('Failed to check verification status for banner', err);
-            }
-        };
-
-        checkStatus();
-        const interval = setInterval(checkStatus, 15000);
-        return () => {
-            isMounted = false;
-            clearInterval(interval);
-        };
-    }, []);
 
     if (!isPending) return null;
 

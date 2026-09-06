@@ -38,7 +38,7 @@ export const ActionRail: React.FC<ActionRailProps> = ({ onLike, onPass, onDM }) 
           activeOpacity={0.8}
         >
           <Ionicons name="chatbubble-ellipses" size={22} color="#ffffff" />
-          
+
           {/* Gold Star Badge for Premium */}
           <View className="absolute -top-1 -right-1 bg-[#D4784F] w-5 h-5 rounded-full items-center justify-center shadow-sm border border-[#1B4D5C]">
             <Ionicons name="star" size={10} color="#ffffff" />

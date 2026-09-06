@@ -7,6 +7,7 @@ import {
 import { ProfilesRepository } from './repositories/profiles.repository';
 import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { PhotosService } from '../photos/photos.service';
 import * as crypto from 'crypto';
 
 const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'default_secret_key_32_bytes_long_'; // Must be 32 bytes
@@ -39,7 +40,10 @@ function decrypt(text: string): string {
 
 @Injectable()
 export class ProfilesService {
-  constructor(private readonly profilesRepository: ProfilesRepository) {}
+  constructor(
+    private readonly profilesRepository: ProfilesRepository,
+    private readonly photosService: PhotosService,
+  ) { }
 
   async getProfile(userId: string) {
     const profile = await this.profilesRepository.findByUserId(userId);
@@ -50,6 +54,16 @@ export class ProfilesService {
     }
     if (profile.virusType) {
       profile.virusType = decrypt(profile.virusType);
+    }
+    if (profile.photos && profile.photos.length > 0) {
+      for (const photo of profile.photos) {
+        try {
+          const { url } = await this.photosService.getPhotoUrl(photo.id, userId);
+          (photo as any).url = url;
+        } catch (e) {
+          // Keep storageRef if presigned URL fails
+        }
+      }
     }
     return profile;
   }

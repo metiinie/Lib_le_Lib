@@ -5,23 +5,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { BlurredPhoto } from '@/components/photos/BlurredPhoto';
 import { useLikes, LikeProfile } from '@/hooks/useLikes';
 import { useSubscription } from '@/hooks/useSubscription';
-import { verificationService } from '@/services/verification.service';
+import { useVerificationStatus } from '@/hooks/useVerificationStatus';
 
 export default function LikesScreen() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'received' | 'sent'>('received');
   const { isPremium } = useSubscription();
-  const [isPendingVerification, setIsPendingVerification] = useState(false);
-
-  useEffect(() => {
-    let isMounted = true;
-    verificationService.checkStatus().then(({ status }) => {
-      if (isMounted) {
-        setIsPendingVerification(status === 'submitted' || status === 'in_review');
-      }
-    }).catch(() => { });
-    return () => { isMounted = false; };
-  }, []);
+  const { isPendingVerification } = useVerificationStatus();
 
   const { data: activeProfiles, isLoading, isError, refetch, passProfile, likeBack, withdrawLike } = useLikes(activeTab);
 

@@ -8,7 +8,7 @@ import { useDiscovery } from '@/hooks/useDiscovery';
 import { useSubscription } from '@/hooks/useSubscription';
 import { FilterSheet } from '@/components/discovery/FilterSheet';
 import { SwipeCard } from '@/components/discovery/SwipeCard';
-import { verificationService } from '@/services/verification.service';
+import { useVerificationStatus } from '@/hooks/useVerificationStatus';
 
 export default function DiscoverScreen() {
   const router = useRouter();
@@ -16,39 +16,14 @@ export default function DiscoverScreen() {
   const [filters, setFilters] = useState({});
   const [isFilterVisible, setFilterVisible] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isPendingVerification, setIsPendingVerification] = useState(false);
-  const [isCheckingVerification, setIsCheckingVerification] = useState(true);
 
+  const { isPendingVerification, isCheckingVerification, checkStatus } = useVerificationStatus();
   const { data: profiles, isLoading, isError, refetch } = useDiscovery(filters);
   const { isPremium, dmCredits } = useSubscription();
 
-  const checkVerificationStatus = async () => {
-    setIsCheckingVerification(true);
-    try {
-      const { status } = await verificationService.checkStatus();
-      setIsPendingVerification(status === 'submitted' || status === 'in_review');
-    } catch (err) {
-      console.warn('Failed to check verification status', err);
-    } finally {
-      setIsCheckingVerification(false);
-    }
-  };
-
-  useEffect(() => {
-    checkVerificationStatus();
-  }, []);
-
   const checkPendingVerification = async (): Promise<boolean> => {
-    try {
-      const { status } = await verificationService.checkStatus();
-      if (status === 'submitted' || status === 'in_review') {
-        setIsPendingVerification(true);
-        return true;
-      }
-    } catch (err) {
-      console.warn('Failed to check verification status', err);
-    }
-    return false;
+    await checkStatus();
+    return isPendingVerification;
   };
 
   const handleLike = async (profileId: string) => {
@@ -97,7 +72,7 @@ export default function DiscoverScreen() {
 
   const handleRefresh = async () => {
     setCurrentIndex(0);
-    await checkVerificationStatus();
+    await checkStatus();
     await refetch();
   };
 
@@ -179,7 +154,7 @@ export default function DiscoverScreen() {
         style={{ paddingTop: Math.max(insets.top, 16), paddingBottom: 16 }}
         pointerEvents="box-none"
       >
-        <Text className="text-3xl font-bold text-[#0F1E24] shadow-sm">
+        <Text className="text-3xl font-extrabold text-white drop-shadow-md">
           Discover
         </Text>
         <TouchableOpacity

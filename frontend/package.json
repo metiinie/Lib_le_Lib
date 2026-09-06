@@ -63,7 +63,8 @@
     "reset-project": "node ./scripts/reset-project.js",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web",
+    "web": "cross-env EXPO_NO_DOCTOR=true expo start --web",
+    "web:offline": "cross-env EXPO_NO_DOCTOR=true expo start --web --clear --offline",
     "lint": "expo lint"
   },
   "private": true,

@@ -130,6 +130,7 @@ export class AuthService {
       console.log(`Purpose: ${isSignUp ? 'registration' : 'login'}`);
       console.log(`CODE:    ${code}`);
       console.log('================================================================================\n');
+      return { message: 'OTP sent successfully.', devCode: code };
     }
 
     return { message: 'OTP sent successfully.' };

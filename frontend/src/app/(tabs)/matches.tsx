@@ -6,21 +6,11 @@ import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { Match, DmRequest } from '@/services/match.service';
 import { BlurredPhoto } from '@/components/photos/BlurredPhoto';
 import { useMatches } from '@/hooks/useMatches';
-import { verificationService } from '@/services/verification.service';
+import { useVerificationStatus } from '@/hooks/useVerificationStatus';
 
 export default function MatchesScreen() {
   const router = useRouter();
-  const [isPendingVerification, setIsPendingVerification] = useState(false);
-
-  useEffect(() => {
-    let isMounted = true;
-    verificationService.checkStatus().then(({ status }) => {
-      if (isMounted) {
-        setIsPendingVerification(status === 'submitted' || status === 'in_review');
-      }
-    }).catch(() => { });
-    return () => { isMounted = false; };
-  }, []);
+  const { isPendingVerification } = useVerificationStatus();
 
   const { data: matches, isLoading, isError, refetch, unmatch, block, dmRequests, acceptDmRequest } = useMatches();
 

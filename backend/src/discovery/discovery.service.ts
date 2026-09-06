@@ -5,6 +5,7 @@ import { SwipesRepository } from '../matches/repositories/swipes.repository';
 import { MatchesRepository } from '../matches/repositories/matches.repository';
 import { DiscoveryRepository } from './repositories/discovery.repository';
 import { DiscoveryFiltersDto } from './dto/discovery-filters.dto';
+import { PhotosService } from '../photos/photos.service';
 
 @Injectable()
 export class DiscoveryService {
@@ -16,6 +17,7 @@ export class DiscoveryService {
     private readonly matchesRepo: MatchesRepository,
     private readonly discoveryRepo: DiscoveryRepository,
     private readonly dataSource: DataSource,
+    private readonly photosService: PhotosService,
   ) { }
 
   async getDiscoveryFeed(
@@ -65,7 +67,7 @@ export class DiscoveryService {
     );
 
     // 3. Map into complete DiscoveryProfile objects
-    return rawProfiles.map((p) => {
+    return Promise.all(rawProfiles.map(async (p) => {
       let age = 25;
       if (p.dateOfBirth) {
         const dob = new Date(p.dateOfBirth);
@@ -75,10 +77,29 @@ export class DiscoveryService {
       }
 
       const profileId = p.id || p.userId;
+      const nickname = p.nickname || 'Member';
+
+      let photoUrl: string | undefined = undefined;
+      if (p.primaryPhotoRef) {
+        if (p.primaryPhotoRef.startsWith('http://') || p.primaryPhotoRef.startsWith('https://')) {
+          photoUrl = p.primaryPhotoRef;
+        } else {
+          try {
+            const { url } = await this.photosService.getPhotoUrl(`ph_${profileId}`, userId);
+            photoUrl = url;
+          } catch (e) {
+            // Fallback avatar with nickname
+            photoUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(nickname)}&background=1B4D5C&color=fff&size=512`;
+          }
+        }
+      } else {
+        photoUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(nickname)}&background=1B4D5C&color=fff&size=512`;
+      }
+
       return {
         id: profileId,
         userId: p.userId || profileId,
-        nickname: p.nickname || 'Member',
+        nickname,
         age,
         gender: p.gender || 'Not specified',
         region: p.region || 'Nearby',
@@ -91,7 +112,7 @@ export class DiscoveryService {
           {
             id: `ph_${profileId}`,
             blurhash: 'LEHV6nWB2yk8pyo0adR*.7kCMdnj',
-            url: p.primaryPhotoRef ? p.primaryPhotoRef : undefined,
+            url: photoUrl,
             revealGranted:
               p.isBlurred === false ||
               (viewerStatus === 'active' &&
@@ -99,6 +120,6 @@ export class DiscoveryService {
           },
         ],
       };
-    });
+    }));
   }
 }

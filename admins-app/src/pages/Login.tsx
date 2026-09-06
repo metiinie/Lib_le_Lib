@@ -24,8 +24,13 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     const cleanDestination = destination.trim().toLowerCase();
 
     try {
-      await authService.requestOtp(cleanDestination, false);
-      setMessage(`Verification OTP code sent to ${cleanDestination}`);
+      const res = await authService.requestOtp(cleanDestination, false);
+      if (res?.devCode) {
+        setMessage(`Verification OTP code: ${res.devCode} (Auto-filled for development testing)`);
+        setCode(res.devCode);
+      } else {
+        setMessage(`Verification OTP code sent to ${cleanDestination}`);
+      }
       setStep('verify');
     } catch (err: any) {
       const errMsg =
